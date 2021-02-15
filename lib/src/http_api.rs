@@ -11,6 +11,7 @@ use crate::api::{
     GetCounterForKey, GetCounterForKeyResult,
     GetManagerKey, GetManagerKeyResult,
     GetPendingOperations, GetPendingOperationsResult, PendingOperation,
+    GetPendingOperationStatus, GetPendingOperationStatusResult, PendingOperationStatus,
     ForgeOperations, ForgeOperationsResult,
     PreapplyOperations, PreapplyOperationsResult,
     InjectOperations, InjectOperationsResult,
@@ -234,6 +235,38 @@ impl GetPendingOperations for HttpApi {
            .unwrap()
            .into_json()
            .unwrap())
+    }
+}
+
+impl GetPendingOperationStatus for HttpApi {
+    fn get_pending_operation_status(
+        &self,
+        operation_hash: &str
+    ) -> GetPendingOperationStatusResult
+    {
+        let pending_operations = self.get_pending_operations()?;
+
+        let contained_by = |ops: &[PendingOperation]| {
+            ops.iter()
+                .find(|op| op.hash == operation_hash)
+                .is_some()
+        };
+
+        let status = if contained_by(&pending_operations.applied) {
+            PendingOperationStatus::Applied
+        } else if contained_by(&pending_operations.refused) {
+            PendingOperationStatus::Refused
+        } else if contained_by(&pending_operations.branch_refused) {
+            PendingOperationStatus::BranchRefused
+        } else if contained_by(&pending_operations.branch_delayed) {
+            PendingOperationStatus::BranchDelayed
+        } else if contained_by(&pending_operations.unprocessed) {
+            PendingOperationStatus::Unprocessed
+        } else {
+            PendingOperationStatus::Finished
+        };
+
+        Ok(status)
     }
 }
 
