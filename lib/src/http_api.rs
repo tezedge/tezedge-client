@@ -229,12 +229,12 @@ impl ForgeOperations for HttpApi {
     {
         let branch_str = last_block_hash.as_ref();
         Ok(self.client.post(&self.forge_operations_url(branch_str))
-           .send_json(dbg!(ureq::json!({
+           .send_json(ureq::json!({
                "branch": branch_str,
                "contents": operations.iter()
                    .map(|op| OperationWithKind::from(op.clone()))
                    .collect::<Vec<_>>(),
-           })))
+           }))
            .unwrap()
            .into_json()
            .unwrap())
@@ -251,14 +251,14 @@ impl PreapplyOperations for HttpApi {
     ) -> PreapplyOperationsResult
     {
         Ok(self.client.post(&self.preapply_operations_url())
-           .send_json(dbg!(ureq::json!([{
+           .send_json(ureq::json!([{
                "protocol": next_protocol_hash,
                "branch": last_block_hash,
                "signature": signature,
                "contents": operations.iter()
                    .map(|op| OperationWithKind::from(op.clone()))
                    .collect::<Vec<_>>(),
-           }])))
+           }]))
            .unwrap()
            .into_json()
            .unwrap())
