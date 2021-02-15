@@ -10,6 +10,7 @@ use crate::api::{
     GetChainID, GetChainIDResult,
     GetCounterForKey, GetCounterForKeyResult,
     GetManagerKey, GetManagerKeyResult,
+    GetPendingOperations, GetPendingOperationsResult, PendingOperation,
     ForgeOperations, ForgeOperationsResult,
     PreapplyOperations, PreapplyOperationsResult,
     InjectOperations, InjectOperationsResult,
@@ -78,6 +79,13 @@ impl HttpApi {
             "{}/chains/main/blocks/head/context/contracts/{}/manager_key",
             self.base_url,
             key.as_ref(),
+        )
+    }
+
+    fn get_pending_operations_url(&self) -> String {
+        format!(
+            "{}/chains/main/mempool/pending_operations",
+            self.base_url,
         )
     }
 
@@ -215,6 +223,16 @@ impl GetManagerKey for HttpApi {
            .call()
            .unwrap()
            .into_json::<Option<String>>()
+           .unwrap())
+    }
+}
+
+impl GetPendingOperations for HttpApi {
+    fn get_pending_operations(&self) -> GetPendingOperationsResult {
+        Ok(self.client.get(&self.get_pending_operations_url())
+           .call()
+           .unwrap()
+           .into_json()
            .unwrap())
     }
 }

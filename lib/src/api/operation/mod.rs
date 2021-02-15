@@ -4,6 +4,9 @@ pub use operation::*;
 pub mod transaction_operation;
 pub use transaction_operation::*;
 
+pub mod get_pending_operations;
+pub use get_pending_operations::*;
+
 pub mod forge_operations;
 pub use forge_operations::*;
 
