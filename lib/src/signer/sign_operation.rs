@@ -1,6 +1,4 @@
-use std::ops::{Deref};
-use sodiumoxide::{hex, crypto};
-use crypto::hash::sha256;
+use sodiumoxide::crypto;
 use crypto::sign::ed25519;
 
 pub use ed25519::Signature;

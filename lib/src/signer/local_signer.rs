@@ -1,49 +1,41 @@
-use std::convert::TryInto;
 use sodiumoxide::{hex, crypto};
 use crypto::sign::ed25519;
 
-use crate::crypto::{blake2b, base58check};
-use base58check::{ToBase58Check, Prefix};
+use crate::{PublicKey, PrivateKey, CombinedKey};
+use crate::crypto::{blake2b, base58check, Prefix, WithPrefix, WithoutPrefix};
+use base58check::ToBase58Check;
 
 use super::{SignOperation, SignOperationResult, OperationSignatureInfo};
 
 pub struct LocalSigner {
-    pub_key: Vec<u8>,
-    priv_key: Vec<u8>,
+    pub_key: PublicKey,
+    priv_key: PrivateKey,
 }
 
 impl LocalSigner {
-    pub fn new(pub_key: Vec<u8>, priv_key: Vec<u8>) -> Self {
+    pub fn new(pub_key: PublicKey, priv_key: PrivateKey) -> Self {
         Self {
             pub_key,
             priv_key,
         }
     }
-
-    /// concatenated private + public key
-    // TODO: refactor
-    fn combined_key(&self) -> [u8; 64] {
-        vec![self.priv_key.clone(), self.pub_key.clone()]
-            .concat()
-            .try_into()
-            .unwrap()
-    }
 }
 
 impl SignOperation for LocalSigner {
     fn sign_operation(&self, forged_operation: String) -> SignOperationResult {
-        let combined_key = self.combined_key();
+        let combined_key = CombinedKey::new(&self.priv_key, &self.pub_key);
         let operation = hex::decode(&forged_operation)?;
 
         // TODO: add watermarks
 
         let signature_bytes = ed25519::sign_detached(
             &blake2b::digest_256(&vec![vec![3], operation].concat()),
-            &ed25519::SecretKey(combined_key),
+            &ed25519::SecretKey(combined_key.as_ref().clone()),
         );
 
         let signature = signature_bytes.as_ref()
-            .to_base58check_prefixed(Prefix::edsig);
+            .with_prefix(Prefix::edsig)
+            .to_base58check();
 
         let operation_with_signature = format!(
             "{}{}",
@@ -53,7 +45,9 @@ impl SignOperation for LocalSigner {
 
         let operation_hash = blake2b::digest_256(
             &hex::decode(&operation_with_signature)?
-        ).to_base58check_prefixed(Prefix::operation);
+        )
+            .with_prefix(Prefix::operation)
+            .to_base58check();
 
 
         Ok(OperationSignatureInfo {
