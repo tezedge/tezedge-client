@@ -11,3 +11,4 @@ ureq = { version = "2.0.1", features = ["json"] }
 sodiumoxide = "0.2.6"
 base58 = "0.1.0"
 failure = "0.1.8"
+rust_decimal = "1.10.3"
