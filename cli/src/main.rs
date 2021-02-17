@@ -3,6 +3,7 @@ use structopt::StructOpt;
 mod options;
 use options::{Options, SubCommand};
 
+mod spinner;
 mod transfer;
 
 fn main() {
