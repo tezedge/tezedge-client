@@ -10,9 +10,6 @@ pub struct PendingOperation {
 pub struct PendingOperations {
     pub applied: Vec<PendingOperation>,
     pub refused: Vec<PendingOperation>,
-    pub branch_refused: Vec<PendingOperation>,
-    pub branch_delayed: Vec<PendingOperation>,
-    pub unprocessed: Vec<PendingOperation>,
 }
 
 pub type GetPendingOperationsResult = Result<PendingOperations, ()>;

@@ -2,9 +2,6 @@
 pub enum PendingOperationStatus {
     Applied,
     Refused,
-    BranchRefused,
-    BranchDelayed,
-    Unprocessed,
     /// transaction is finished but not necessarily successful
     Finished,
 }

@@ -256,12 +256,6 @@ impl GetPendingOperationStatus for HttpApi {
             PendingOperationStatus::Applied
         } else if contained_by(&pending_operations.refused) {
             PendingOperationStatus::Refused
-        } else if contained_by(&pending_operations.branch_refused) {
-            PendingOperationStatus::BranchRefused
-        } else if contained_by(&pending_operations.branch_delayed) {
-            PendingOperationStatus::BranchDelayed
-        } else if contained_by(&pending_operations.unprocessed) {
-            PendingOperationStatus::Unprocessed
         } else {
             PendingOperationStatus::Finished
         };
