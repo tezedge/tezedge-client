@@ -3,6 +3,7 @@ use structopt::StructOpt;
 mod options;
 use options::{Options, SubCommand};
 
+mod emojies;
 mod spinner;
 mod transfer;
 
