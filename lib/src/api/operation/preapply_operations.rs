@@ -1,6 +1,5 @@
 // use serde::{Serialize, Deserialize};
 
-use crate::signer::OperationSignatureInfo;
 use super::Operation;
 
 pub type PreapplyOperationsResult = Result<serde_json::Value, ()>;

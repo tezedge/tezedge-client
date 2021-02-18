@@ -1,5 +1,3 @@
-use serde::{Serialize, Deserialize};
-
 pub type GetChainIDResult = Result<String, ()>;
 
 pub trait GetChainID {

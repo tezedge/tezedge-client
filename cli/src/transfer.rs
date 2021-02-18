@@ -2,7 +2,7 @@ use std::{process, thread};
 use std::fmt::Display;
 use std::time::Duration;
 use structopt::StructOpt;
-use console::{style, Term};
+use console::style;
 
 use lib::api::*;
 use lib::{PublicKey, PrivateKey};
@@ -58,7 +58,8 @@ fn exit_with_error<E: Display>(error: E) -> ! {
 impl Transfer {
     pub fn execute(self) {
         let Transfer {
-            verbose,
+            // TODO: use verbose to print additional info
+            verbose: _,
             endpoint,
             from,
             to,
@@ -182,7 +183,6 @@ impl Transfer {
                 PendingOperationStatus::Finished => {
                     break;
                 }
-                _ => {}
             }
         }
 

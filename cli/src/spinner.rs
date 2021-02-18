@@ -64,7 +64,7 @@ impl SpinnerBuilder {
                     }
                 }
 
-                let mut t = Term::stderr();
+                let t = Term::stderr();
 
                 if has_printed {
                     let _ = t.clear_last_lines(1);

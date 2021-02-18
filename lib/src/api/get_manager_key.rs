@@ -1,5 +1,3 @@
-use serde::{Serialize, Deserialize};
-
 pub type GetManagerKeyResult = Result<Option<String>, ()>;
 
 pub trait GetManagerKey {

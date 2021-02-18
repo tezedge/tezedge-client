@@ -2,7 +2,7 @@ use sodiumoxide::{hex, crypto};
 use crypto::sign::ed25519;
 
 use crate::{PublicKey, PrivateKey, CombinedKey};
-use crate::crypto::{blake2b, base58check, Prefix, WithPrefix, WithoutPrefix};
+use crate::crypto::{blake2b, base58check, Prefix, WithPrefix};
 use base58check::ToBase58Check;
 
 use super::{SignOperation, SignOperationResult, OperationSignatureInfo};

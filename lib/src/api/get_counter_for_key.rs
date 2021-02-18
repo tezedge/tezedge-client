@@ -1,5 +1,3 @@
-use serde::{Serialize, Deserialize};
-
 pub type GetCounterForKeyResult = Result<u64, ()>;
 
 pub trait GetCounterForKey {
