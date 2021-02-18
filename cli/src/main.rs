@@ -1,16 +1,20 @@
 use structopt::StructOpt;
 
-mod options;
-use options::{Options, SubCommand};
-
 mod emojies;
 mod spinner;
+
 mod transfer;
+use transfer::Transfer;
+
+#[derive(StructOpt, Debug, Clone)]
+pub enum Command {
+    Transfer(Transfer),
+}
 
 fn main() {
-    let opts = Options::from_args();
+    let command = Command::from_args();
 
-    match opts.sub_command.clone() {
-        SubCommand::Transfer(transfer) => transfer.execute(opts),
+    match command {
+        Command::Transfer(transfer) => transfer.execute(),
     }
 }

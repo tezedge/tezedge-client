@@ -9,7 +9,6 @@ use lib::{PublicKey, PrivateKey};
 use lib::utils::parse_float_amount;
 use lib::signer::{SignOperation, LocalSigner};
 
-use crate::options::Options;
 use crate::spinner::SpinnerBuilder;
 use crate::emojies;
 
@@ -18,6 +17,13 @@ use crate::emojies;
 /// Outputs transaction hash to stdout in case of success.
 #[derive(StructOpt, Debug, Clone)]
 pub struct Transfer {
+    /// Verbose mode (-v, -vv, -vvv, etc.)
+    #[structopt(short, long, parse(from_occurrences))]
+    verbose: u8,
+
+    #[structopt(short = "E", long)]
+    endpoint: String,
+
     #[structopt(short, long)]
     from: String,
     #[structopt(short, long)]
@@ -50,15 +56,21 @@ fn exit_with_error<E: Display>(error: E) -> ! {
 }
 
 impl Transfer {
-    pub fn execute(self, global_options: Options) {
-        let from = self.from;
-        let to = self.to;
-        let amount = match parse_float_amount(&self.amount) {
+    pub fn execute(self) {
+        let Transfer {
+            verbose,
+            endpoint,
+            from,
+            to,
+            amount: raw_amount,
+        } = self;
+
+        let amount = match parse_float_amount(&raw_amount) {
             Ok(amount) => amount,
             Err(_) => {
                 exit_with_error(format!(
                     "invalid amount: {}",
-                    style(&self.amount).bold()
+                    style(&raw_amount).bold()
                 ));
             }
         };
@@ -69,7 +81,7 @@ impl Transfer {
                 Err(_) => {
                     exit_with_error(format!(
                         "no local wallet with public key hash: {}",
-                        style(&self.amount).bold()
+                        style(&raw_amount).bold()
                     ));
                 }
             };
@@ -77,7 +89,7 @@ impl Transfer {
         };
 
         // TODO: accept this as generic parameter instead
-        let client = lib::http_api::HttpApi::new(global_options.endpoint);
+        let client = lib::http_api::HttpApi::new(endpoint);
 
         let spinner = SpinnerBuilder::new()
             .with_prefix(style("[1/4]").bold().dim())
