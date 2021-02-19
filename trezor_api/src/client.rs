@@ -4,7 +4,6 @@ use sodiumoxide::hex;
 
 use crate::transport::{ProtoMessage, Transport};
 use crate::messages::TrezorMessage;
-use crate::utils;
 use super::{protos, TrezorModel, Error, Result};
 use protos::{MessageType::*, TezosAddress, TezosSignTx, TezosSignedTx};
 
