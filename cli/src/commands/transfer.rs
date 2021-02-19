@@ -30,6 +30,8 @@ pub struct Transfer {
     to: String,
     #[structopt(short, long)]
     amount: String,
+    #[structopt(long)]
+    fee: String,
 }
 
 // TODO: replace with query to persistent encrypted store for keys
@@ -65,6 +67,7 @@ impl Transfer {
             from,
             to,
             amount: raw_amount,
+            fee: raw_fee,
         } = self;
 
         let amount = match parse_float_amount(&raw_amount) {
@@ -72,6 +75,16 @@ impl Transfer {
             Err(_) => {
                 exit_with_error(format!(
                     "invalid amount: {}",
+                    style(&raw_amount).bold()
+                ));
+            }
+        };
+
+        let fee = match parse_float_amount(&raw_fee) {
+            Ok(amount) => amount,
+            Err(_) => {
+                exit_with_error(format!(
+                    "invalid fee: {}",
                     style(&raw_amount).bold()
                 ));
             }
@@ -115,7 +128,7 @@ impl Transfer {
             .source(from.to_string())
             .destination(to.to_string())
             .amount(amount.to_string())
-            .fee("100000".to_string())
+            .fee(fee.to_string())
             .counter(counter.to_string())
             .gas_limit(50000.to_string())
             .storage_limit(constants.hard_storage_limit_per_operation.to_string())
