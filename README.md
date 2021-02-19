@@ -8,6 +8,8 @@ You can build the package by simply running: `cargo build`.
 
 ## Create Transaction In DelphiNet Testnet
 
+<p align="center"><img src="/docs/create_transaction.gif?raw=true"/></p>
+
 Store for keys isn't yet implemented so for now keys are hardcoded.
 That means transaction can only be created with this key (`--from` address):
 **tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU**
@@ -19,6 +21,8 @@ To create a transaction run this:
 ```
 
 ## Get Address from Trezor
+
+<p align="center"><img src="/docs/trezor_get_address.gif?raw=true"/></p>
 
 To get address (public key hash) from Trezor using [key derivation path](https://learnmeabitcoin.com/technical/derivation-paths) run this command:
 
