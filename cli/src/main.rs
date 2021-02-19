@@ -11,6 +11,7 @@ fn main() {
     let command = Command::from_args();
 
     match command {
-        Command::Transfer(transfer) => transfer.execute(),
+        Command::Address(c) => c.execute(),
+        Command::Transfer(c) => c.execute(),
     }
 }
