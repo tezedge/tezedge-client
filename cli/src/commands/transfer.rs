@@ -56,6 +56,7 @@ fn exit_with_error<E: Display>(error: E) -> ! {
 }
 
 impl Transfer {
+    // TODO: fix transfer not working to new account
     pub fn execute(self) {
         let Transfer {
             // TODO: use verbose to print additional info

@@ -3,13 +3,9 @@ use structopt::StructOpt;
 mod emojies;
 mod spinner;
 
-mod transfer;
-use transfer::Transfer;
+mod commands;
+use commands::Command;
 
-#[derive(StructOpt, Debug, Clone)]
-pub enum Command {
-    Transfer(Transfer),
-}
 
 fn main() {
     let command = Command::from_args();
