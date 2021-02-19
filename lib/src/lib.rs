@@ -1,3 +1,5 @@
+pub use trezor_api;
+
 mod types;
 pub use types::*;
 
