@@ -3,6 +3,7 @@ use structopt::StructOpt;
 mod emojies;
 mod spinner;
 mod common;
+mod trezor;
 
 mod commands;
 use commands::Command;

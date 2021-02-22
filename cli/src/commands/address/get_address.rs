@@ -1,9 +1,7 @@
 use structopt::StructOpt;
-use console::style;
-
-use lib::trezor_api;
 
 use crate::common::exit_with_error;
+use crate::trezor::{find_trezor_device, trezor_execute};
 
 /// Get address
 ///
@@ -20,18 +18,6 @@ pub struct GetAddress {
     /// E.g. m/44'/1729'/0'
     #[structopt(short, long)]
     path: String
-}
-
-fn find_trezor_device() -> trezor_api::AvailableDevice {
-    let mut devices = trezor_api::find_devices().unwrap();
-
-    // TODO: only allow trezor T
-    match devices.len() {
-        0 => exit_with_error("Trezor not connected"),
-        1 => devices.remove(0),
-        // TODO: show select with filtering to choose between devices
-        _ => exit_with_error("More than one Trezor connected (unsupported for now)"),
-    }
 }
 
 impl GetAddress {
@@ -65,6 +51,12 @@ impl GetAddress {
             })
             .collect::<Vec<_>>();
 
-        println!("{}", trezor.get_address(path).unwrap().ok().unwrap().get_address());
+        let address = trezor_execute(
+            trezor.get_address(path.clone()),
+        )
+            .get_address()
+            .to_string();
+
+        println!("{}", address);
     }
 }

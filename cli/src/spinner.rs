@@ -9,6 +9,7 @@ type SpinnerSender = mpsc::Sender<SpinnerMsg>;
 type SpinnerReceiver = mpsc::Receiver<SpinnerMsg>;
 type SpinnerChannel = (SpinnerSender, SpinnerReceiver);
 
+#[derive(Clone)]
 pub struct SpinnerBuilder {
     spinner_chars: Vec<String>,
     interval: Duration,

@@ -8,4 +8,5 @@ edition = "2018"
 lib = { path = "../lib" }
 structopt = "0.3.21"
 console = "0.14.0"
+dialoguer = "0.7.1"
 failure = "0.1.8"
