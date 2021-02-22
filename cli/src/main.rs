@@ -2,6 +2,7 @@ use structopt::StructOpt;
 
 mod emojies;
 mod spinner;
+mod common;
 
 mod commands;
 use commands::Command;

@@ -1,5 +1,4 @@
-use std::{process, thread};
-use std::fmt::Display;
+use std::thread;
 use std::time::Duration;
 use structopt::StructOpt;
 use console::style;
@@ -10,6 +9,7 @@ use lib::utils::parse_float_amount;
 use lib::signer::{SignOperation, LocalSigner};
 
 use crate::spinner::SpinnerBuilder;
+use crate::common::exit_with_error;
 use crate::emojies;
 
 /// Create a transaction
@@ -46,15 +46,6 @@ fn get_keys_by_pkh(pkh: &str) -> Result<(PublicKey, PrivateKey), ()> {
         PublicKey::from_base58check(pub_key).unwrap(),
         PrivateKey::from_base58check(priv_key).unwrap(),
     ))
-}
-
-fn exit_with_error<E: Display>(error: E) -> ! {
-    eprintln!(
-        "{} {}",
-        style("[ERROR]").red().bold(),
-        error,
-    );
-    process::exit(1)
 }
 
 impl Transfer {

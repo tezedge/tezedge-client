@@ -1,9 +1,9 @@
-use std::process;
-use std::fmt::Display;
 use structopt::StructOpt;
 use console::style;
 
 use lib::trezor_api;
+
+use crate::common::exit_with_error;
 
 /// Get address
 ///
@@ -20,15 +20,6 @@ pub struct GetAddress {
     /// E.g. m/44'/1729'/0'
     #[structopt(short, long)]
     path: String
-}
-
-fn exit_with_error<E: Display>(error: E) -> ! {
-    eprintln!(
-        "{} {}",
-        style("[ERROR]").red().bold(),
-        error,
-    );
-    process::exit(1)
 }
 
 fn find_trezor_device() -> trezor_api::AvailableDevice {
