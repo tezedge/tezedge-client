@@ -42,6 +42,20 @@ impl SpinnerBuilder {
         self
     }
 
+    pub fn with_interval_ms(mut self, millis: u64) -> Self {
+        self.interval = Duration::from_millis(millis);
+        self
+    }
+
+    pub fn with_spinner_chars<T>(mut self, chars: Vec<T>) -> Self
+        where T: ToString,
+    {
+        self.spinner_chars = chars.into_iter()
+            .map(|x| x.to_string())
+            .collect();
+        self
+    }
+
     pub fn start(self) -> Spinner {
         let (tx, rx): SpinnerChannel = mpsc::channel();
         let spinner_chars = self.spinner_chars;
