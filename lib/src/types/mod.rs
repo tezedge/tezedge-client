@@ -1,5 +1,8 @@
-mod key_from_base58check_error;
-pub use key_from_base58check_error::*;
+mod from_prefixed_base58check_error;
+pub use from_prefixed_base58check_error::*;
+
+mod block_hash;
+pub use block_hash::*;
 
 mod public_key;
 pub use public_key::*;

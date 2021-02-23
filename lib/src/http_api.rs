@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use serde_json::Value as SerdeValue;
 
-use crate::{NewOperation, NewOperationWithKind};
+use crate::{BlockHash, NewOperation, NewOperationWithKind, ToBase58Check};
 use crate::api::{
     GetVersionInfo, GetVersionInfoResult, VersionInfo, NodeVersion, NetworkVersion, CommitInfo,
     GetConstants, GetConstantsResult,
@@ -92,13 +92,11 @@ impl HttpApi {
 
     // TODO: add /monitor/bootstrapped  endpoint
 
-    fn forge_operations_url<S>(&self, last_block_hash: S) -> String
-        where S: AsRef<str>,
-    {
+    fn forge_operations_url(&self, last_block_hash: &BlockHash) -> String {
         format!(
             "{}/chains/main/blocks/{}/helpers/forge/operations",
             self.base_url,
-            last_block_hash.as_ref(),
+            last_block_hash.to_base58check(),
         )
     }
 
@@ -265,17 +263,15 @@ impl GetPendingOperationStatus for HttpApi {
 }
 
 impl ForgeOperations for HttpApi {
-    fn forge_operations<S>(
+    fn forge_operations(
         &self,
-        last_block_hash: S,
+        last_block_hash: &BlockHash,
         operations: &[NewOperation],
     ) -> ForgeOperationsResult
-        where S: AsRef<str>,
     {
-        let branch_str = last_block_hash.as_ref();
-        Ok(self.client.post(&self.forge_operations_url(branch_str))
+        Ok(self.client.post(&self.forge_operations_url(last_block_hash))
            .send_json(ureq::json!({
-               "branch": branch_str,
+               "branch": last_block_hash,
                "contents": operations.iter()
                    .map(|op| NewOperationWithKind::from(op.clone()))
                    .collect::<Vec<_>>(),
@@ -290,7 +286,7 @@ impl PreapplyOperations for HttpApi {
     fn preapply_operations(
         &self,
         next_protocol_hash: &str,
-        last_block_hash: &str,
+        last_block_hash: &BlockHash,
         signature: &str,
         operations: &[NewOperation],
     ) -> PreapplyOperationsResult

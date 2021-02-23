@@ -2,7 +2,7 @@ use serde::{Serialize, Deserialize};
 
 use super::NewTransactionOperation;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum NewOperation {
     Transaction(NewTransactionOperation),
@@ -24,7 +24,7 @@ impl From<NewTransactionOperation> for NewOperation {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone)]
 pub struct NewOperationWithKind {
     kind: String,
 

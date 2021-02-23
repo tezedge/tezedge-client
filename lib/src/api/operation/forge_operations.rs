@@ -1,12 +1,11 @@
-use crate::NewOperation;
+use crate::{BlockHash, NewOperation};
 
 pub type ForgeOperationsResult = Result<String, ()>;
 
 pub trait ForgeOperations {
-    fn forge_operations<S>(
+    fn forge_operations(
         &self,
-        last_block_hash: S,
+        last_block_hash: &BlockHash,
         operations: &[NewOperation],
-    ) -> ForgeOperationsResult
-        where S: AsRef<str>;
+    ) -> ForgeOperationsResult;
 }

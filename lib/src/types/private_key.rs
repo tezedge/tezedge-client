@@ -2,7 +2,7 @@ use std::convert::TryInto;
 
 use crate::crypto::{Prefix, WithPrefix, WithoutPrefix};
 use crate::crypto::base58check::{FromBase58Check, ToBase58Check};
-use super::KeyFromBase58CheckError;
+use super::FromPrefixedBase58CheckError;
 
 type PrivateKeyInner = [u8; 32];
 
@@ -10,12 +10,12 @@ type PrivateKeyInner = [u8; 32];
 pub struct PrivateKey(PrivateKeyInner);
 
 impl PrivateKey {
-    pub fn from_base58check(encoded: &str) -> Result<Self, KeyFromBase58CheckError> {
+    pub fn from_base58check(encoded: &str) -> Result<Self, FromPrefixedBase58CheckError> {
         let key_bytes: PrivateKeyInner = encoded
             .from_base58check()?
             .without_prefix(Prefix::edsk32)?
             .try_into()
-            .or(Err(KeyFromBase58CheckError::InvalidKeySize))?;
+            .or(Err(FromPrefixedBase58CheckError::InvalidSize))?;
 
         Ok(Self(key_bytes))
     }

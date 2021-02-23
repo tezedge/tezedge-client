@@ -5,7 +5,7 @@ use crate::crypto::NotMatchingPrefixError;
 
 /// Possible errors for base58checked
 #[derive(Debug, PartialEq, Fail)]
-pub enum KeyFromBase58CheckError {
+pub enum FromPrefixedBase58CheckError {
     /// Base58 error.
     #[fail(display = "invalid base58")]
     InvalidBase58,
@@ -18,12 +18,12 @@ pub enum KeyFromBase58CheckError {
     /// Provided prefix doesn't match one in base58 string
     #[fail(display = "not matching prefix")]
     NotMatchingPrefix,
-    /// Provided prefix doesn't match one in base58 string
-    #[fail(display = "invalid key size")]
-    InvalidKeySize,
+    /// Invalid size
+    #[fail(display = "invalid size")]
+    InvalidSize,
 }
 
-impl From<FromBase58CheckError> for KeyFromBase58CheckError {
+impl From<FromBase58CheckError> for FromPrefixedBase58CheckError {
     fn from(err: FromBase58CheckError) -> Self {
         match err {
             FromBase58CheckError::InvalidBase58 => {
@@ -39,7 +39,7 @@ impl From<FromBase58CheckError> for KeyFromBase58CheckError {
     }
 }
 
-impl From<NotMatchingPrefixError> for KeyFromBase58CheckError {
+impl From<NotMatchingPrefixError> for FromPrefixedBase58CheckError {
     fn from(_: NotMatchingPrefixError) -> Self {
         Self::NotMatchingPrefix
     }
