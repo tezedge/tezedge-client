@@ -1,6 +1,6 @@
 // use serde::{Serialize, Deserialize};
 
-use super::Operation;
+use crate::NewOperation;
 
 pub type PreapplyOperationsResult = Result<serde_json::Value, ()>;
 
@@ -10,6 +10,6 @@ pub trait PreapplyOperations {
         next_protocol_hash: &str,
         last_block_hash: &str,
         signature: &str,
-        operations: &[Operation],
+        operations: &[NewOperation],
     ) -> PreapplyOperationsResult;
 }

@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Default, Clone)]
-pub struct TransactionOperationBuilder {
+pub struct NewTransactionOperationBuilder {
     source: Option<String>,
     destination: Option<String>,
     amount: Option<String>,
@@ -11,7 +11,7 @@ pub struct TransactionOperationBuilder {
     storage_limit: Option<String>,
 }
 
-impl TransactionOperationBuilder {
+impl NewTransactionOperationBuilder {
     pub fn new() -> Self {
         Default::default()
     }
@@ -51,9 +51,9 @@ impl TransactionOperationBuilder {
         self
     }
 
-    pub fn build(self) -> Result<TransactionOperation, ()> {
+    pub fn build(self) -> Result<NewTransactionOperation, ()> {
         // TODO: proper error handling
-        Ok(TransactionOperation {
+        Ok(NewTransactionOperation {
             source: self.source.unwrap(),
             destination: self.destination.unwrap(),
             amount: self.amount.unwrap(),
@@ -66,7 +66,7 @@ impl TransactionOperationBuilder {
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
-pub struct TransactionOperation {
+pub struct NewTransactionOperation {
     pub source: String,
     pub destination: String,
     pub amount: String,

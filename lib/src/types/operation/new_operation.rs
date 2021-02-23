@@ -1,39 +1,39 @@
 use serde::{Serialize, Deserialize};
 
-use super::TransactionOperation;
+use super::NewTransactionOperation;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
-pub enum Operation {
-    Transaction(TransactionOperation),
+pub enum NewOperation {
+    Transaction(NewTransactionOperation),
 }
 
-impl Operation {
+impl NewOperation {
     pub fn kind_str(&self) -> &'static str {
         match self {
-            Operation::Transaction(_) => "transaction",
+            Self::Transaction(_) => "transaction",
         }
     }
     // TODO: estimate fees and if estimate fee is bigger than max
     // allow fee, then show error to user.
 }
 
-impl From<TransactionOperation> for Operation {
-    fn from(tx: TransactionOperation) -> Self {
+impl From<NewTransactionOperation> for NewOperation {
+    fn from(tx: NewTransactionOperation) -> Self {
         Self::Transaction(tx)
     }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct OperationWithKind {
+pub struct NewOperationWithKind {
     kind: String,
 
     #[serde(flatten)]
-    operation: Operation,
+    operation: NewOperation,
 }
 
-impl From<Operation> for OperationWithKind {
-    fn from(op: Operation) -> Self {
+impl From<NewOperation> for NewOperationWithKind {
+    fn from(op: NewOperation) -> Self {
         Self {
             kind: op.kind_str().to_owned(),
             operation: op,

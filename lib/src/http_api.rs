@@ -1,8 +1,8 @@
 use serde::Deserialize;
 use serde_json::Value as SerdeValue;
 
+use crate::{NewOperation, NewOperationWithKind};
 use crate::api::{
-    Operation, OperationWithKind,
     GetVersionInfo, GetVersionInfoResult, VersionInfo, NodeVersion, NetworkVersion, CommitInfo,
     GetConstants, GetConstantsResult,
     GetProtocolInfo, GetProtocolInfoResult, ProtocolInfo,
@@ -268,7 +268,7 @@ impl ForgeOperations for HttpApi {
     fn forge_operations<S>(
         &self,
         last_block_hash: S,
-        operations: &[Operation],
+        operations: &[NewOperation],
     ) -> ForgeOperationsResult
         where S: AsRef<str>,
     {
@@ -277,7 +277,7 @@ impl ForgeOperations for HttpApi {
            .send_json(ureq::json!({
                "branch": branch_str,
                "contents": operations.iter()
-                   .map(|op| OperationWithKind::from(op.clone()))
+                   .map(|op| NewOperationWithKind::from(op.clone()))
                    .collect::<Vec<_>>(),
            }))
            .unwrap()
@@ -292,7 +292,7 @@ impl PreapplyOperations for HttpApi {
         next_protocol_hash: &str,
         last_block_hash: &str,
         signature: &str,
-        operations: &[Operation],
+        operations: &[NewOperation],
     ) -> PreapplyOperationsResult
     {
         Ok(self.client.post(&self.preapply_operations_url())
@@ -301,7 +301,7 @@ impl PreapplyOperations for HttpApi {
                "branch": last_block_hash,
                "signature": signature,
                "contents": operations.iter()
-                   .map(|op| OperationWithKind::from(op.clone()))
+                   .map(|op| NewOperationWithKind::from(op.clone()))
                    .collect::<Vec<_>>(),
            }]))
            .unwrap()

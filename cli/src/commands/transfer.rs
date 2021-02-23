@@ -4,7 +4,7 @@ use structopt::StructOpt;
 use console::style;
 
 use lib::api::*;
-use lib::{PublicKey, PrivateKey};
+use lib::{PublicKey, PrivateKey, NewTransactionOperationBuilder};
 use lib::utils::parse_float_amount;
 use lib::signer::{SignOperation, LocalSigner};
 
@@ -115,7 +115,7 @@ impl Transfer {
             "fetched necessary data from the node",
         );
 
-        let tx = TransactionOperationBuilder::new()
+        let tx = NewTransactionOperationBuilder::new()
             .source(from.to_string())
             .destination(to.to_string())
             .amount(amount.to_string())

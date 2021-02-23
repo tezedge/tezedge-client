@@ -9,3 +9,6 @@ pub use private_key::*;
 
 mod combined_key;
 pub use combined_key::*;
+
+mod operation;
+pub use operation::*;
