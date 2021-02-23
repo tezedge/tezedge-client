@@ -109,7 +109,7 @@ impl Transfer {
                 Err(_) => {
                     exit_with_error(format!(
                         "no local wallet with public key hash: {}",
-                        style(&raw_amount).bold()
+                        style(&from).bold()
                     ));
                 }
             };
