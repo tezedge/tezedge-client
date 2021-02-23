@@ -1,16 +1,18 @@
 use serde::{Serialize, Deserialize};
 
-use super::NewTransactionOperation;
+use super::{NewRevealOperation, NewTransactionOperation};
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum NewOperation {
+    Reveal(NewRevealOperation),
     Transaction(NewTransactionOperation),
 }
 
 impl NewOperation {
     pub fn kind_str(&self) -> &'static str {
         match self {
+            Self::Reveal(_) => "reveal",
             Self::Transaction(_) => "transaction",
         }
     }
@@ -18,9 +20,15 @@ impl NewOperation {
     // allow fee, then show error to user.
 }
 
+impl From<NewRevealOperation> for NewOperation {
+    fn from(op: NewRevealOperation) -> Self {
+        Self::Reveal(op)
+    }
+}
+
 impl From<NewTransactionOperation> for NewOperation {
-    fn from(tx: NewTransactionOperation) -> Self {
-        Self::Transaction(tx)
+    fn from(op: NewTransactionOperation) -> Self {
+        Self::Transaction(op)
     }
 }
 

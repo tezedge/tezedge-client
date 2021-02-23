@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use serde_json::Value as SerdeValue;
 
-use crate::{BlockHash, NewOperation, NewOperationWithKind, ToBase58Check};
+use crate::{BlockHash, NewOperationGroup, NewOperationWithKind, ToBase58Check};
 use crate::api::{
     GetVersionInfo, GetVersionInfoResult, VersionInfo, NodeVersion, NetworkVersion, CommitInfo,
     GetConstants, GetConstantsResult,
@@ -266,14 +266,15 @@ impl ForgeOperations for HttpApi {
     fn forge_operations(
         &self,
         last_block_hash: &BlockHash,
-        operations: &[NewOperation],
+        operation_group: &NewOperationGroup,
     ) -> ForgeOperationsResult
     {
         Ok(self.client.post(&self.forge_operations_url(last_block_hash))
            .send_json(ureq::json!({
                "branch": last_block_hash,
-               "contents": operations.iter()
-                   .map(|op| NewOperationWithKind::from(op.clone()))
+               "contents": operation_group.to_operations_vec()
+                   .into_iter()
+                   .map(|op| NewOperationWithKind::from(op))
                    .collect::<Vec<_>>(),
            }))
            .unwrap()
@@ -288,7 +289,7 @@ impl PreapplyOperations for HttpApi {
         next_protocol_hash: &str,
         last_block_hash: &BlockHash,
         signature: &str,
-        operations: &[NewOperation],
+        operation_group: &NewOperationGroup,
     ) -> PreapplyOperationsResult
     {
         Ok(self.client.post(&self.preapply_operations_url())
@@ -296,8 +297,9 @@ impl PreapplyOperations for HttpApi {
                "protocol": next_protocol_hash,
                "branch": last_block_hash,
                "signature": signature,
-               "contents": operations.iter()
-                   .map(|op| NewOperationWithKind::from(op.clone()))
+               "contents": operation_group.to_operations_vec()
+                   .into_iter()
+                   .map(|op| NewOperationWithKind::from(op))
                    .collect::<Vec<_>>(),
            }]))
            .unwrap()

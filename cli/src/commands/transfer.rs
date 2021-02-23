@@ -4,7 +4,7 @@ use structopt::StructOpt;
 use console::style;
 
 use lib::api::*;
-use lib::{PublicKey, PrivateKey, NewTransactionOperationBuilder};
+use lib::{PublicKey, PrivateKey, NewOperationGroup, NewTransactionOperationBuilder};
 use lib::utils::parse_float_amount;
 use lib::signer::{SignOperation, LocalSigner};
 
@@ -132,8 +132,10 @@ impl Transfer {
             .with_text("forging the operation and signing")
             .start();
 
-        let operations = &[tx.into()];
-        let forged_operation = client.forge_operations(&head_block_hash, operations).unwrap();
+        let operation_group = NewOperationGroup::new(head_block_hash.clone())
+            .with_transaction(tx);
+
+        let forged_operation = client.forge_operations(&head_block_hash, &operation_group).unwrap();
 
         let sig_info = local_signer.sign_operation(forged_operation.clone()).unwrap();
         let signature = sig_info.signature.clone();
@@ -157,7 +159,7 @@ impl Transfer {
             &protocol_info.next_protocol_hash,
             &head_block_hash,
             &signature,
-            operations,
+            &operation_group,
         ).unwrap();
 
         client.inject_operations(&operation_with_signature).unwrap();
