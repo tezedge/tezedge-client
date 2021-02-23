@@ -1,4 +1,5 @@
 use serde::{Serialize, Deserialize};
+use trezor_api::protos::TezosSignTx_TezosRevealOp;
 
 use crate::{PublicKey, PublicKeyHash};
 
@@ -81,4 +82,10 @@ pub struct NewRevealOperation {
     pub counter: String,
     pub gas_limit: String,
     pub storage_limit: String,
+}
+
+impl Into<TezosSignTx_TezosRevealOp> for NewRevealOperation {
+    fn into(self) -> TezosSignTx_TezosRevealOp {
+        unimplemented!()
+    }
 }

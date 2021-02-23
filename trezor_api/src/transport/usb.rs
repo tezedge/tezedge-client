@@ -167,22 +167,31 @@ impl UsbTransport {
 		let handle_ptr = Box::into_raw(Box::new(handle));
 		let handle_ref = unsafe { &mut *handle_ptr as &'static mut rusb::DeviceHandle<rusb::Context> };
 
-		Ok(Box::new(UsbTransport {
-			protocol: ProtocolV1 {
-				link: UsbLink {
-					libusb_context: context_ref,
-					handle: handle_ref,
-					endpoint: match device.debug {
-						false => ENDPOINT,
-						true => ENDPOINT_DEBUG,
-					},
+		let mut protocol = ProtocolV1 {
+			link: UsbLink {
+				libusb_context: context_ref,
+				handle: handle_ref,
+				endpoint: match device.debug {
+					false => ENDPOINT,
+					true => ENDPOINT_DEBUG,
 				},
 			},
+		};
+		Ok(Box::new(UsbTransport {
+			protocol,
 		}))
 	}
 }
 
 impl super::Transport for UsbTransport {
+    // fn get_session_id(&self) -> u32 {
+    //     self.protocol.session_id
+    // }
+
+    // fn set_session_id(&mut self, session_id: u32) {
+    //     self.protocol.session_id = session_id;
+    // }
+
 	fn session_begin(&mut self) -> Result<(), Error> {
 		self.protocol.session_begin()
 	}

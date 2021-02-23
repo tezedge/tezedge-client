@@ -3,14 +3,15 @@ use std::time::Duration;
 use structopt::StructOpt;
 use console::style;
 
-use lib::api::*;
+use lib::{ToBase58Check, api::*, trezor_api::TezosSignTx};
 use lib::{PublicKeyHash, PublicKey, PrivateKey, NewOperationGroup, NewTransactionOperationBuilder};
 use lib::utils::parse_float_amount;
 use lib::signer::{SignOperation, LocalSigner};
 
 use crate::spinner::SpinnerBuilder;
-use crate::common::exit_with_error;
+use crate::common::{exit_with_error, parse_derivation_path};
 use crate::emojies;
+use crate::trezor::{find_trezor_device, trezor_execute};
 
 /// Create a transaction
 ///
@@ -24,12 +25,23 @@ pub struct Transfer {
     #[structopt(short = "E", long)]
     endpoint: String,
 
+    #[structopt(long = "trezor")]
+    use_trezor: bool,
+
+    /// Address to transfer tezos from.
+    ///
+    /// Can either be public key hash: tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU
+    ///
+    /// Or if --trezor flag is set, key derivation path**: "m/44'/1729'/0'"
     #[structopt(short, long)]
     from: String,
+
     #[structopt(short, long)]
     to: String,
+
     #[structopt(short, long)]
     amount: String,
+
     #[structopt(long)]
     fee: String,
 }
@@ -55,20 +67,35 @@ impl Transfer {
             // TODO: use verbose to print additional info
             verbose: _,
             endpoint,
-            from,
+            use_trezor,
             to,
+            from: raw_from,
             amount: raw_amount,
             fee: raw_fee,
         } = self;
 
-        let from = match PublicKeyHash::from_base58check(&from) {
-            Ok(pkh) => pkh,
-            Err(err) => {
-                exit_with_error(format!(
-                    "invalid {} public key hash: {}",
-                    style("--from").bold(),
-                    style(from).magenta(),
-                ));
+        let mut device = find_trezor_device();
+        // device.set_debug_mode();
+        let mut trezor = device.connect().unwrap();
+        trezor.init_device().unwrap();
+
+        let from = {
+            let from = if use_trezor {
+                // TODO: get address
+                "tz1cQbQUb1EcrEwCgTPPGdoWmixFzRArozYW".to_string()
+            } else {
+                raw_from
+            };
+
+            match PublicKeyHash::from_base58check(&from) {
+                Ok(pkh) => pkh,
+                Err(err) => {
+                    exit_with_error(format!(
+                        "invalid {} public key hash: {}",
+                        style("--from").bold(),
+                        style(from).magenta(),
+                    ));
+                }
             }
         };
 
@@ -103,19 +130,6 @@ impl Transfer {
             }
         };
 
-        let local_signer = {
-            let (pub_key, priv_key) = match get_keys_by_pkh(&from) {
-                Ok(keys) => keys,
-                Err(_) => {
-                    exit_with_error(format!(
-                        "no local wallet with public key hash: {}",
-                        style(&from).bold()
-                    ));
-                }
-            };
-            LocalSigner::new(pub_key, priv_key)
-        };
-
         // TODO: accept this as generic parameter instead
         let client = lib::http_api::HttpApi::new(endpoint);
 
@@ -138,8 +152,8 @@ impl Transfer {
         );
 
         let tx = NewTransactionOperationBuilder::new()
-            .source(from)
-            .destination(to)
+            .source(from.clone())
+            .destination(to.clone())
             .amount(amount.to_string())
             .fee(fee.to_string())
             .counter(counter.to_string())
@@ -159,7 +173,33 @@ impl Transfer {
 
         let forged_operation = client.forge_operations(&head_block_hash, &operation_group).unwrap();
 
-        let sig_info = local_signer.sign_operation(forged_operation.clone()).unwrap();
+        let sig_info = {
+            if !use_trezor {
+                let local_signer = {
+                    let (pub_key, priv_key) = match get_keys_by_pkh(&from) {
+                        Ok(keys) => keys,
+                        Err(_) => {
+                            exit_with_error(format!(
+                                    "no local wallet with public key hash: {}",
+                                    style(from.to_base58check()).bold()
+                                    ));
+                        }
+                    };
+                    LocalSigner::new(pub_key, priv_key)
+                };
+
+                local_signer.sign_operation(forged_operation.clone()).unwrap()
+            } else {
+                let mut tx: TezosSignTx = operation_group.into();
+                tx.set_address_n(parse_derivation_path("m/44'/1729'/0'"));
+                dbg!(
+                    trezor_execute(
+                        trezor.sign_tx(tx)
+                    )
+                );
+                exit_with_error("");
+            }
+        };
         let signature = sig_info.signature.clone();
         let operation_with_signature = sig_info.operation_with_signature.clone();
         let operation_hash = sig_info.operation_hash.clone();
@@ -177,12 +217,12 @@ impl Transfer {
             .with_text("applying and injecting the operation")
             .start();
 
-        client.preapply_operations(
+        dbg!(client.preapply_operations(
             &protocol_info.next_protocol_hash,
             &head_block_hash,
             &signature,
             &operation_group,
-        ).unwrap();
+        ).unwrap());
 
         client.inject_operations(&operation_with_signature).unwrap();
 

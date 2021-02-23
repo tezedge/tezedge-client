@@ -410,6 +410,8 @@ pub enum Failure_FailureType {
     Failure_NotEnoughFunds = 10,
     Failure_NotInitialized = 11,
     Failure_PinMismatch = 12,
+    Failure_WipeCodeMismatch = 13,
+    Failure_InvalidSession = 14,
     Failure_FirmwareError = 99,
 }
 
@@ -432,6 +434,8 @@ impl ::protobuf::ProtobufEnum for Failure_FailureType {
             10 => ::std::option::Option::Some(Failure_FailureType::Failure_NotEnoughFunds),
             11 => ::std::option::Option::Some(Failure_FailureType::Failure_NotInitialized),
             12 => ::std::option::Option::Some(Failure_FailureType::Failure_PinMismatch),
+            13 => ::std::option::Option::Some(Failure_FailureType::Failure_WipeCodeMismatch),
+            14 => ::std::option::Option::Some(Failure_FailureType::Failure_InvalidSession),
             99 => ::std::option::Option::Some(Failure_FailureType::Failure_FirmwareError),
             _ => ::std::option::Option::None
         }
@@ -451,6 +455,8 @@ impl ::protobuf::ProtobufEnum for Failure_FailureType {
             Failure_FailureType::Failure_NotEnoughFunds,
             Failure_FailureType::Failure_NotInitialized,
             Failure_FailureType::Failure_PinMismatch,
+            Failure_FailureType::Failure_WipeCodeMismatch,
+            Failure_FailureType::Failure_InvalidSession,
             Failure_FailureType::Failure_FirmwareError,
         ];
         values
@@ -484,7 +490,6 @@ impl ::protobuf::reflect::ProtobufValue for Failure_FailureType {
 pub struct ButtonRequest {
     // message fields
     code: ::std::option::Option<ButtonRequest_ButtonRequestType>,
-    data: ::protobuf::SingularField<::std::string::String>,
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
@@ -519,42 +524,6 @@ impl ButtonRequest {
     pub fn set_code(&mut self, v: ButtonRequest_ButtonRequestType) {
         self.code = ::std::option::Option::Some(v);
     }
-
-    // optional string data = 2;
-
-
-    pub fn get_data(&self) -> &str {
-        match self.data.as_ref() {
-            Some(v) => &v,
-            None => "",
-        }
-    }
-    pub fn clear_data(&mut self) {
-        self.data.clear();
-    }
-
-    pub fn has_data(&self) -> bool {
-        self.data.is_some()
-    }
-
-    // Param is passed by value, moved
-    pub fn set_data(&mut self, v: ::std::string::String) {
-        self.data = ::protobuf::SingularField::some(v);
-    }
-
-    // Mutable pointer to the field.
-    // If field is not initialized, it is initialized with default value first.
-    pub fn mut_data(&mut self) -> &mut ::std::string::String {
-        if self.data.is_none() {
-            self.data.set_default();
-        }
-        self.data.as_mut().unwrap()
-    }
-
-    // Take field
-    pub fn take_data(&mut self) -> ::std::string::String {
-        self.data.take().unwrap_or_else(|| ::std::string::String::new())
-    }
 }
 
 impl ::protobuf::Message for ButtonRequest {
@@ -568,9 +537,6 @@ impl ::protobuf::Message for ButtonRequest {
             match field_number {
                 1 => {
                     ::protobuf::rt::read_proto2_enum_with_unknown_fields_into(wire_type, is, &mut self.code, 1, &mut self.unknown_fields)?
-                },
-                2 => {
-                    ::protobuf::rt::read_singular_string_into(wire_type, is, &mut self.data)?;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -587,9 +553,6 @@ impl ::protobuf::Message for ButtonRequest {
         if let Some(v) = self.code {
             my_size += ::protobuf::rt::enum_size(1, v);
         }
-        if let Some(ref v) = self.data.as_ref() {
-            my_size += ::protobuf::rt::string_size(2, &v);
-        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
@@ -598,9 +561,6 @@ impl ::protobuf::Message for ButtonRequest {
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
         if let Some(v) = self.code {
             os.write_enum(1, ::protobuf::ProtobufEnum::value(&v))?;
-        }
-        if let Some(ref v) = self.data.as_ref() {
-            os.write_string(2, &v)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -645,11 +605,6 @@ impl ::protobuf::Message for ButtonRequest {
                 |m: &ButtonRequest| { &m.code },
                 |m: &mut ButtonRequest| { &mut m.code },
             ));
-            fields.push(::protobuf::reflect::accessor::make_singular_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
-                "data",
-                |m: &ButtonRequest| { &m.data },
-                |m: &mut ButtonRequest| { &mut m.data },
-            ));
             ::protobuf::reflect::MessageDescriptor::new_pb_name::<ButtonRequest>(
                 "ButtonRequest",
                 fields,
@@ -667,7 +622,6 @@ impl ::protobuf::Message for ButtonRequest {
 impl ::protobuf::Clear for ButtonRequest {
     fn clear(&mut self) {
         self.code = ::std::option::Option::None;
-        self.data.clear();
         self.unknown_fields.clear();
     }
 }
@@ -699,8 +653,13 @@ pub enum ButtonRequest_ButtonRequestType {
     ButtonRequest_PublicKey = 11,
     ButtonRequest_MnemonicWordCount = 12,
     ButtonRequest_MnemonicInput = 13,
-    ButtonRequest_PassphraseType = 14,
+    _Deprecated_ButtonRequest_PassphraseType = 14,
     ButtonRequest_UnknownDerivationPath = 15,
+    ButtonRequest_RecoveryHomepage = 16,
+    ButtonRequest_Success = 17,
+    ButtonRequest_Warning = 18,
+    ButtonRequest_PassphraseEntry = 19,
+    ButtonRequest_PinEntry = 20,
 }
 
 impl ::protobuf::ProtobufEnum for ButtonRequest_ButtonRequestType {
@@ -723,8 +682,13 @@ impl ::protobuf::ProtobufEnum for ButtonRequest_ButtonRequestType {
             11 => ::std::option::Option::Some(ButtonRequest_ButtonRequestType::ButtonRequest_PublicKey),
             12 => ::std::option::Option::Some(ButtonRequest_ButtonRequestType::ButtonRequest_MnemonicWordCount),
             13 => ::std::option::Option::Some(ButtonRequest_ButtonRequestType::ButtonRequest_MnemonicInput),
-            14 => ::std::option::Option::Some(ButtonRequest_ButtonRequestType::ButtonRequest_PassphraseType),
+            14 => ::std::option::Option::Some(ButtonRequest_ButtonRequestType::_Deprecated_ButtonRequest_PassphraseType),
             15 => ::std::option::Option::Some(ButtonRequest_ButtonRequestType::ButtonRequest_UnknownDerivationPath),
+            16 => ::std::option::Option::Some(ButtonRequest_ButtonRequestType::ButtonRequest_RecoveryHomepage),
+            17 => ::std::option::Option::Some(ButtonRequest_ButtonRequestType::ButtonRequest_Success),
+            18 => ::std::option::Option::Some(ButtonRequest_ButtonRequestType::ButtonRequest_Warning),
+            19 => ::std::option::Option::Some(ButtonRequest_ButtonRequestType::ButtonRequest_PassphraseEntry),
+            20 => ::std::option::Option::Some(ButtonRequest_ButtonRequestType::ButtonRequest_PinEntry),
             _ => ::std::option::Option::None
         }
     }
@@ -744,8 +708,13 @@ impl ::protobuf::ProtobufEnum for ButtonRequest_ButtonRequestType {
             ButtonRequest_ButtonRequestType::ButtonRequest_PublicKey,
             ButtonRequest_ButtonRequestType::ButtonRequest_MnemonicWordCount,
             ButtonRequest_ButtonRequestType::ButtonRequest_MnemonicInput,
-            ButtonRequest_ButtonRequestType::ButtonRequest_PassphraseType,
+            ButtonRequest_ButtonRequestType::_Deprecated_ButtonRequest_PassphraseType,
             ButtonRequest_ButtonRequestType::ButtonRequest_UnknownDerivationPath,
+            ButtonRequest_ButtonRequestType::ButtonRequest_RecoveryHomepage,
+            ButtonRequest_ButtonRequestType::ButtonRequest_Success,
+            ButtonRequest_ButtonRequestType::ButtonRequest_Warning,
+            ButtonRequest_ButtonRequestType::ButtonRequest_PassphraseEntry,
+            ButtonRequest_ButtonRequestType::ButtonRequest_PinEntry,
         ];
         values
     }
@@ -1047,6 +1016,8 @@ pub enum PinMatrixRequest_PinMatrixRequestType {
     PinMatrixRequestType_Current = 1,
     PinMatrixRequestType_NewFirst = 2,
     PinMatrixRequestType_NewSecond = 3,
+    PinMatrixRequestType_WipeCodeFirst = 4,
+    PinMatrixRequestType_WipeCodeSecond = 5,
 }
 
 impl ::protobuf::ProtobufEnum for PinMatrixRequest_PinMatrixRequestType {
@@ -1059,6 +1030,8 @@ impl ::protobuf::ProtobufEnum for PinMatrixRequest_PinMatrixRequestType {
             1 => ::std::option::Option::Some(PinMatrixRequest_PinMatrixRequestType::PinMatrixRequestType_Current),
             2 => ::std::option::Option::Some(PinMatrixRequest_PinMatrixRequestType::PinMatrixRequestType_NewFirst),
             3 => ::std::option::Option::Some(PinMatrixRequest_PinMatrixRequestType::PinMatrixRequestType_NewSecond),
+            4 => ::std::option::Option::Some(PinMatrixRequest_PinMatrixRequestType::PinMatrixRequestType_WipeCodeFirst),
+            5 => ::std::option::Option::Some(PinMatrixRequest_PinMatrixRequestType::PinMatrixRequestType_WipeCodeSecond),
             _ => ::std::option::Option::None
         }
     }
@@ -1068,6 +1041,8 @@ impl ::protobuf::ProtobufEnum for PinMatrixRequest_PinMatrixRequestType {
             PinMatrixRequest_PinMatrixRequestType::PinMatrixRequestType_Current,
             PinMatrixRequest_PinMatrixRequestType::PinMatrixRequestType_NewFirst,
             PinMatrixRequest_PinMatrixRequestType::PinMatrixRequestType_NewSecond,
+            PinMatrixRequest_PinMatrixRequestType::PinMatrixRequestType_WipeCodeFirst,
+            PinMatrixRequest_PinMatrixRequestType::PinMatrixRequestType_WipeCodeSecond,
         ];
         values
     }
@@ -1271,7 +1246,7 @@ impl ::protobuf::reflect::ProtobufValue for PinMatrixAck {
 #[derive(PartialEq,Clone,Default)]
 pub struct PassphraseRequest {
     // message fields
-    on_device: ::std::option::Option<bool>,
+    _on_device: ::std::option::Option<bool>,
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
@@ -1288,23 +1263,23 @@ impl PassphraseRequest {
         ::std::default::Default::default()
     }
 
-    // optional bool on_device = 1;
+    // optional bool _on_device = 1;
 
 
-    pub fn get_on_device(&self) -> bool {
-        self.on_device.unwrap_or(false)
+    pub fn get__on_device(&self) -> bool {
+        self._on_device.unwrap_or(false)
     }
-    pub fn clear_on_device(&mut self) {
-        self.on_device = ::std::option::Option::None;
+    pub fn clear__on_device(&mut self) {
+        self._on_device = ::std::option::Option::None;
     }
 
-    pub fn has_on_device(&self) -> bool {
-        self.on_device.is_some()
+    pub fn has__on_device(&self) -> bool {
+        self._on_device.is_some()
     }
 
     // Param is passed by value, moved
-    pub fn set_on_device(&mut self, v: bool) {
-        self.on_device = ::std::option::Option::Some(v);
+    pub fn set__on_device(&mut self, v: bool) {
+        self._on_device = ::std::option::Option::Some(v);
     }
 }
 
@@ -1322,7 +1297,7 @@ impl ::protobuf::Message for PassphraseRequest {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
                     let tmp = is.read_bool()?;
-                    self.on_device = ::std::option::Option::Some(tmp);
+                    self._on_device = ::std::option::Option::Some(tmp);
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -1336,7 +1311,7 @@ impl ::protobuf::Message for PassphraseRequest {
     #[allow(unused_variables)]
     fn compute_size(&self) -> u32 {
         let mut my_size = 0;
-        if let Some(v) = self.on_device {
+        if let Some(v) = self._on_device {
             my_size += 2;
         }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
@@ -1345,7 +1320,7 @@ impl ::protobuf::Message for PassphraseRequest {
     }
 
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
-        if let Some(v) = self.on_device {
+        if let Some(v) = self._on_device {
             os.write_bool(1, v)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
@@ -1387,9 +1362,9 @@ impl ::protobuf::Message for PassphraseRequest {
         descriptor.get(|| {
             let mut fields = ::std::vec::Vec::new();
             fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
-                "on_device",
-                |m: &PassphraseRequest| { &m.on_device },
-                |m: &mut PassphraseRequest| { &mut m.on_device },
+                "_on_device",
+                |m: &PassphraseRequest| { &m._on_device },
+                |m: &mut PassphraseRequest| { &mut m._on_device },
             ));
             ::protobuf::reflect::MessageDescriptor::new_pb_name::<PassphraseRequest>(
                 "PassphraseRequest",
@@ -1407,7 +1382,7 @@ impl ::protobuf::Message for PassphraseRequest {
 
 impl ::protobuf::Clear for PassphraseRequest {
     fn clear(&mut self) {
-        self.on_device = ::std::option::Option::None;
+        self._on_device = ::std::option::Option::None;
         self.unknown_fields.clear();
     }
 }
@@ -1428,7 +1403,8 @@ impl ::protobuf::reflect::ProtobufValue for PassphraseRequest {
 pub struct PassphraseAck {
     // message fields
     passphrase: ::protobuf::SingularField<::std::string::String>,
-    state: ::protobuf::SingularField<::std::vec::Vec<u8>>,
+    _state: ::protobuf::SingularField<::std::vec::Vec<u8>>,
+    on_device: ::std::option::Option<bool>,
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
@@ -1481,40 +1457,59 @@ impl PassphraseAck {
         self.passphrase.take().unwrap_or_else(|| ::std::string::String::new())
     }
 
-    // optional bytes state = 2;
+    // optional bytes _state = 2;
 
 
-    pub fn get_state(&self) -> &[u8] {
-        match self.state.as_ref() {
+    pub fn get__state(&self) -> &[u8] {
+        match self._state.as_ref() {
             Some(v) => &v,
             None => &[],
         }
     }
-    pub fn clear_state(&mut self) {
-        self.state.clear();
+    pub fn clear__state(&mut self) {
+        self._state.clear();
     }
 
-    pub fn has_state(&self) -> bool {
-        self.state.is_some()
+    pub fn has__state(&self) -> bool {
+        self._state.is_some()
     }
 
     // Param is passed by value, moved
-    pub fn set_state(&mut self, v: ::std::vec::Vec<u8>) {
-        self.state = ::protobuf::SingularField::some(v);
+    pub fn set__state(&mut self, v: ::std::vec::Vec<u8>) {
+        self._state = ::protobuf::SingularField::some(v);
     }
 
     // Mutable pointer to the field.
     // If field is not initialized, it is initialized with default value first.
-    pub fn mut_state(&mut self) -> &mut ::std::vec::Vec<u8> {
-        if self.state.is_none() {
-            self.state.set_default();
+    pub fn mut__state(&mut self) -> &mut ::std::vec::Vec<u8> {
+        if self._state.is_none() {
+            self._state.set_default();
         }
-        self.state.as_mut().unwrap()
+        self._state.as_mut().unwrap()
     }
 
     // Take field
-    pub fn take_state(&mut self) -> ::std::vec::Vec<u8> {
-        self.state.take().unwrap_or_else(|| ::std::vec::Vec::new())
+    pub fn take__state(&mut self) -> ::std::vec::Vec<u8> {
+        self._state.take().unwrap_or_else(|| ::std::vec::Vec::new())
+    }
+
+    // optional bool on_device = 3;
+
+
+    pub fn get_on_device(&self) -> bool {
+        self.on_device.unwrap_or(false)
+    }
+    pub fn clear_on_device(&mut self) {
+        self.on_device = ::std::option::Option::None;
+    }
+
+    pub fn has_on_device(&self) -> bool {
+        self.on_device.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_on_device(&mut self, v: bool) {
+        self.on_device = ::std::option::Option::Some(v);
     }
 }
 
@@ -1531,7 +1526,14 @@ impl ::protobuf::Message for PassphraseAck {
                     ::protobuf::rt::read_singular_string_into(wire_type, is, &mut self.passphrase)?;
                 },
                 2 => {
-                    ::protobuf::rt::read_singular_bytes_into(wire_type, is, &mut self.state)?;
+                    ::protobuf::rt::read_singular_bytes_into(wire_type, is, &mut self._state)?;
+                },
+                3 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.on_device = ::std::option::Option::Some(tmp);
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -1548,8 +1550,11 @@ impl ::protobuf::Message for PassphraseAck {
         if let Some(ref v) = self.passphrase.as_ref() {
             my_size += ::protobuf::rt::string_size(1, &v);
         }
-        if let Some(ref v) = self.state.as_ref() {
+        if let Some(ref v) = self._state.as_ref() {
             my_size += ::protobuf::rt::bytes_size(2, &v);
+        }
+        if let Some(v) = self.on_device {
+            my_size += 2;
         }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
@@ -1560,8 +1565,11 @@ impl ::protobuf::Message for PassphraseAck {
         if let Some(ref v) = self.passphrase.as_ref() {
             os.write_string(1, &v)?;
         }
-        if let Some(ref v) = self.state.as_ref() {
+        if let Some(ref v) = self._state.as_ref() {
             os.write_bytes(2, &v)?;
+        }
+        if let Some(v) = self.on_device {
+            os.write_bool(3, v)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -1607,9 +1615,14 @@ impl ::protobuf::Message for PassphraseAck {
                 |m: &mut PassphraseAck| { &mut m.passphrase },
             ));
             fields.push(::protobuf::reflect::accessor::make_singular_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
-                "state",
-                |m: &PassphraseAck| { &m.state },
-                |m: &mut PassphraseAck| { &mut m.state },
+                "_state",
+                |m: &PassphraseAck| { &m._state },
+                |m: &mut PassphraseAck| { &mut m._state },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                "on_device",
+                |m: &PassphraseAck| { &m.on_device },
+                |m: &mut PassphraseAck| { &mut m.on_device },
             ));
             ::protobuf::reflect::MessageDescriptor::new_pb_name::<PassphraseAck>(
                 "PassphraseAck",
@@ -1628,7 +1641,8 @@ impl ::protobuf::Message for PassphraseAck {
 impl ::protobuf::Clear for PassphraseAck {
     fn clear(&mut self) {
         self.passphrase.clear();
-        self.state.clear();
+        self._state.clear();
+        self.on_device = ::std::option::Option::None;
         self.unknown_fields.clear();
     }
 }
@@ -1646,7 +1660,7 @@ impl ::protobuf::reflect::ProtobufValue for PassphraseAck {
 }
 
 #[derive(PartialEq,Clone,Default)]
-pub struct PassphraseStateRequest {
+pub struct Deprecated_PassphraseStateRequest {
     // message fields
     state: ::protobuf::SingularField<::std::vec::Vec<u8>>,
     // special fields
@@ -1654,14 +1668,14 @@ pub struct PassphraseStateRequest {
     pub cached_size: ::protobuf::CachedSize,
 }
 
-impl<'a> ::std::default::Default for &'a PassphraseStateRequest {
-    fn default() -> &'a PassphraseStateRequest {
-        <PassphraseStateRequest as ::protobuf::Message>::default_instance()
+impl<'a> ::std::default::Default for &'a Deprecated_PassphraseStateRequest {
+    fn default() -> &'a Deprecated_PassphraseStateRequest {
+        <Deprecated_PassphraseStateRequest as ::protobuf::Message>::default_instance()
     }
 }
 
-impl PassphraseStateRequest {
-    pub fn new() -> PassphraseStateRequest {
+impl Deprecated_PassphraseStateRequest {
+    pub fn new() -> Deprecated_PassphraseStateRequest {
         ::std::default::Default::default()
     }
 
@@ -1702,7 +1716,7 @@ impl PassphraseStateRequest {
     }
 }
 
-impl ::protobuf::Message for PassphraseStateRequest {
+impl ::protobuf::Message for Deprecated_PassphraseStateRequest {
     fn is_initialized(&self) -> bool {
         true
     }
@@ -1768,8 +1782,8 @@ impl ::protobuf::Message for PassphraseStateRequest {
         Self::descriptor_static()
     }
 
-    fn new() -> PassphraseStateRequest {
-        PassphraseStateRequest::new()
+    fn new() -> Deprecated_PassphraseStateRequest {
+        Deprecated_PassphraseStateRequest::new()
     }
 
     fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
@@ -1778,62 +1792,62 @@ impl ::protobuf::Message for PassphraseStateRequest {
             let mut fields = ::std::vec::Vec::new();
             fields.push(::protobuf::reflect::accessor::make_singular_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
                 "state",
-                |m: &PassphraseStateRequest| { &m.state },
-                |m: &mut PassphraseStateRequest| { &mut m.state },
+                |m: &Deprecated_PassphraseStateRequest| { &m.state },
+                |m: &mut Deprecated_PassphraseStateRequest| { &mut m.state },
             ));
-            ::protobuf::reflect::MessageDescriptor::new_pb_name::<PassphraseStateRequest>(
-                "PassphraseStateRequest",
+            ::protobuf::reflect::MessageDescriptor::new_pb_name::<Deprecated_PassphraseStateRequest>(
+                "Deprecated_PassphraseStateRequest",
                 fields,
                 file_descriptor_proto()
             )
         })
     }
 
-    fn default_instance() -> &'static PassphraseStateRequest {
-        static instance: ::protobuf::rt::LazyV2<PassphraseStateRequest> = ::protobuf::rt::LazyV2::INIT;
-        instance.get(PassphraseStateRequest::new)
+    fn default_instance() -> &'static Deprecated_PassphraseStateRequest {
+        static instance: ::protobuf::rt::LazyV2<Deprecated_PassphraseStateRequest> = ::protobuf::rt::LazyV2::INIT;
+        instance.get(Deprecated_PassphraseStateRequest::new)
     }
 }
 
-impl ::protobuf::Clear for PassphraseStateRequest {
+impl ::protobuf::Clear for Deprecated_PassphraseStateRequest {
     fn clear(&mut self) {
         self.state.clear();
         self.unknown_fields.clear();
     }
 }
 
-impl ::std::fmt::Debug for PassphraseStateRequest {
+impl ::std::fmt::Debug for Deprecated_PassphraseStateRequest {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         ::protobuf::text_format::fmt(self, f)
     }
 }
 
-impl ::protobuf::reflect::ProtobufValue for PassphraseStateRequest {
+impl ::protobuf::reflect::ProtobufValue for Deprecated_PassphraseStateRequest {
     fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
         ::protobuf::reflect::ReflectValueRef::Message(self)
     }
 }
 
 #[derive(PartialEq,Clone,Default)]
-pub struct PassphraseStateAck {
+pub struct Deprecated_PassphraseStateAck {
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
 }
 
-impl<'a> ::std::default::Default for &'a PassphraseStateAck {
-    fn default() -> &'a PassphraseStateAck {
-        <PassphraseStateAck as ::protobuf::Message>::default_instance()
+impl<'a> ::std::default::Default for &'a Deprecated_PassphraseStateAck {
+    fn default() -> &'a Deprecated_PassphraseStateAck {
+        <Deprecated_PassphraseStateAck as ::protobuf::Message>::default_instance()
     }
 }
 
-impl PassphraseStateAck {
-    pub fn new() -> PassphraseStateAck {
+impl Deprecated_PassphraseStateAck {
+    pub fn new() -> Deprecated_PassphraseStateAck {
         ::std::default::Default::default()
     }
 }
 
-impl ::protobuf::Message for PassphraseStateAck {
+impl ::protobuf::Message for Deprecated_PassphraseStateAck {
     fn is_initialized(&self) -> bool {
         true
     }
@@ -1890,41 +1904,41 @@ impl ::protobuf::Message for PassphraseStateAck {
         Self::descriptor_static()
     }
 
-    fn new() -> PassphraseStateAck {
-        PassphraseStateAck::new()
+    fn new() -> Deprecated_PassphraseStateAck {
+        Deprecated_PassphraseStateAck::new()
     }
 
     fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
         static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
         descriptor.get(|| {
             let fields = ::std::vec::Vec::new();
-            ::protobuf::reflect::MessageDescriptor::new_pb_name::<PassphraseStateAck>(
-                "PassphraseStateAck",
+            ::protobuf::reflect::MessageDescriptor::new_pb_name::<Deprecated_PassphraseStateAck>(
+                "Deprecated_PassphraseStateAck",
                 fields,
                 file_descriptor_proto()
             )
         })
     }
 
-    fn default_instance() -> &'static PassphraseStateAck {
-        static instance: ::protobuf::rt::LazyV2<PassphraseStateAck> = ::protobuf::rt::LazyV2::INIT;
-        instance.get(PassphraseStateAck::new)
+    fn default_instance() -> &'static Deprecated_PassphraseStateAck {
+        static instance: ::protobuf::rt::LazyV2<Deprecated_PassphraseStateAck> = ::protobuf::rt::LazyV2::INIT;
+        instance.get(Deprecated_PassphraseStateAck::new)
     }
 }
 
-impl ::protobuf::Clear for PassphraseStateAck {
+impl ::protobuf::Clear for Deprecated_PassphraseStateAck {
     fn clear(&mut self) {
         self.unknown_fields.clear();
     }
 }
 
-impl ::std::fmt::Debug for PassphraseStateAck {
+impl ::std::fmt::Debug for Deprecated_PassphraseStateAck {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         ::protobuf::text_format::fmt(self, f)
     }
 }
 
-impl ::protobuf::reflect::ProtobufValue for PassphraseStateAck {
+impl ::protobuf::reflect::ProtobufValue for Deprecated_PassphraseStateAck {
     fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
         ::protobuf::reflect::ReflectValueRef::Message(self)
     }
@@ -2084,7 +2098,7 @@ impl HDNodeType {
         self.private_key.take().unwrap_or_else(|| ::std::vec::Vec::new())
     }
 
-    // optional bytes public_key = 6;
+    // required bytes public_key = 6;
 
 
     pub fn get_public_key(&self) -> &[u8] {
@@ -2133,6 +2147,9 @@ impl ::protobuf::Message for HDNodeType {
             return false;
         }
         if self.chain_code.is_none() {
+            return false;
+        }
+        if self.public_key.is_none() {
             return false;
         }
         true
@@ -2334,46 +2351,54 @@ impl ::protobuf::reflect::ProtobufValue for HDNodeType {
 
 static file_descriptor_proto_data: &'static [u8] = b"\
     \n\x15messages-common.proto\x12\x19hw.trezor.messages.common\"#\n\x07Suc\
-    cess\x12\x18\n\x07message\x18\x01\x20\x01(\tR\x07message\"\xd5\x03\n\x07\
+    cess\x12\x18\n\x07message\x18\x01\x20\x01(\tR\x07message\"\x8f\x04\n\x07\
     Failure\x12B\n\x04code\x18\x01\x20\x01(\x0e2..hw.trezor.messages.common.\
     Failure.FailureTypeR\x04code\x12\x18\n\x07message\x18\x02\x20\x01(\tR\
-    \x07message\"\xeb\x02\n\x0bFailureType\x12\x1d\n\x19Failure_UnexpectedMe\
+    \x07message\"\xa5\x03\n\x0bFailureType\x12\x1d\n\x19Failure_UnexpectedMe\
     ssage\x10\x01\x12\x1a\n\x16Failure_ButtonExpected\x10\x02\x12\x15\n\x11F\
     ailure_DataError\x10\x03\x12\x1b\n\x17Failure_ActionCancelled\x10\x04\
     \x12\x17\n\x13Failure_PinExpected\x10\x05\x12\x18\n\x14Failure_PinCancel\
     led\x10\x06\x12\x16\n\x12Failure_PinInvalid\x10\x07\x12\x1c\n\x18Failure\
     _InvalidSignature\x10\x08\x12\x18\n\x14Failure_ProcessError\x10\t\x12\
     \x1a\n\x16Failure_NotEnoughFunds\x10\n\x12\x1a\n\x16Failure_NotInitializ\
-    ed\x10\x0b\x12\x17\n\x13Failure_PinMismatch\x10\x0c\x12\x19\n\x15Failure\
-    _FirmwareError\x10c\"\xe6\x04\n\rButtonRequest\x12N\n\x04code\x18\x01\
-    \x20\x01(\x0e2:.hw.trezor.messages.common.ButtonRequest.ButtonRequestTyp\
-    eR\x04code\x12\x12\n\x04data\x18\x02\x20\x01(\tR\x04data\"\xf0\x03\n\x11\
-    ButtonRequestType\x12\x17\n\x13ButtonRequest_Other\x10\x01\x12\"\n\x1eBu\
-    ttonRequest_FeeOverThreshold\x10\x02\x12\x1f\n\x1bButtonRequest_ConfirmO\
-    utput\x10\x03\x12\x1d\n\x19ButtonRequest_ResetDevice\x10\x04\x12\x1d\n\
-    \x19ButtonRequest_ConfirmWord\x10\x05\x12\x1c\n\x18ButtonRequest_WipeDev\
-    ice\x10\x06\x12\x1d\n\x19ButtonRequest_ProtectCall\x10\x07\x12\x18\n\x14\
-    ButtonRequest_SignTx\x10\x08\x12\x1f\n\x1bButtonRequest_FirmwareCheck\
-    \x10\t\x12\x19\n\x15ButtonRequest_Address\x10\n\x12\x1b\n\x17ButtonReque\
-    st_PublicKey\x10\x0b\x12#\n\x1fButtonRequest_MnemonicWordCount\x10\x0c\
-    \x12\x1f\n\x1bButtonRequest_MnemonicInput\x10\r\x12\x20\n\x1cButtonReque\
-    st_PassphraseType\x10\x0e\x12'\n#ButtonRequest_UnknownDerivationPath\x10\
-    \x0f\"\x0b\n\tButtonAck\"\xe9\x01\n\x10PinMatrixRequest\x12T\n\x04type\
-    \x18\x01\x20\x01(\x0e2@.hw.trezor.messages.common.PinMatrixRequest.PinMa\
-    trixRequestTypeR\x04type\"\x7f\n\x14PinMatrixRequestType\x12\x20\n\x1cPi\
-    nMatrixRequestType_Current\x10\x01\x12!\n\x1dPinMatrixRequestType_NewFir\
-    st\x10\x02\x12\"\n\x1ePinMatrixRequestType_NewSecond\x10\x03\"\x20\n\x0c\
-    PinMatrixAck\x12\x10\n\x03pin\x18\x01\x20\x02(\tR\x03pin\"0\n\x11Passphr\
-    aseRequest\x12\x1b\n\ton_device\x18\x01\x20\x01(\x08R\x08onDevice\"E\n\r\
-    PassphraseAck\x12\x1e\n\npassphrase\x18\x01\x20\x01(\tR\npassphrase\x12\
-    \x14\n\x05state\x18\x02\x20\x01(\x0cR\x05state\".\n\x16PassphraseStateRe\
-    quest\x12\x14\n\x05state\x18\x01\x20\x01(\x0cR\x05state\"\x14\n\x12Passp\
-    hraseStateAck\"\xc0\x01\n\nHDNodeType\x12\x14\n\x05depth\x18\x01\x20\x02\
-    (\rR\x05depth\x12\x20\n\x0bfingerprint\x18\x02\x20\x02(\rR\x0bfingerprin\
-    t\x12\x1b\n\tchild_num\x18\x03\x20\x02(\rR\x08childNum\x12\x1d\n\nchain_\
-    code\x18\x04\x20\x02(\x0cR\tchainCode\x12\x1f\n\x0bprivate_key\x18\x05\
-    \x20\x01(\x0cR\nprivateKey\x12\x1d\n\npublic_key\x18\x06\x20\x01(\x0cR\t\
-    publicKey\
+    ed\x10\x0b\x12\x17\n\x13Failure_PinMismatch\x10\x0c\x12\x1c\n\x18Failure\
+    _WipeCodeMismatch\x10\r\x12\x1a\n\x16Failure_InvalidSession\x10\x0e\x12\
+    \x19\n\x15Failure_FirmwareError\x10c\"\xfb\x05\n\rButtonRequest\x12N\n\
+    \x04code\x18\x01\x20\x01(\x0e2:.hw.trezor.messages.common.ButtonRequest.\
+    ButtonRequestTypeR\x04code\"\x99\x05\n\x11ButtonRequestType\x12\x17\n\
+    \x13ButtonRequest_Other\x10\x01\x12\"\n\x1eButtonRequest_FeeOverThreshol\
+    d\x10\x02\x12\x1f\n\x1bButtonRequest_ConfirmOutput\x10\x03\x12\x1d\n\x19\
+    ButtonRequest_ResetDevice\x10\x04\x12\x1d\n\x19ButtonRequest_ConfirmWord\
+    \x10\x05\x12\x1c\n\x18ButtonRequest_WipeDevice\x10\x06\x12\x1d\n\x19Butt\
+    onRequest_ProtectCall\x10\x07\x12\x18\n\x14ButtonRequest_SignTx\x10\x08\
+    \x12\x1f\n\x1bButtonRequest_FirmwareCheck\x10\t\x12\x19\n\x15ButtonReque\
+    st_Address\x10\n\x12\x1b\n\x17ButtonRequest_PublicKey\x10\x0b\x12#\n\x1f\
+    ButtonRequest_MnemonicWordCount\x10\x0c\x12\x1f\n\x1bButtonRequest_Mnemo\
+    nicInput\x10\r\x120\n(_Deprecated_ButtonRequest_PassphraseType\x10\x0e\
+    \x1a\x02\x08\x01\x12'\n#ButtonRequest_UnknownDerivationPath\x10\x0f\x12\
+    \"\n\x1eButtonRequest_RecoveryHomepage\x10\x10\x12\x19\n\x15ButtonReques\
+    t_Success\x10\x11\x12\x19\n\x15ButtonRequest_Warning\x10\x12\x12!\n\x1dB\
+    uttonRequest_PassphraseEntry\x10\x13\x12\x1a\n\x16ButtonRequest_PinEntry\
+    \x10\x14\"\x0b\n\tButtonAck\"\xbb\x02\n\x10PinMatrixRequest\x12T\n\x04ty\
+    pe\x18\x01\x20\x01(\x0e2@.hw.trezor.messages.common.PinMatrixRequest.Pin\
+    MatrixRequestTypeR\x04type\"\xd0\x01\n\x14PinMatrixRequestType\x12\x20\n\
+    \x1cPinMatrixRequestType_Current\x10\x01\x12!\n\x1dPinMatrixRequestType_\
+    NewFirst\x10\x02\x12\"\n\x1ePinMatrixRequestType_NewSecond\x10\x03\x12&\
+    \n\"PinMatrixRequestType_WipeCodeFirst\x10\x04\x12'\n#PinMatrixRequestTy\
+    pe_WipeCodeSecond\x10\x05\"\x20\n\x0cPinMatrixAck\x12\x10\n\x03pin\x18\
+    \x01\x20\x02(\tR\x03pin\"5\n\x11PassphraseRequest\x12\x20\n\n_on_device\
+    \x18\x01\x20\x01(\x08R\x08OnDeviceB\x02\x18\x01\"g\n\rPassphraseAck\x12\
+    \x1e\n\npassphrase\x18\x01\x20\x01(\tR\npassphrase\x12\x19\n\x06_state\
+    \x18\x02\x20\x01(\x0cR\x05StateB\x02\x18\x01\x12\x1b\n\ton_device\x18\
+    \x03\x20\x01(\x08R\x08onDevice\"=\n!Deprecated_PassphraseStateRequest\
+    \x12\x14\n\x05state\x18\x01\x20\x01(\x0cR\x05state:\x02\x18\x01\"#\n\x1d\
+    Deprecated_PassphraseStateAck:\x02\x18\x01\"\xc0\x01\n\nHDNodeType\x12\
+    \x14\n\x05depth\x18\x01\x20\x02(\rR\x05depth\x12\x20\n\x0bfingerprint\
+    \x18\x02\x20\x02(\rR\x0bfingerprint\x12\x1b\n\tchild_num\x18\x03\x20\x02\
+    (\rR\x08childNum\x12\x1d\n\nchain_code\x18\x04\x20\x02(\x0cR\tchainCode\
+    \x12\x1f\n\x0bprivate_key\x18\x05\x20\x01(\x0cR\nprivateKey\x12\x1d\n\np\
+    ublic_key\x18\x06\x20\x02(\x0cR\tpublicKeyB:\n#com.satoshilabs.trezor.li\
+    b.protobufB\x13TrezorMessageCommon\
 ";
 
 static file_descriptor_proto_lazy: ::protobuf::rt::LazyV2<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::rt::LazyV2::INIT;

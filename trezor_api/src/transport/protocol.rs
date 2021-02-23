@@ -120,7 +120,9 @@ impl<L: Link> Protocol for ProtocolV2<L> {
 		let mut data: Vec<u8> = chunk[13..].into();
 		let mut seq = 0;
 		while data.len() < data_length {
+            dbg!("read");
 			let chunk = self.link.read_chunk()?;
+            dbg!(("read", data.len()));
 			if chunk[0] != 0x02 {
 				println!("bad magic in v2 session_begin: {:x} instead of 0x02", chunk[0]);
 				return Err(Error::DeviceBadMagic);

@@ -12,6 +12,8 @@ pub fn find_trezor_device() -> trezor_api::AvailableDevice {
 
     // TODO: only allow trezor T
     match devices.len() {
+        // TODO: show message that device is not conntected and wait
+        // till it's connected.
         0 => exit_with_error("Trezor not connected"),
         1 => devices.remove(0),
         // TODO: show select with filtering to choose between devices
@@ -55,16 +57,16 @@ pub fn trezor_execute<T, R>(mut response: Result<TrezorResponse<T, R>>) -> T
                     .unwrap();
                 response = req.ack_pin(pin);
             }
-            TrezorResponse::PassphraseRequest(req) => {
-                let _spinner = spinner.clone()
-                    .with_text("please enter the passphase on Trezor device")
-                    .start();
-                response = req.ack();
-            }
-            TrezorResponse::PassphraseStateRequest(req) => {
-                // TODO: revisit
-                response = req.ack();
-            }
+            // TrezorResponse::PassphraseRequest(req) => {
+            //     let _spinner = spinner.clone()
+            //         .with_text("please enter the passphase on Trezor device")
+            //         .start();
+            //     response = req.ack();
+            // }
+            // TrezorResponse::PassphraseStateRequest(req) => {
+            //     // TODO: revisit
+            //     response = req.ack();
+            // }
         }
     }
 }

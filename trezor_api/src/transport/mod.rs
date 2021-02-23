@@ -59,6 +59,9 @@ impl ProtoMessage {
 /// The transport interface that is implemented by the different ways to communicate with a Trezor
 /// device.
 pub trait Transport {
+    // fn get_session_id(&self) -> u32;
+    // fn set_session_id(&mut self, session_id: u32);
+
 	fn session_begin(&mut self) -> Result<(), error::Error>;
 	fn session_end(&mut self) -> Result<(), error::Error>;
 
