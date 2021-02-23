@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use serde_json::Value as SerdeValue;
 
-use crate::{BlockHash, NewOperationGroup, NewOperationWithKind, ToBase58Check};
+use crate::{BlockHash, NewOperationGroup, NewOperationWithKind, PublicKeyHash, ToBase58Check};
 use crate::api::{
     GetVersionInfo, GetVersionInfoResult, VersionInfo, NodeVersion, NetworkVersion, CommitInfo,
     GetConstants, GetConstantsResult,
@@ -62,13 +62,11 @@ impl HttpApi {
         )
     }
 
-    fn get_counter_for_key_url<S>(&self, key: S) -> String
-        where S: AsRef<str>,
-    {
+    fn get_counter_for_key_url(&self, key: &PublicKeyHash) -> String {
         format!(
             "{}/chains/main/blocks/head/context/contracts/{}/counter",
             self.base_url,
-            key.as_ref(),
+            key.to_base58check(),
         )
     }
 
@@ -200,9 +198,7 @@ impl GetChainID for HttpApi {
 }
 
 impl GetCounterForKey for HttpApi {
-    fn get_counter_for_key<S>(&self, key: S) -> GetCounterForKeyResult
-        where S: AsRef<str>,
-    {
+    fn get_counter_for_key(&self, key: &PublicKeyHash) -> GetCounterForKeyResult {
         Ok(self.client.get(&self.get_counter_for_key_url(key))
            .call()
            .unwrap()

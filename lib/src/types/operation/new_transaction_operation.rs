@@ -1,9 +1,11 @@
 use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Default, Clone)]
+use crate::PublicKeyHash;
+
+#[derive(Debug, Clone)]
 pub struct NewTransactionOperationBuilder {
-    source: Option<String>,
-    destination: Option<String>,
+    source: Option<PublicKeyHash>,
+    destination: Option<PublicKeyHash>,
     amount: Option<String>,
     fee: Option<String>,
     counter: Option<String>,
@@ -16,12 +18,12 @@ impl NewTransactionOperationBuilder {
         Default::default()
     }
 
-    pub fn source(mut self, source: String) -> Self {
+    pub fn source(mut self, source: PublicKeyHash) -> Self {
         self.source = Some(source);
         self
     }
 
-    pub fn destination(mut self, destination: String) -> Self {
+    pub fn destination(mut self, destination: PublicKeyHash) -> Self {
         self.destination = Some(destination);
         self
     }
@@ -65,10 +67,24 @@ impl NewTransactionOperationBuilder {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+impl Default for NewTransactionOperationBuilder {
+    fn default() -> Self {
+        Self {
+            source: None,
+            destination: None,
+            amount: None,
+            fee: None,
+            counter: None,
+            gas_limit: None,
+            storage_limit: None,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NewTransactionOperation {
-    pub source: String,
-    pub destination: String,
+    pub source: PublicKeyHash,
+    pub destination: PublicKeyHash,
     pub amount: String,
     pub fee: String,
     pub counter: String,

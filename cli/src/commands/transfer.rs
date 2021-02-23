@@ -4,7 +4,7 @@ use structopt::StructOpt;
 use console::style;
 
 use lib::api::*;
-use lib::{PublicKey, PrivateKey, NewOperationGroup, NewTransactionOperationBuilder};
+use lib::{PublicKeyHash, PublicKey, PrivateKey, NewOperationGroup, NewTransactionOperationBuilder};
 use lib::utils::parse_float_amount;
 use lib::signer::{SignOperation, LocalSigner};
 
@@ -35,8 +35,8 @@ pub struct Transfer {
 }
 
 // TODO: replace with query to persistent encrypted store for keys
-fn get_keys_by_pkh(pkh: &str) -> Result<(PublicKey, PrivateKey), ()> {
-    if pkh != "tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU" {
+fn get_keys_by_pkh(pkh: &PublicKeyHash) -> Result<(PublicKey, PrivateKey), ()> {
+    if pkh != &PublicKeyHash::from_base58check("tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU").unwrap() {
         return Err(());
     }
     let pub_key = "edpktywJsAeturPxoFkDEerF6bi7N41ZnQyMrmNLQ3GZx2w6nn8eCZ";
@@ -60,6 +60,28 @@ impl Transfer {
             amount: raw_amount,
             fee: raw_fee,
         } = self;
+
+        let from = match PublicKeyHash::from_base58check(&from) {
+            Ok(pkh) => pkh,
+            Err(err) => {
+                exit_with_error(format!(
+                    "invalid {} public key hash: {}",
+                    style("--from").bold(),
+                    style(from).magenta(),
+                ));
+            }
+        };
+
+        let to = match PublicKeyHash::from_base58check(&to) {
+            Ok(pkh) => pkh,
+            Err(_) => {
+                exit_with_error(format!(
+                    "invalid {} public key hash: {}",
+                    style("--from").bold(),
+                    style(to).magenta(),
+                ));
+            }
+        };
 
         let amount = match parse_float_amount(&raw_amount) {
             Ok(amount) => amount,
@@ -116,8 +138,8 @@ impl Transfer {
         );
 
         let tx = NewTransactionOperationBuilder::new()
-            .source(from.to_string())
-            .destination(to.to_string())
+            .source(from)
+            .destination(to)
             .amount(amount.to_string())
             .fee(fee.to_string())
             .counter(counter.to_string())

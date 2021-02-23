@@ -1,10 +1,10 @@
 use serde::{Serialize, Deserialize};
 
-use crate::PublicKey;
+use crate::{PublicKey, PublicKeyHash};
 
 #[derive(Debug, Clone)]
 pub struct NewRevealOperationBuilder {
-    source: Option<String>,
+    source: Option<PublicKeyHash>,
     public_key: Option<PublicKey>,
     fee: Option<String>,
     counter: Option<String>,
@@ -17,7 +17,7 @@ impl NewRevealOperationBuilder {
         Default::default()
     }
 
-    pub fn source(mut self, source: String) -> Self {
+    pub fn source(mut self, source: PublicKeyHash) -> Self {
         self.source = Some(source);
         self
     }
@@ -75,7 +75,7 @@ impl Default for NewRevealOperationBuilder {
 
 #[derive(Serialize, Debug, Clone)]
 pub struct NewRevealOperation {
-    pub source: String,
+    pub source: PublicKeyHash,
     pub public_key: PublicKey,
     pub fee: String,
     pub counter: String,

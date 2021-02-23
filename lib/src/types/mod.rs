@@ -4,6 +4,9 @@ pub use from_prefixed_base58check_error::*;
 mod block_hash;
 pub use block_hash::*;
 
+mod public_key_hash;
+pub use public_key_hash::*;
+
 mod public_key;
 pub use public_key::*;
 
