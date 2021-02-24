@@ -1,6 +1,6 @@
 use structopt::StructOpt;
 
-use crate::common::exit_with_error;
+use crate::common::{exit_with_error, parse_derivation_path};
 use crate::trezor::{find_trezor_device, trezor_execute};
 
 /// Get address
@@ -27,29 +27,7 @@ impl GetAddress {
             .unwrap();
         trezor.init_device().unwrap();
 
-        // TODO: better parsing
-        let path = self.path
-            .replace("m/", "")
-            .split("/")
-            .map(|num| {
-                let mut num = num.to_string();
-                let is_hardened = num.ends_with("'");
-
-                if is_hardened {
-                    num.pop();
-                }
-
-                let num = match num.parse() {
-                    Ok(n) => n,
-                    Err(_) => exit_with_error("invalid path"),
-                };
-                if is_hardened {
-                    num + 2147483648
-                } else {
-                    num
-                }
-            })
-            .collect::<Vec<_>>();
+        let path = parse_derivation_path(&self.path);
 
         let address = trezor_execute(
             trezor.get_address(path.clone()),
