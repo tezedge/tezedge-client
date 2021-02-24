@@ -55,16 +55,6 @@ pub fn trezor_execute<T, R>(mut response: Result<TrezorResponse<T, R>>) -> T
                     .unwrap();
                 response = req.ack_pin(pin);
             }
-            TrezorResponse::PassphraseRequest(req) => {
-                let _spinner = spinner.clone()
-                    .with_text("please enter the passphase on Trezor device")
-                    .start();
-                response = req.ack();
-            }
-            TrezorResponse::PassphraseStateRequest(req) => {
-                // TODO: revisit
-                response = req.ack();
-            }
         }
     }
 }
