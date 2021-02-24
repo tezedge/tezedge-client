@@ -26,8 +26,7 @@
 #[derive(PartialEq,Clone,Default)]
 pub struct Initialize {
     // message fields
-    state: ::protobuf::SingularField<::std::vec::Vec<u8>>,
-    skip_passphrase: ::std::option::Option<bool>,
+    session_id: ::protobuf::SingularField<::std::vec::Vec<u8>>,
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
@@ -44,59 +43,40 @@ impl Initialize {
         ::std::default::Default::default()
     }
 
-    // optional bytes state = 1;
+    // optional bytes session_id = 1;
 
 
-    pub fn get_state(&self) -> &[u8] {
-        match self.state.as_ref() {
+    pub fn get_session_id(&self) -> &[u8] {
+        match self.session_id.as_ref() {
             Some(v) => &v,
             None => &[],
         }
     }
-    pub fn clear_state(&mut self) {
-        self.state.clear();
+    pub fn clear_session_id(&mut self) {
+        self.session_id.clear();
     }
 
-    pub fn has_state(&self) -> bool {
-        self.state.is_some()
+    pub fn has_session_id(&self) -> bool {
+        self.session_id.is_some()
     }
 
     // Param is passed by value, moved
-    pub fn set_state(&mut self, v: ::std::vec::Vec<u8>) {
-        self.state = ::protobuf::SingularField::some(v);
+    pub fn set_session_id(&mut self, v: ::std::vec::Vec<u8>) {
+        self.session_id = ::protobuf::SingularField::some(v);
     }
 
     // Mutable pointer to the field.
     // If field is not initialized, it is initialized with default value first.
-    pub fn mut_state(&mut self) -> &mut ::std::vec::Vec<u8> {
-        if self.state.is_none() {
-            self.state.set_default();
+    pub fn mut_session_id(&mut self) -> &mut ::std::vec::Vec<u8> {
+        if self.session_id.is_none() {
+            self.session_id.set_default();
         }
-        self.state.as_mut().unwrap()
+        self.session_id.as_mut().unwrap()
     }
 
     // Take field
-    pub fn take_state(&mut self) -> ::std::vec::Vec<u8> {
-        self.state.take().unwrap_or_else(|| ::std::vec::Vec::new())
-    }
-
-    // optional bool skip_passphrase = 2;
-
-
-    pub fn get_skip_passphrase(&self) -> bool {
-        self.skip_passphrase.unwrap_or(false)
-    }
-    pub fn clear_skip_passphrase(&mut self) {
-        self.skip_passphrase = ::std::option::Option::None;
-    }
-
-    pub fn has_skip_passphrase(&self) -> bool {
-        self.skip_passphrase.is_some()
-    }
-
-    // Param is passed by value, moved
-    pub fn set_skip_passphrase(&mut self, v: bool) {
-        self.skip_passphrase = ::std::option::Option::Some(v);
+    pub fn take_session_id(&mut self) -> ::std::vec::Vec<u8> {
+        self.session_id.take().unwrap_or_else(|| ::std::vec::Vec::new())
     }
 }
 
@@ -110,14 +90,7 @@ impl ::protobuf::Message for Initialize {
             let (field_number, wire_type) = is.read_tag_unpack()?;
             match field_number {
                 1 => {
-                    ::protobuf::rt::read_singular_bytes_into(wire_type, is, &mut self.state)?;
-                },
-                2 => {
-                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
-                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
-                    }
-                    let tmp = is.read_bool()?;
-                    self.skip_passphrase = ::std::option::Option::Some(tmp);
+                    ::protobuf::rt::read_singular_bytes_into(wire_type, is, &mut self.session_id)?;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -131,11 +104,8 @@ impl ::protobuf::Message for Initialize {
     #[allow(unused_variables)]
     fn compute_size(&self) -> u32 {
         let mut my_size = 0;
-        if let Some(ref v) = self.state.as_ref() {
+        if let Some(ref v) = self.session_id.as_ref() {
             my_size += ::protobuf::rt::bytes_size(1, &v);
-        }
-        if let Some(v) = self.skip_passphrase {
-            my_size += 2;
         }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
@@ -143,11 +113,8 @@ impl ::protobuf::Message for Initialize {
     }
 
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
-        if let Some(ref v) = self.state.as_ref() {
+        if let Some(ref v) = self.session_id.as_ref() {
             os.write_bytes(1, &v)?;
-        }
-        if let Some(v) = self.skip_passphrase {
-            os.write_bool(2, v)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -188,14 +155,9 @@ impl ::protobuf::Message for Initialize {
         descriptor.get(|| {
             let mut fields = ::std::vec::Vec::new();
             fields.push(::protobuf::reflect::accessor::make_singular_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
-                "state",
-                |m: &Initialize| { &m.state },
-                |m: &mut Initialize| { &mut m.state },
-            ));
-            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
-                "skip_passphrase",
-                |m: &Initialize| { &m.skip_passphrase },
-                |m: &mut Initialize| { &mut m.skip_passphrase },
+                "session_id",
+                |m: &Initialize| { &m.session_id },
+                |m: &mut Initialize| { &mut m.session_id },
             ));
             ::protobuf::reflect::MessageDescriptor::new_pb_name::<Initialize>(
                 "Initialize",
@@ -213,8 +175,7 @@ impl ::protobuf::Message for Initialize {
 
 impl ::protobuf::Clear for Initialize {
     fn clear(&mut self) {
-        self.state.clear();
-        self.skip_passphrase = ::std::option::Option::None;
+        self.session_id.clear();
         self.unknown_fields.clear();
     }
 }
@@ -364,8 +325,7 @@ pub struct Features {
     revision: ::protobuf::SingularField<::std::vec::Vec<u8>>,
     bootloader_hash: ::protobuf::SingularField<::std::vec::Vec<u8>>,
     imported: ::std::option::Option<bool>,
-    pin_cached: ::std::option::Option<bool>,
-    passphrase_cached: ::std::option::Option<bool>,
+    unlocked: ::std::option::Option<bool>,
     firmware_present: ::std::option::Option<bool>,
     needs_backup: ::std::option::Option<bool>,
     flags: ::std::option::Option<u32>,
@@ -377,6 +337,18 @@ pub struct Features {
     fw_vendor_keys: ::protobuf::SingularField<::std::vec::Vec<u8>>,
     unfinished_backup: ::std::option::Option<bool>,
     no_backup: ::std::option::Option<bool>,
+    recovery_mode: ::std::option::Option<bool>,
+    pub capabilities: ::std::vec::Vec<Features_Capability>,
+    backup_type: ::std::option::Option<BackupType>,
+    sd_card_present: ::std::option::Option<bool>,
+    sd_protection: ::std::option::Option<bool>,
+    wipe_code_protection: ::std::option::Option<bool>,
+    session_id: ::protobuf::SingularField<::std::vec::Vec<u8>>,
+    passphrase_always_on_device: ::std::option::Option<bool>,
+    safety_checks: ::std::option::Option<SafetyCheckLevel>,
+    auto_lock_delay_ms: ::std::option::Option<u32>,
+    display_rotation: ::std::option::Option<u32>,
+    experimental_features: ::std::option::Option<bool>,
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
@@ -761,42 +733,23 @@ impl Features {
         self.imported = ::std::option::Option::Some(v);
     }
 
-    // optional bool pin_cached = 16;
+    // optional bool unlocked = 16;
 
 
-    pub fn get_pin_cached(&self) -> bool {
-        self.pin_cached.unwrap_or(false)
+    pub fn get_unlocked(&self) -> bool {
+        self.unlocked.unwrap_or(false)
     }
-    pub fn clear_pin_cached(&mut self) {
-        self.pin_cached = ::std::option::Option::None;
-    }
-
-    pub fn has_pin_cached(&self) -> bool {
-        self.pin_cached.is_some()
+    pub fn clear_unlocked(&mut self) {
+        self.unlocked = ::std::option::Option::None;
     }
 
-    // Param is passed by value, moved
-    pub fn set_pin_cached(&mut self, v: bool) {
-        self.pin_cached = ::std::option::Option::Some(v);
-    }
-
-    // optional bool passphrase_cached = 17;
-
-
-    pub fn get_passphrase_cached(&self) -> bool {
-        self.passphrase_cached.unwrap_or(false)
-    }
-    pub fn clear_passphrase_cached(&mut self) {
-        self.passphrase_cached = ::std::option::Option::None;
-    }
-
-    pub fn has_passphrase_cached(&self) -> bool {
-        self.passphrase_cached.is_some()
+    pub fn has_unlocked(&self) -> bool {
+        self.unlocked.is_some()
     }
 
     // Param is passed by value, moved
-    pub fn set_passphrase_cached(&mut self, v: bool) {
-        self.passphrase_cached = ::std::option::Option::Some(v);
+    pub fn set_unlocked(&mut self, v: bool) {
+        self.unlocked = ::std::option::Option::Some(v);
     }
 
     // optional bool firmware_present = 18;
@@ -1058,6 +1011,257 @@ impl Features {
     pub fn set_no_backup(&mut self, v: bool) {
         self.no_backup = ::std::option::Option::Some(v);
     }
+
+    // optional bool recovery_mode = 29;
+
+
+    pub fn get_recovery_mode(&self) -> bool {
+        self.recovery_mode.unwrap_or(false)
+    }
+    pub fn clear_recovery_mode(&mut self) {
+        self.recovery_mode = ::std::option::Option::None;
+    }
+
+    pub fn has_recovery_mode(&self) -> bool {
+        self.recovery_mode.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_recovery_mode(&mut self, v: bool) {
+        self.recovery_mode = ::std::option::Option::Some(v);
+    }
+
+    // repeated .hw.trezor.messages.management.Features.Capability capabilities = 30;
+
+
+    pub fn get_capabilities(&self) -> &[Features_Capability] {
+        &self.capabilities
+    }
+    pub fn clear_capabilities(&mut self) {
+        self.capabilities.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_capabilities(&mut self, v: ::std::vec::Vec<Features_Capability>) {
+        self.capabilities = v;
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_capabilities(&mut self) -> &mut ::std::vec::Vec<Features_Capability> {
+        &mut self.capabilities
+    }
+
+    // Take field
+    pub fn take_capabilities(&mut self) -> ::std::vec::Vec<Features_Capability> {
+        ::std::mem::replace(&mut self.capabilities, ::std::vec::Vec::new())
+    }
+
+    // optional .hw.trezor.messages.management.BackupType backup_type = 31;
+
+
+    pub fn get_backup_type(&self) -> BackupType {
+        self.backup_type.unwrap_or(BackupType::Bip39)
+    }
+    pub fn clear_backup_type(&mut self) {
+        self.backup_type = ::std::option::Option::None;
+    }
+
+    pub fn has_backup_type(&self) -> bool {
+        self.backup_type.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_backup_type(&mut self, v: BackupType) {
+        self.backup_type = ::std::option::Option::Some(v);
+    }
+
+    // optional bool sd_card_present = 32;
+
+
+    pub fn get_sd_card_present(&self) -> bool {
+        self.sd_card_present.unwrap_or(false)
+    }
+    pub fn clear_sd_card_present(&mut self) {
+        self.sd_card_present = ::std::option::Option::None;
+    }
+
+    pub fn has_sd_card_present(&self) -> bool {
+        self.sd_card_present.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_sd_card_present(&mut self, v: bool) {
+        self.sd_card_present = ::std::option::Option::Some(v);
+    }
+
+    // optional bool sd_protection = 33;
+
+
+    pub fn get_sd_protection(&self) -> bool {
+        self.sd_protection.unwrap_or(false)
+    }
+    pub fn clear_sd_protection(&mut self) {
+        self.sd_protection = ::std::option::Option::None;
+    }
+
+    pub fn has_sd_protection(&self) -> bool {
+        self.sd_protection.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_sd_protection(&mut self, v: bool) {
+        self.sd_protection = ::std::option::Option::Some(v);
+    }
+
+    // optional bool wipe_code_protection = 34;
+
+
+    pub fn get_wipe_code_protection(&self) -> bool {
+        self.wipe_code_protection.unwrap_or(false)
+    }
+    pub fn clear_wipe_code_protection(&mut self) {
+        self.wipe_code_protection = ::std::option::Option::None;
+    }
+
+    pub fn has_wipe_code_protection(&self) -> bool {
+        self.wipe_code_protection.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_wipe_code_protection(&mut self, v: bool) {
+        self.wipe_code_protection = ::std::option::Option::Some(v);
+    }
+
+    // optional bytes session_id = 35;
+
+
+    pub fn get_session_id(&self) -> &[u8] {
+        match self.session_id.as_ref() {
+            Some(v) => &v,
+            None => &[],
+        }
+    }
+    pub fn clear_session_id(&mut self) {
+        self.session_id.clear();
+    }
+
+    pub fn has_session_id(&self) -> bool {
+        self.session_id.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_session_id(&mut self, v: ::std::vec::Vec<u8>) {
+        self.session_id = ::protobuf::SingularField::some(v);
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_session_id(&mut self) -> &mut ::std::vec::Vec<u8> {
+        if self.session_id.is_none() {
+            self.session_id.set_default();
+        }
+        self.session_id.as_mut().unwrap()
+    }
+
+    // Take field
+    pub fn take_session_id(&mut self) -> ::std::vec::Vec<u8> {
+        self.session_id.take().unwrap_or_else(|| ::std::vec::Vec::new())
+    }
+
+    // optional bool passphrase_always_on_device = 36;
+
+
+    pub fn get_passphrase_always_on_device(&self) -> bool {
+        self.passphrase_always_on_device.unwrap_or(false)
+    }
+    pub fn clear_passphrase_always_on_device(&mut self) {
+        self.passphrase_always_on_device = ::std::option::Option::None;
+    }
+
+    pub fn has_passphrase_always_on_device(&self) -> bool {
+        self.passphrase_always_on_device.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_passphrase_always_on_device(&mut self, v: bool) {
+        self.passphrase_always_on_device = ::std::option::Option::Some(v);
+    }
+
+    // optional .hw.trezor.messages.management.SafetyCheckLevel safety_checks = 37;
+
+
+    pub fn get_safety_checks(&self) -> SafetyCheckLevel {
+        self.safety_checks.unwrap_or(SafetyCheckLevel::Strict)
+    }
+    pub fn clear_safety_checks(&mut self) {
+        self.safety_checks = ::std::option::Option::None;
+    }
+
+    pub fn has_safety_checks(&self) -> bool {
+        self.safety_checks.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_safety_checks(&mut self, v: SafetyCheckLevel) {
+        self.safety_checks = ::std::option::Option::Some(v);
+    }
+
+    // optional uint32 auto_lock_delay_ms = 38;
+
+
+    pub fn get_auto_lock_delay_ms(&self) -> u32 {
+        self.auto_lock_delay_ms.unwrap_or(0)
+    }
+    pub fn clear_auto_lock_delay_ms(&mut self) {
+        self.auto_lock_delay_ms = ::std::option::Option::None;
+    }
+
+    pub fn has_auto_lock_delay_ms(&self) -> bool {
+        self.auto_lock_delay_ms.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_auto_lock_delay_ms(&mut self, v: u32) {
+        self.auto_lock_delay_ms = ::std::option::Option::Some(v);
+    }
+
+    // optional uint32 display_rotation = 39;
+
+
+    pub fn get_display_rotation(&self) -> u32 {
+        self.display_rotation.unwrap_or(0)
+    }
+    pub fn clear_display_rotation(&mut self) {
+        self.display_rotation = ::std::option::Option::None;
+    }
+
+    pub fn has_display_rotation(&self) -> bool {
+        self.display_rotation.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_display_rotation(&mut self, v: u32) {
+        self.display_rotation = ::std::option::Option::Some(v);
+    }
+
+    // optional bool experimental_features = 40;
+
+
+    pub fn get_experimental_features(&self) -> bool {
+        self.experimental_features.unwrap_or(false)
+    }
+    pub fn clear_experimental_features(&mut self) {
+        self.experimental_features = ::std::option::Option::None;
+    }
+
+    pub fn has_experimental_features(&self) -> bool {
+        self.experimental_features.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_experimental_features(&mut self, v: bool) {
+        self.experimental_features = ::std::option::Option::Some(v);
+    }
 }
 
 impl ::protobuf::Message for Features {
@@ -1148,14 +1352,7 @@ impl ::protobuf::Message for Features {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
                     let tmp = is.read_bool()?;
-                    self.pin_cached = ::std::option::Option::Some(tmp);
-                },
-                17 => {
-                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
-                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
-                    }
-                    let tmp = is.read_bool()?;
-                    self.passphrase_cached = ::std::option::Option::Some(tmp);
+                    self.unlocked = ::std::option::Option::Some(tmp);
                 },
                 18 => {
                     if wire_type != ::protobuf::wire_format::WireTypeVarint {
@@ -1222,6 +1419,74 @@ impl ::protobuf::Message for Features {
                     let tmp = is.read_bool()?;
                     self.no_backup = ::std::option::Option::Some(tmp);
                 },
+                29 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.recovery_mode = ::std::option::Option::Some(tmp);
+                },
+                30 => {
+                    ::protobuf::rt::read_repeated_enum_with_unknown_fields_into(wire_type, is, &mut self.capabilities, 30, &mut self.unknown_fields)?
+                },
+                31 => {
+                    ::protobuf::rt::read_proto2_enum_with_unknown_fields_into(wire_type, is, &mut self.backup_type, 31, &mut self.unknown_fields)?
+                },
+                32 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.sd_card_present = ::std::option::Option::Some(tmp);
+                },
+                33 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.sd_protection = ::std::option::Option::Some(tmp);
+                },
+                34 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.wipe_code_protection = ::std::option::Option::Some(tmp);
+                },
+                35 => {
+                    ::protobuf::rt::read_singular_bytes_into(wire_type, is, &mut self.session_id)?;
+                },
+                36 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.passphrase_always_on_device = ::std::option::Option::Some(tmp);
+                },
+                37 => {
+                    ::protobuf::rt::read_proto2_enum_with_unknown_fields_into(wire_type, is, &mut self.safety_checks, 37, &mut self.unknown_fields)?
+                },
+                38 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint32()?;
+                    self.auto_lock_delay_ms = ::std::option::Option::Some(tmp);
+                },
+                39 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint32()?;
+                    self.display_rotation = ::std::option::Option::Some(tmp);
+                },
+                40 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.experimental_features = ::std::option::Option::Some(tmp);
+                },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
                 },
@@ -1276,10 +1541,7 @@ impl ::protobuf::Message for Features {
         if let Some(v) = self.imported {
             my_size += 2;
         }
-        if let Some(v) = self.pin_cached {
-            my_size += 3;
-        }
-        if let Some(v) = self.passphrase_cached {
+        if let Some(v) = self.unlocked {
             my_size += 3;
         }
         if let Some(v) = self.firmware_present {
@@ -1313,6 +1575,42 @@ impl ::protobuf::Message for Features {
             my_size += 3;
         }
         if let Some(v) = self.no_backup {
+            my_size += 3;
+        }
+        if let Some(v) = self.recovery_mode {
+            my_size += 3;
+        }
+        for value in &self.capabilities {
+            my_size += ::protobuf::rt::enum_size(30, *value);
+        };
+        if let Some(v) = self.backup_type {
+            my_size += ::protobuf::rt::enum_size(31, v);
+        }
+        if let Some(v) = self.sd_card_present {
+            my_size += 3;
+        }
+        if let Some(v) = self.sd_protection {
+            my_size += 3;
+        }
+        if let Some(v) = self.wipe_code_protection {
+            my_size += 3;
+        }
+        if let Some(ref v) = self.session_id.as_ref() {
+            my_size += ::protobuf::rt::bytes_size(35, &v);
+        }
+        if let Some(v) = self.passphrase_always_on_device {
+            my_size += 3;
+        }
+        if let Some(v) = self.safety_checks {
+            my_size += ::protobuf::rt::enum_size(37, v);
+        }
+        if let Some(v) = self.auto_lock_delay_ms {
+            my_size += ::protobuf::rt::value_size(38, v, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if let Some(v) = self.display_rotation {
+            my_size += ::protobuf::rt::value_size(39, v, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if let Some(v) = self.experimental_features {
             my_size += 3;
         }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
@@ -1363,11 +1661,8 @@ impl ::protobuf::Message for Features {
         if let Some(v) = self.imported {
             os.write_bool(15, v)?;
         }
-        if let Some(v) = self.pin_cached {
+        if let Some(v) = self.unlocked {
             os.write_bool(16, v)?;
-        }
-        if let Some(v) = self.passphrase_cached {
-            os.write_bool(17, v)?;
         }
         if let Some(v) = self.firmware_present {
             os.write_bool(18, v)?;
@@ -1401,6 +1696,42 @@ impl ::protobuf::Message for Features {
         }
         if let Some(v) = self.no_backup {
             os.write_bool(28, v)?;
+        }
+        if let Some(v) = self.recovery_mode {
+            os.write_bool(29, v)?;
+        }
+        for v in &self.capabilities {
+            os.write_enum(30, ::protobuf::ProtobufEnum::value(v))?;
+        };
+        if let Some(v) = self.backup_type {
+            os.write_enum(31, ::protobuf::ProtobufEnum::value(&v))?;
+        }
+        if let Some(v) = self.sd_card_present {
+            os.write_bool(32, v)?;
+        }
+        if let Some(v) = self.sd_protection {
+            os.write_bool(33, v)?;
+        }
+        if let Some(v) = self.wipe_code_protection {
+            os.write_bool(34, v)?;
+        }
+        if let Some(ref v) = self.session_id.as_ref() {
+            os.write_bytes(35, &v)?;
+        }
+        if let Some(v) = self.passphrase_always_on_device {
+            os.write_bool(36, v)?;
+        }
+        if let Some(v) = self.safety_checks {
+            os.write_enum(37, ::protobuf::ProtobufEnum::value(&v))?;
+        }
+        if let Some(v) = self.auto_lock_delay_ms {
+            os.write_uint32(38, v)?;
+        }
+        if let Some(v) = self.display_rotation {
+            os.write_uint32(39, v)?;
+        }
+        if let Some(v) = self.experimental_features {
+            os.write_bool(40, v)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -1511,14 +1842,9 @@ impl ::protobuf::Message for Features {
                 |m: &mut Features| { &mut m.imported },
             ));
             fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
-                "pin_cached",
-                |m: &Features| { &m.pin_cached },
-                |m: &mut Features| { &mut m.pin_cached },
-            ));
-            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
-                "passphrase_cached",
-                |m: &Features| { &m.passphrase_cached },
-                |m: &mut Features| { &mut m.passphrase_cached },
+                "unlocked",
+                |m: &Features| { &m.unlocked },
+                |m: &mut Features| { &mut m.unlocked },
             ));
             fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
                 "firmware_present",
@@ -1575,6 +1901,66 @@ impl ::protobuf::Message for Features {
                 |m: &Features| { &m.no_backup },
                 |m: &mut Features| { &mut m.no_backup },
             ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                "recovery_mode",
+                |m: &Features| { &m.recovery_mode },
+                |m: &mut Features| { &mut m.recovery_mode },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_vec_accessor::<_, ::protobuf::types::ProtobufTypeEnum<Features_Capability>>(
+                "capabilities",
+                |m: &Features| { &m.capabilities },
+                |m: &mut Features| { &mut m.capabilities },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeEnum<BackupType>>(
+                "backup_type",
+                |m: &Features| { &m.backup_type },
+                |m: &mut Features| { &mut m.backup_type },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                "sd_card_present",
+                |m: &Features| { &m.sd_card_present },
+                |m: &mut Features| { &mut m.sd_card_present },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                "sd_protection",
+                |m: &Features| { &m.sd_protection },
+                |m: &mut Features| { &mut m.sd_protection },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                "wipe_code_protection",
+                |m: &Features| { &m.wipe_code_protection },
+                |m: &mut Features| { &mut m.wipe_code_protection },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_singular_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                "session_id",
+                |m: &Features| { &m.session_id },
+                |m: &mut Features| { &mut m.session_id },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                "passphrase_always_on_device",
+                |m: &Features| { &m.passphrase_always_on_device },
+                |m: &mut Features| { &mut m.passphrase_always_on_device },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeEnum<SafetyCheckLevel>>(
+                "safety_checks",
+                |m: &Features| { &m.safety_checks },
+                |m: &mut Features| { &mut m.safety_checks },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeUint32>(
+                "auto_lock_delay_ms",
+                |m: &Features| { &m.auto_lock_delay_ms },
+                |m: &mut Features| { &mut m.auto_lock_delay_ms },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeUint32>(
+                "display_rotation",
+                |m: &Features| { &m.display_rotation },
+                |m: &mut Features| { &mut m.display_rotation },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                "experimental_features",
+                |m: &Features| { &m.experimental_features },
+                |m: &mut Features| { &mut m.experimental_features },
+            ));
             ::protobuf::reflect::MessageDescriptor::new_pb_name::<Features>(
                 "Features",
                 fields,
@@ -1605,8 +1991,7 @@ impl ::protobuf::Clear for Features {
         self.revision.clear();
         self.bootloader_hash.clear();
         self.imported = ::std::option::Option::None;
-        self.pin_cached = ::std::option::Option::None;
-        self.passphrase_cached = ::std::option::Option::None;
+        self.unlocked = ::std::option::Option::None;
         self.firmware_present = ::std::option::Option::None;
         self.needs_backup = ::std::option::Option::None;
         self.flags = ::std::option::Option::None;
@@ -1618,6 +2003,18 @@ impl ::protobuf::Clear for Features {
         self.fw_vendor_keys.clear();
         self.unfinished_backup = ::std::option::Option::None;
         self.no_backup = ::std::option::Option::None;
+        self.recovery_mode = ::std::option::Option::None;
+        self.capabilities.clear();
+        self.backup_type = ::std::option::Option::None;
+        self.sd_card_present = ::std::option::Option::None;
+        self.sd_protection = ::std::option::Option::None;
+        self.wipe_code_protection = ::std::option::Option::None;
+        self.session_id.clear();
+        self.passphrase_always_on_device = ::std::option::Option::None;
+        self.safety_checks = ::std::option::Option::None;
+        self.auto_lock_delay_ms = ::std::option::Option::None;
+        self.display_rotation = ::std::option::Option::None;
+        self.experimental_features = ::std::option::Option::None;
         self.unknown_fields.clear();
     }
 }
@@ -1634,26 +2031,122 @@ impl ::protobuf::reflect::ProtobufValue for Features {
     }
 }
 
+#[derive(Clone,PartialEq,Eq,Debug,Hash)]
+pub enum Features_Capability {
+    Capability_Bitcoin = 1,
+    Capability_Bitcoin_like = 2,
+    Capability_Binance = 3,
+    Capability_Cardano = 4,
+    Capability_Crypto = 5,
+    Capability_EOS = 6,
+    Capability_Ethereum = 7,
+    Capability_Lisk = 8,
+    Capability_Monero = 9,
+    Capability_NEM = 10,
+    Capability_Ripple = 11,
+    Capability_Stellar = 12,
+    Capability_Tezos = 13,
+    Capability_U2F = 14,
+    Capability_Shamir = 15,
+    Capability_ShamirGroups = 16,
+    Capability_PassphraseEntry = 17,
+}
+
+impl ::protobuf::ProtobufEnum for Features_Capability {
+    fn value(&self) -> i32 {
+        *self as i32
+    }
+
+    fn from_i32(value: i32) -> ::std::option::Option<Features_Capability> {
+        match value {
+            1 => ::std::option::Option::Some(Features_Capability::Capability_Bitcoin),
+            2 => ::std::option::Option::Some(Features_Capability::Capability_Bitcoin_like),
+            3 => ::std::option::Option::Some(Features_Capability::Capability_Binance),
+            4 => ::std::option::Option::Some(Features_Capability::Capability_Cardano),
+            5 => ::std::option::Option::Some(Features_Capability::Capability_Crypto),
+            6 => ::std::option::Option::Some(Features_Capability::Capability_EOS),
+            7 => ::std::option::Option::Some(Features_Capability::Capability_Ethereum),
+            8 => ::std::option::Option::Some(Features_Capability::Capability_Lisk),
+            9 => ::std::option::Option::Some(Features_Capability::Capability_Monero),
+            10 => ::std::option::Option::Some(Features_Capability::Capability_NEM),
+            11 => ::std::option::Option::Some(Features_Capability::Capability_Ripple),
+            12 => ::std::option::Option::Some(Features_Capability::Capability_Stellar),
+            13 => ::std::option::Option::Some(Features_Capability::Capability_Tezos),
+            14 => ::std::option::Option::Some(Features_Capability::Capability_U2F),
+            15 => ::std::option::Option::Some(Features_Capability::Capability_Shamir),
+            16 => ::std::option::Option::Some(Features_Capability::Capability_ShamirGroups),
+            17 => ::std::option::Option::Some(Features_Capability::Capability_PassphraseEntry),
+            _ => ::std::option::Option::None
+        }
+    }
+
+    fn values() -> &'static [Self] {
+        static values: &'static [Features_Capability] = &[
+            Features_Capability::Capability_Bitcoin,
+            Features_Capability::Capability_Bitcoin_like,
+            Features_Capability::Capability_Binance,
+            Features_Capability::Capability_Cardano,
+            Features_Capability::Capability_Crypto,
+            Features_Capability::Capability_EOS,
+            Features_Capability::Capability_Ethereum,
+            Features_Capability::Capability_Lisk,
+            Features_Capability::Capability_Monero,
+            Features_Capability::Capability_NEM,
+            Features_Capability::Capability_Ripple,
+            Features_Capability::Capability_Stellar,
+            Features_Capability::Capability_Tezos,
+            Features_Capability::Capability_U2F,
+            Features_Capability::Capability_Shamir,
+            Features_Capability::Capability_ShamirGroups,
+            Features_Capability::Capability_PassphraseEntry,
+        ];
+        values
+    }
+
+    fn enum_descriptor_static() -> &'static ::protobuf::reflect::EnumDescriptor {
+        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::EnumDescriptor> = ::protobuf::rt::LazyV2::INIT;
+        descriptor.get(|| {
+            ::protobuf::reflect::EnumDescriptor::new_pb_name::<Features_Capability>("Features.Capability", file_descriptor_proto())
+        })
+    }
+}
+
+impl ::std::marker::Copy for Features_Capability {
+}
+
+// Note, `Default` is implemented although default value is not 0
+impl ::std::default::Default for Features_Capability {
+    fn default() -> Self {
+        Features_Capability::Capability_Bitcoin
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for Features_Capability {
+    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
+        ::protobuf::reflect::ReflectValueRef::Enum(::protobuf::ProtobufEnum::descriptor(self))
+    }
+}
+
 #[derive(PartialEq,Clone,Default)]
-pub struct ClearSession {
+pub struct LockDevice {
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
 }
 
-impl<'a> ::std::default::Default for &'a ClearSession {
-    fn default() -> &'a ClearSession {
-        <ClearSession as ::protobuf::Message>::default_instance()
+impl<'a> ::std::default::Default for &'a LockDevice {
+    fn default() -> &'a LockDevice {
+        <LockDevice as ::protobuf::Message>::default_instance()
     }
 }
 
-impl ClearSession {
-    pub fn new() -> ClearSession {
+impl LockDevice {
+    pub fn new() -> LockDevice {
         ::std::default::Default::default()
     }
 }
 
-impl ::protobuf::Message for ClearSession {
+impl ::protobuf::Message for LockDevice {
     fn is_initialized(&self) -> bool {
         true
     }
@@ -1710,41 +2203,157 @@ impl ::protobuf::Message for ClearSession {
         Self::descriptor_static()
     }
 
-    fn new() -> ClearSession {
-        ClearSession::new()
+    fn new() -> LockDevice {
+        LockDevice::new()
     }
 
     fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
         static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
         descriptor.get(|| {
             let fields = ::std::vec::Vec::new();
-            ::protobuf::reflect::MessageDescriptor::new_pb_name::<ClearSession>(
-                "ClearSession",
+            ::protobuf::reflect::MessageDescriptor::new_pb_name::<LockDevice>(
+                "LockDevice",
                 fields,
                 file_descriptor_proto()
             )
         })
     }
 
-    fn default_instance() -> &'static ClearSession {
-        static instance: ::protobuf::rt::LazyV2<ClearSession> = ::protobuf::rt::LazyV2::INIT;
-        instance.get(ClearSession::new)
+    fn default_instance() -> &'static LockDevice {
+        static instance: ::protobuf::rt::LazyV2<LockDevice> = ::protobuf::rt::LazyV2::INIT;
+        instance.get(LockDevice::new)
     }
 }
 
-impl ::protobuf::Clear for ClearSession {
+impl ::protobuf::Clear for LockDevice {
     fn clear(&mut self) {
         self.unknown_fields.clear();
     }
 }
 
-impl ::std::fmt::Debug for ClearSession {
+impl ::std::fmt::Debug for LockDevice {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         ::protobuf::text_format::fmt(self, f)
     }
 }
 
-impl ::protobuf::reflect::ProtobufValue for ClearSession {
+impl ::protobuf::reflect::ProtobufValue for LockDevice {
+    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
+        ::protobuf::reflect::ReflectValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct EndSession {
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a EndSession {
+    fn default() -> &'a EndSession {
+        <EndSession as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl EndSession {
+    pub fn new() -> EndSession {
+        ::std::default::Default::default()
+    }
+}
+
+impl ::protobuf::Message for EndSession {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: ::std::boxed::Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> EndSession {
+        EndSession::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
+        descriptor.get(|| {
+            let fields = ::std::vec::Vec::new();
+            ::protobuf::reflect::MessageDescriptor::new_pb_name::<EndSession>(
+                "EndSession",
+                fields,
+                file_descriptor_proto()
+            )
+        })
+    }
+
+    fn default_instance() -> &'static EndSession {
+        static instance: ::protobuf::rt::LazyV2<EndSession> = ::protobuf::rt::LazyV2::INIT;
+        instance.get(EndSession::new)
+    }
+}
+
+impl ::protobuf::Clear for EndSession {
+    fn clear(&mut self) {
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for EndSession {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for EndSession {
     fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
         ::protobuf::reflect::ReflectValueRef::Message(self)
     }
@@ -1757,8 +2366,11 @@ pub struct ApplySettings {
     label: ::protobuf::SingularField<::std::string::String>,
     use_passphrase: ::std::option::Option<bool>,
     homescreen: ::protobuf::SingularField<::std::vec::Vec<u8>>,
-    passphrase_source: ::std::option::Option<ApplySettings_PassphraseSourceType>,
     auto_lock_delay_ms: ::std::option::Option<u32>,
+    display_rotation: ::std::option::Option<u32>,
+    passphrase_always_on_device: ::std::option::Option<bool>,
+    safety_checks: ::std::option::Option<SafetyCheckLevel>,
+    experimental_features: ::std::option::Option<bool>,
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
@@ -1902,25 +2514,6 @@ impl ApplySettings {
         self.homescreen.take().unwrap_or_else(|| ::std::vec::Vec::new())
     }
 
-    // optional .hw.trezor.messages.management.ApplySettings.PassphraseSourceType passphrase_source = 5;
-
-
-    pub fn get_passphrase_source(&self) -> ApplySettings_PassphraseSourceType {
-        self.passphrase_source.unwrap_or(ApplySettings_PassphraseSourceType::ASK)
-    }
-    pub fn clear_passphrase_source(&mut self) {
-        self.passphrase_source = ::std::option::Option::None;
-    }
-
-    pub fn has_passphrase_source(&self) -> bool {
-        self.passphrase_source.is_some()
-    }
-
-    // Param is passed by value, moved
-    pub fn set_passphrase_source(&mut self, v: ApplySettings_PassphraseSourceType) {
-        self.passphrase_source = ::std::option::Option::Some(v);
-    }
-
     // optional uint32 auto_lock_delay_ms = 6;
 
 
@@ -1938,6 +2531,82 @@ impl ApplySettings {
     // Param is passed by value, moved
     pub fn set_auto_lock_delay_ms(&mut self, v: u32) {
         self.auto_lock_delay_ms = ::std::option::Option::Some(v);
+    }
+
+    // optional uint32 display_rotation = 7;
+
+
+    pub fn get_display_rotation(&self) -> u32 {
+        self.display_rotation.unwrap_or(0)
+    }
+    pub fn clear_display_rotation(&mut self) {
+        self.display_rotation = ::std::option::Option::None;
+    }
+
+    pub fn has_display_rotation(&self) -> bool {
+        self.display_rotation.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_display_rotation(&mut self, v: u32) {
+        self.display_rotation = ::std::option::Option::Some(v);
+    }
+
+    // optional bool passphrase_always_on_device = 8;
+
+
+    pub fn get_passphrase_always_on_device(&self) -> bool {
+        self.passphrase_always_on_device.unwrap_or(false)
+    }
+    pub fn clear_passphrase_always_on_device(&mut self) {
+        self.passphrase_always_on_device = ::std::option::Option::None;
+    }
+
+    pub fn has_passphrase_always_on_device(&self) -> bool {
+        self.passphrase_always_on_device.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_passphrase_always_on_device(&mut self, v: bool) {
+        self.passphrase_always_on_device = ::std::option::Option::Some(v);
+    }
+
+    // optional .hw.trezor.messages.management.SafetyCheckLevel safety_checks = 9;
+
+
+    pub fn get_safety_checks(&self) -> SafetyCheckLevel {
+        self.safety_checks.unwrap_or(SafetyCheckLevel::Strict)
+    }
+    pub fn clear_safety_checks(&mut self) {
+        self.safety_checks = ::std::option::Option::None;
+    }
+
+    pub fn has_safety_checks(&self) -> bool {
+        self.safety_checks.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_safety_checks(&mut self, v: SafetyCheckLevel) {
+        self.safety_checks = ::std::option::Option::Some(v);
+    }
+
+    // optional bool experimental_features = 10;
+
+
+    pub fn get_experimental_features(&self) -> bool {
+        self.experimental_features.unwrap_or(false)
+    }
+    pub fn clear_experimental_features(&mut self) {
+        self.experimental_features = ::std::option::Option::None;
+    }
+
+    pub fn has_experimental_features(&self) -> bool {
+        self.experimental_features.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_experimental_features(&mut self, v: bool) {
+        self.experimental_features = ::std::option::Option::Some(v);
     }
 }
 
@@ -1966,15 +2635,36 @@ impl ::protobuf::Message for ApplySettings {
                 4 => {
                     ::protobuf::rt::read_singular_bytes_into(wire_type, is, &mut self.homescreen)?;
                 },
-                5 => {
-                    ::protobuf::rt::read_proto2_enum_with_unknown_fields_into(wire_type, is, &mut self.passphrase_source, 5, &mut self.unknown_fields)?
-                },
                 6 => {
                     if wire_type != ::protobuf::wire_format::WireTypeVarint {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
                     let tmp = is.read_uint32()?;
                     self.auto_lock_delay_ms = ::std::option::Option::Some(tmp);
+                },
+                7 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint32()?;
+                    self.display_rotation = ::std::option::Option::Some(tmp);
+                },
+                8 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.passphrase_always_on_device = ::std::option::Option::Some(tmp);
+                },
+                9 => {
+                    ::protobuf::rt::read_proto2_enum_with_unknown_fields_into(wire_type, is, &mut self.safety_checks, 9, &mut self.unknown_fields)?
+                },
+                10 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.experimental_features = ::std::option::Option::Some(tmp);
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -2000,11 +2690,20 @@ impl ::protobuf::Message for ApplySettings {
         if let Some(ref v) = self.homescreen.as_ref() {
             my_size += ::protobuf::rt::bytes_size(4, &v);
         }
-        if let Some(v) = self.passphrase_source {
-            my_size += ::protobuf::rt::enum_size(5, v);
-        }
         if let Some(v) = self.auto_lock_delay_ms {
             my_size += ::protobuf::rt::value_size(6, v, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if let Some(v) = self.display_rotation {
+            my_size += ::protobuf::rt::value_size(7, v, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if let Some(v) = self.passphrase_always_on_device {
+            my_size += 2;
+        }
+        if let Some(v) = self.safety_checks {
+            my_size += ::protobuf::rt::enum_size(9, v);
+        }
+        if let Some(v) = self.experimental_features {
+            my_size += 2;
         }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
@@ -2024,11 +2723,20 @@ impl ::protobuf::Message for ApplySettings {
         if let Some(ref v) = self.homescreen.as_ref() {
             os.write_bytes(4, &v)?;
         }
-        if let Some(v) = self.passphrase_source {
-            os.write_enum(5, ::protobuf::ProtobufEnum::value(&v))?;
-        }
         if let Some(v) = self.auto_lock_delay_ms {
             os.write_uint32(6, v)?;
+        }
+        if let Some(v) = self.display_rotation {
+            os.write_uint32(7, v)?;
+        }
+        if let Some(v) = self.passphrase_always_on_device {
+            os.write_bool(8, v)?;
+        }
+        if let Some(v) = self.safety_checks {
+            os.write_enum(9, ::protobuf::ProtobufEnum::value(&v))?;
+        }
+        if let Some(v) = self.experimental_features {
+            os.write_bool(10, v)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -2088,15 +2796,30 @@ impl ::protobuf::Message for ApplySettings {
                 |m: &ApplySettings| { &m.homescreen },
                 |m: &mut ApplySettings| { &mut m.homescreen },
             ));
-            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeEnum<ApplySettings_PassphraseSourceType>>(
-                "passphrase_source",
-                |m: &ApplySettings| { &m.passphrase_source },
-                |m: &mut ApplySettings| { &mut m.passphrase_source },
-            ));
             fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeUint32>(
                 "auto_lock_delay_ms",
                 |m: &ApplySettings| { &m.auto_lock_delay_ms },
                 |m: &mut ApplySettings| { &mut m.auto_lock_delay_ms },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeUint32>(
+                "display_rotation",
+                |m: &ApplySettings| { &m.display_rotation },
+                |m: &mut ApplySettings| { &mut m.display_rotation },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                "passphrase_always_on_device",
+                |m: &ApplySettings| { &m.passphrase_always_on_device },
+                |m: &mut ApplySettings| { &mut m.passphrase_always_on_device },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeEnum<SafetyCheckLevel>>(
+                "safety_checks",
+                |m: &ApplySettings| { &m.safety_checks },
+                |m: &mut ApplySettings| { &mut m.safety_checks },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                "experimental_features",
+                |m: &ApplySettings| { &m.experimental_features },
+                |m: &mut ApplySettings| { &mut m.experimental_features },
             ));
             ::protobuf::reflect::MessageDescriptor::new_pb_name::<ApplySettings>(
                 "ApplySettings",
@@ -2118,8 +2841,11 @@ impl ::protobuf::Clear for ApplySettings {
         self.label.clear();
         self.use_passphrase = ::std::option::Option::None;
         self.homescreen.clear();
-        self.passphrase_source = ::std::option::Option::None;
         self.auto_lock_delay_ms = ::std::option::Option::None;
+        self.display_rotation = ::std::option::Option::None;
+        self.passphrase_always_on_device = ::std::option::Option::None;
+        self.safety_checks = ::std::option::Option::None;
+        self.experimental_features = ::std::option::Option::None;
         self.unknown_fields.clear();
     }
 }
@@ -2133,59 +2859,6 @@ impl ::std::fmt::Debug for ApplySettings {
 impl ::protobuf::reflect::ProtobufValue for ApplySettings {
     fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
         ::protobuf::reflect::ReflectValueRef::Message(self)
-    }
-}
-
-#[derive(Clone,PartialEq,Eq,Debug,Hash)]
-pub enum ApplySettings_PassphraseSourceType {
-    ASK = 0,
-    DEVICE = 1,
-    HOST = 2,
-}
-
-impl ::protobuf::ProtobufEnum for ApplySettings_PassphraseSourceType {
-    fn value(&self) -> i32 {
-        *self as i32
-    }
-
-    fn from_i32(value: i32) -> ::std::option::Option<ApplySettings_PassphraseSourceType> {
-        match value {
-            0 => ::std::option::Option::Some(ApplySettings_PassphraseSourceType::ASK),
-            1 => ::std::option::Option::Some(ApplySettings_PassphraseSourceType::DEVICE),
-            2 => ::std::option::Option::Some(ApplySettings_PassphraseSourceType::HOST),
-            _ => ::std::option::Option::None
-        }
-    }
-
-    fn values() -> &'static [Self] {
-        static values: &'static [ApplySettings_PassphraseSourceType] = &[
-            ApplySettings_PassphraseSourceType::ASK,
-            ApplySettings_PassphraseSourceType::DEVICE,
-            ApplySettings_PassphraseSourceType::HOST,
-        ];
-        values
-    }
-
-    fn enum_descriptor_static() -> &'static ::protobuf::reflect::EnumDescriptor {
-        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::EnumDescriptor> = ::protobuf::rt::LazyV2::INIT;
-        descriptor.get(|| {
-            ::protobuf::reflect::EnumDescriptor::new_pb_name::<ApplySettings_PassphraseSourceType>("ApplySettings.PassphraseSourceType", file_descriptor_proto())
-        })
-    }
-}
-
-impl ::std::marker::Copy for ApplySettings_PassphraseSourceType {
-}
-
-impl ::std::default::Default for ApplySettings_PassphraseSourceType {
-    fn default() -> Self {
-        ApplySettings_PassphraseSourceType::ASK
-    }
-}
-
-impl ::protobuf::reflect::ProtobufValue for ApplySettings_PassphraseSourceType {
-    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
-        ::protobuf::reflect::ReflectValueRef::Enum(::protobuf::ProtobufEnum::descriptor(self))
     }
 }
 
@@ -2502,12 +3175,371 @@ impl ::protobuf::reflect::ProtobufValue for ChangePin {
 }
 
 #[derive(PartialEq,Clone,Default)]
+pub struct ChangeWipeCode {
+    // message fields
+    remove: ::std::option::Option<bool>,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a ChangeWipeCode {
+    fn default() -> &'a ChangeWipeCode {
+        <ChangeWipeCode as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl ChangeWipeCode {
+    pub fn new() -> ChangeWipeCode {
+        ::std::default::Default::default()
+    }
+
+    // optional bool remove = 1;
+
+
+    pub fn get_remove(&self) -> bool {
+        self.remove.unwrap_or(false)
+    }
+    pub fn clear_remove(&mut self) {
+        self.remove = ::std::option::Option::None;
+    }
+
+    pub fn has_remove(&self) -> bool {
+        self.remove.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_remove(&mut self, v: bool) {
+        self.remove = ::std::option::Option::Some(v);
+    }
+}
+
+impl ::protobuf::Message for ChangeWipeCode {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.remove = ::std::option::Option::Some(tmp);
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if let Some(v) = self.remove {
+            my_size += 2;
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if let Some(v) = self.remove {
+            os.write_bool(1, v)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: ::std::boxed::Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> ChangeWipeCode {
+        ChangeWipeCode::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
+        descriptor.get(|| {
+            let mut fields = ::std::vec::Vec::new();
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                "remove",
+                |m: &ChangeWipeCode| { &m.remove },
+                |m: &mut ChangeWipeCode| { &mut m.remove },
+            ));
+            ::protobuf::reflect::MessageDescriptor::new_pb_name::<ChangeWipeCode>(
+                "ChangeWipeCode",
+                fields,
+                file_descriptor_proto()
+            )
+        })
+    }
+
+    fn default_instance() -> &'static ChangeWipeCode {
+        static instance: ::protobuf::rt::LazyV2<ChangeWipeCode> = ::protobuf::rt::LazyV2::INIT;
+        instance.get(ChangeWipeCode::new)
+    }
+}
+
+impl ::protobuf::Clear for ChangeWipeCode {
+    fn clear(&mut self) {
+        self.remove = ::std::option::Option::None;
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for ChangeWipeCode {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for ChangeWipeCode {
+    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
+        ::protobuf::reflect::ReflectValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct SdProtect {
+    // message fields
+    operation: ::std::option::Option<SdProtect_SdProtectOperationType>,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a SdProtect {
+    fn default() -> &'a SdProtect {
+        <SdProtect as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl SdProtect {
+    pub fn new() -> SdProtect {
+        ::std::default::Default::default()
+    }
+
+    // optional .hw.trezor.messages.management.SdProtect.SdProtectOperationType operation = 1;
+
+
+    pub fn get_operation(&self) -> SdProtect_SdProtectOperationType {
+        self.operation.unwrap_or(SdProtect_SdProtectOperationType::DISABLE)
+    }
+    pub fn clear_operation(&mut self) {
+        self.operation = ::std::option::Option::None;
+    }
+
+    pub fn has_operation(&self) -> bool {
+        self.operation.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_operation(&mut self, v: SdProtect_SdProtectOperationType) {
+        self.operation = ::std::option::Option::Some(v);
+    }
+}
+
+impl ::protobuf::Message for SdProtect {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_proto2_enum_with_unknown_fields_into(wire_type, is, &mut self.operation, 1, &mut self.unknown_fields)?
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if let Some(v) = self.operation {
+            my_size += ::protobuf::rt::enum_size(1, v);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if let Some(v) = self.operation {
+            os.write_enum(1, ::protobuf::ProtobufEnum::value(&v))?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: ::std::boxed::Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> SdProtect {
+        SdProtect::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
+        descriptor.get(|| {
+            let mut fields = ::std::vec::Vec::new();
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeEnum<SdProtect_SdProtectOperationType>>(
+                "operation",
+                |m: &SdProtect| { &m.operation },
+                |m: &mut SdProtect| { &mut m.operation },
+            ));
+            ::protobuf::reflect::MessageDescriptor::new_pb_name::<SdProtect>(
+                "SdProtect",
+                fields,
+                file_descriptor_proto()
+            )
+        })
+    }
+
+    fn default_instance() -> &'static SdProtect {
+        static instance: ::protobuf::rt::LazyV2<SdProtect> = ::protobuf::rt::LazyV2::INIT;
+        instance.get(SdProtect::new)
+    }
+}
+
+impl ::protobuf::Clear for SdProtect {
+    fn clear(&mut self) {
+        self.operation = ::std::option::Option::None;
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for SdProtect {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for SdProtect {
+    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
+        ::protobuf::reflect::ReflectValueRef::Message(self)
+    }
+}
+
+#[derive(Clone,PartialEq,Eq,Debug,Hash)]
+pub enum SdProtect_SdProtectOperationType {
+    DISABLE = 0,
+    ENABLE = 1,
+    REFRESH = 2,
+}
+
+impl ::protobuf::ProtobufEnum for SdProtect_SdProtectOperationType {
+    fn value(&self) -> i32 {
+        *self as i32
+    }
+
+    fn from_i32(value: i32) -> ::std::option::Option<SdProtect_SdProtectOperationType> {
+        match value {
+            0 => ::std::option::Option::Some(SdProtect_SdProtectOperationType::DISABLE),
+            1 => ::std::option::Option::Some(SdProtect_SdProtectOperationType::ENABLE),
+            2 => ::std::option::Option::Some(SdProtect_SdProtectOperationType::REFRESH),
+            _ => ::std::option::Option::None
+        }
+    }
+
+    fn values() -> &'static [Self] {
+        static values: &'static [SdProtect_SdProtectOperationType] = &[
+            SdProtect_SdProtectOperationType::DISABLE,
+            SdProtect_SdProtectOperationType::ENABLE,
+            SdProtect_SdProtectOperationType::REFRESH,
+        ];
+        values
+    }
+
+    fn enum_descriptor_static() -> &'static ::protobuf::reflect::EnumDescriptor {
+        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::EnumDescriptor> = ::protobuf::rt::LazyV2::INIT;
+        descriptor.get(|| {
+            ::protobuf::reflect::EnumDescriptor::new_pb_name::<SdProtect_SdProtectOperationType>("SdProtect.SdProtectOperationType", file_descriptor_proto())
+        })
+    }
+}
+
+impl ::std::marker::Copy for SdProtect_SdProtectOperationType {
+}
+
+impl ::std::default::Default for SdProtect_SdProtectOperationType {
+    fn default() -> Self {
+        SdProtect_SdProtectOperationType::DISABLE
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for SdProtect_SdProtectOperationType {
+    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
+        ::protobuf::reflect::ReflectValueRef::Enum(::protobuf::ProtobufEnum::descriptor(self))
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
 pub struct Ping {
     // message fields
     message: ::protobuf::SingularField<::std::string::String>,
     button_protection: ::std::option::Option<bool>,
-    pin_protection: ::std::option::Option<bool>,
-    passphrase_protection: ::std::option::Option<bool>,
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
@@ -2578,44 +3610,6 @@ impl Ping {
     pub fn set_button_protection(&mut self, v: bool) {
         self.button_protection = ::std::option::Option::Some(v);
     }
-
-    // optional bool pin_protection = 3;
-
-
-    pub fn get_pin_protection(&self) -> bool {
-        self.pin_protection.unwrap_or(false)
-    }
-    pub fn clear_pin_protection(&mut self) {
-        self.pin_protection = ::std::option::Option::None;
-    }
-
-    pub fn has_pin_protection(&self) -> bool {
-        self.pin_protection.is_some()
-    }
-
-    // Param is passed by value, moved
-    pub fn set_pin_protection(&mut self, v: bool) {
-        self.pin_protection = ::std::option::Option::Some(v);
-    }
-
-    // optional bool passphrase_protection = 4;
-
-
-    pub fn get_passphrase_protection(&self) -> bool {
-        self.passphrase_protection.unwrap_or(false)
-    }
-    pub fn clear_passphrase_protection(&mut self) {
-        self.passphrase_protection = ::std::option::Option::None;
-    }
-
-    pub fn has_passphrase_protection(&self) -> bool {
-        self.passphrase_protection.is_some()
-    }
-
-    // Param is passed by value, moved
-    pub fn set_passphrase_protection(&mut self, v: bool) {
-        self.passphrase_protection = ::std::option::Option::Some(v);
-    }
 }
 
 impl ::protobuf::Message for Ping {
@@ -2637,20 +3631,6 @@ impl ::protobuf::Message for Ping {
                     let tmp = is.read_bool()?;
                     self.button_protection = ::std::option::Option::Some(tmp);
                 },
-                3 => {
-                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
-                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
-                    }
-                    let tmp = is.read_bool()?;
-                    self.pin_protection = ::std::option::Option::Some(tmp);
-                },
-                4 => {
-                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
-                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
-                    }
-                    let tmp = is.read_bool()?;
-                    self.passphrase_protection = ::std::option::Option::Some(tmp);
-                },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
                 },
@@ -2669,12 +3649,6 @@ impl ::protobuf::Message for Ping {
         if let Some(v) = self.button_protection {
             my_size += 2;
         }
-        if let Some(v) = self.pin_protection {
-            my_size += 2;
-        }
-        if let Some(v) = self.passphrase_protection {
-            my_size += 2;
-        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
@@ -2686,12 +3660,6 @@ impl ::protobuf::Message for Ping {
         }
         if let Some(v) = self.button_protection {
             os.write_bool(2, v)?;
-        }
-        if let Some(v) = self.pin_protection {
-            os.write_bool(3, v)?;
-        }
-        if let Some(v) = self.passphrase_protection {
-            os.write_bool(4, v)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -2741,16 +3709,6 @@ impl ::protobuf::Message for Ping {
                 |m: &Ping| { &m.button_protection },
                 |m: &mut Ping| { &mut m.button_protection },
             ));
-            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
-                "pin_protection",
-                |m: &Ping| { &m.pin_protection },
-                |m: &mut Ping| { &mut m.pin_protection },
-            ));
-            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
-                "passphrase_protection",
-                |m: &Ping| { &m.passphrase_protection },
-                |m: &mut Ping| { &mut m.passphrase_protection },
-            ));
             ::protobuf::reflect::MessageDescriptor::new_pb_name::<Ping>(
                 "Ping",
                 fields,
@@ -2769,8 +3727,6 @@ impl ::protobuf::Clear for Ping {
     fn clear(&mut self) {
         self.message.clear();
         self.button_protection = ::std::option::Option::None;
-        self.pin_protection = ::std::option::Option::None;
-        self.passphrase_protection = ::std::option::Option::None;
         self.unknown_fields.clear();
     }
 }
@@ -3353,14 +4309,15 @@ impl ::protobuf::reflect::ProtobufValue for WipeDevice {
 #[derive(PartialEq,Clone,Default)]
 pub struct LoadDevice {
     // message fields
-    mnemonic: ::protobuf::SingularField<::std::string::String>,
-    pub node: ::protobuf::SingularPtrField<super::messages_common::HDNodeType>,
+    pub mnemonics: ::protobuf::RepeatedField<::std::string::String>,
     pin: ::protobuf::SingularField<::std::string::String>,
     passphrase_protection: ::std::option::Option<bool>,
     language: ::protobuf::SingularField<::std::string::String>,
     label: ::protobuf::SingularField<::std::string::String>,
     skip_checksum: ::std::option::Option<bool>,
     u2f_counter: ::std::option::Option<u32>,
+    needs_backup: ::std::option::Option<bool>,
+    no_backup: ::std::option::Option<bool>,
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
@@ -3377,73 +4334,29 @@ impl LoadDevice {
         ::std::default::Default::default()
     }
 
-    // optional string mnemonic = 1;
+    // repeated string mnemonics = 1;
 
 
-    pub fn get_mnemonic(&self) -> &str {
-        match self.mnemonic.as_ref() {
-            Some(v) => &v,
-            None => "",
-        }
+    pub fn get_mnemonics(&self) -> &[::std::string::String] {
+        &self.mnemonics
     }
-    pub fn clear_mnemonic(&mut self) {
-        self.mnemonic.clear();
-    }
-
-    pub fn has_mnemonic(&self) -> bool {
-        self.mnemonic.is_some()
+    pub fn clear_mnemonics(&mut self) {
+        self.mnemonics.clear();
     }
 
     // Param is passed by value, moved
-    pub fn set_mnemonic(&mut self, v: ::std::string::String) {
-        self.mnemonic = ::protobuf::SingularField::some(v);
+    pub fn set_mnemonics(&mut self, v: ::protobuf::RepeatedField<::std::string::String>) {
+        self.mnemonics = v;
     }
 
     // Mutable pointer to the field.
-    // If field is not initialized, it is initialized with default value first.
-    pub fn mut_mnemonic(&mut self) -> &mut ::std::string::String {
-        if self.mnemonic.is_none() {
-            self.mnemonic.set_default();
-        }
-        self.mnemonic.as_mut().unwrap()
+    pub fn mut_mnemonics(&mut self) -> &mut ::protobuf::RepeatedField<::std::string::String> {
+        &mut self.mnemonics
     }
 
     // Take field
-    pub fn take_mnemonic(&mut self) -> ::std::string::String {
-        self.mnemonic.take().unwrap_or_else(|| ::std::string::String::new())
-    }
-
-    // optional .hw.trezor.messages.common.HDNodeType node = 2;
-
-
-    pub fn get_node(&self) -> &super::messages_common::HDNodeType {
-        self.node.as_ref().unwrap_or_else(|| <super::messages_common::HDNodeType as ::protobuf::Message>::default_instance())
-    }
-    pub fn clear_node(&mut self) {
-        self.node.clear();
-    }
-
-    pub fn has_node(&self) -> bool {
-        self.node.is_some()
-    }
-
-    // Param is passed by value, moved
-    pub fn set_node(&mut self, v: super::messages_common::HDNodeType) {
-        self.node = ::protobuf::SingularPtrField::some(v);
-    }
-
-    // Mutable pointer to the field.
-    // If field is not initialized, it is initialized with default value first.
-    pub fn mut_node(&mut self) -> &mut super::messages_common::HDNodeType {
-        if self.node.is_none() {
-            self.node.set_default();
-        }
-        self.node.as_mut().unwrap()
-    }
-
-    // Take field
-    pub fn take_node(&mut self) -> super::messages_common::HDNodeType {
-        self.node.take().unwrap_or_else(|| super::messages_common::HDNodeType::new())
+    pub fn take_mnemonics(&mut self) -> ::protobuf::RepeatedField<::std::string::String> {
+        ::std::mem::replace(&mut self.mnemonics, ::protobuf::RepeatedField::new())
     }
 
     // optional string pin = 3;
@@ -3507,7 +4420,7 @@ impl LoadDevice {
     pub fn get_language(&self) -> &str {
         match self.language.as_ref() {
             Some(v) => &v,
-            None => "english",
+            None => "en-US",
         }
     }
     pub fn clear_language(&mut self) {
@@ -3610,15 +4523,48 @@ impl LoadDevice {
     pub fn set_u2f_counter(&mut self, v: u32) {
         self.u2f_counter = ::std::option::Option::Some(v);
     }
+
+    // optional bool needs_backup = 9;
+
+
+    pub fn get_needs_backup(&self) -> bool {
+        self.needs_backup.unwrap_or(false)
+    }
+    pub fn clear_needs_backup(&mut self) {
+        self.needs_backup = ::std::option::Option::None;
+    }
+
+    pub fn has_needs_backup(&self) -> bool {
+        self.needs_backup.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_needs_backup(&mut self, v: bool) {
+        self.needs_backup = ::std::option::Option::Some(v);
+    }
+
+    // optional bool no_backup = 10;
+
+
+    pub fn get_no_backup(&self) -> bool {
+        self.no_backup.unwrap_or(false)
+    }
+    pub fn clear_no_backup(&mut self) {
+        self.no_backup = ::std::option::Option::None;
+    }
+
+    pub fn has_no_backup(&self) -> bool {
+        self.no_backup.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_no_backup(&mut self, v: bool) {
+        self.no_backup = ::std::option::Option::Some(v);
+    }
 }
 
 impl ::protobuf::Message for LoadDevice {
     fn is_initialized(&self) -> bool {
-        for v in &self.node {
-            if !v.is_initialized() {
-                return false;
-            }
-        };
         true
     }
 
@@ -3627,10 +4573,7 @@ impl ::protobuf::Message for LoadDevice {
             let (field_number, wire_type) = is.read_tag_unpack()?;
             match field_number {
                 1 => {
-                    ::protobuf::rt::read_singular_string_into(wire_type, is, &mut self.mnemonic)?;
-                },
-                2 => {
-                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.node)?;
+                    ::protobuf::rt::read_repeated_string_into(wire_type, is, &mut self.mnemonics)?;
                 },
                 3 => {
                     ::protobuf::rt::read_singular_string_into(wire_type, is, &mut self.pin)?;
@@ -3662,6 +4605,20 @@ impl ::protobuf::Message for LoadDevice {
                     let tmp = is.read_uint32()?;
                     self.u2f_counter = ::std::option::Option::Some(tmp);
                 },
+                9 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.needs_backup = ::std::option::Option::Some(tmp);
+                },
+                10 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.no_backup = ::std::option::Option::Some(tmp);
+                },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
                 },
@@ -3674,13 +4631,9 @@ impl ::protobuf::Message for LoadDevice {
     #[allow(unused_variables)]
     fn compute_size(&self) -> u32 {
         let mut my_size = 0;
-        if let Some(ref v) = self.mnemonic.as_ref() {
-            my_size += ::protobuf::rt::string_size(1, &v);
-        }
-        if let Some(ref v) = self.node.as_ref() {
-            let len = v.compute_size();
-            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
-        }
+        for value in &self.mnemonics {
+            my_size += ::protobuf::rt::string_size(1, &value);
+        };
         if let Some(ref v) = self.pin.as_ref() {
             my_size += ::protobuf::rt::string_size(3, &v);
         }
@@ -3699,20 +4652,21 @@ impl ::protobuf::Message for LoadDevice {
         if let Some(v) = self.u2f_counter {
             my_size += ::protobuf::rt::value_size(8, v, ::protobuf::wire_format::WireTypeVarint);
         }
+        if let Some(v) = self.needs_backup {
+            my_size += 2;
+        }
+        if let Some(v) = self.no_backup {
+            my_size += 2;
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
     }
 
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
-        if let Some(ref v) = self.mnemonic.as_ref() {
+        for v in &self.mnemonics {
             os.write_string(1, &v)?;
-        }
-        if let Some(ref v) = self.node.as_ref() {
-            os.write_tag(2, ::protobuf::wire_format::WireTypeLengthDelimited)?;
-            os.write_raw_varint32(v.get_cached_size())?;
-            v.write_to_with_cached_sizes(os)?;
-        }
+        };
         if let Some(ref v) = self.pin.as_ref() {
             os.write_string(3, &v)?;
         }
@@ -3730,6 +4684,12 @@ impl ::protobuf::Message for LoadDevice {
         }
         if let Some(v) = self.u2f_counter {
             os.write_uint32(8, v)?;
+        }
+        if let Some(v) = self.needs_backup {
+            os.write_bool(9, v)?;
+        }
+        if let Some(v) = self.no_backup {
+            os.write_bool(10, v)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -3769,15 +4729,10 @@ impl ::protobuf::Message for LoadDevice {
         static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
         descriptor.get(|| {
             let mut fields = ::std::vec::Vec::new();
-            fields.push(::protobuf::reflect::accessor::make_singular_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
-                "mnemonic",
-                |m: &LoadDevice| { &m.mnemonic },
-                |m: &mut LoadDevice| { &mut m.mnemonic },
-            ));
-            fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<super::messages_common::HDNodeType>>(
-                "node",
-                |m: &LoadDevice| { &m.node },
-                |m: &mut LoadDevice| { &mut m.node },
+            fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+                "mnemonics",
+                |m: &LoadDevice| { &m.mnemonics },
+                |m: &mut LoadDevice| { &mut m.mnemonics },
             ));
             fields.push(::protobuf::reflect::accessor::make_singular_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
                 "pin",
@@ -3809,6 +4764,16 @@ impl ::protobuf::Message for LoadDevice {
                 |m: &LoadDevice| { &m.u2f_counter },
                 |m: &mut LoadDevice| { &mut m.u2f_counter },
             ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                "needs_backup",
+                |m: &LoadDevice| { &m.needs_backup },
+                |m: &mut LoadDevice| { &mut m.needs_backup },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                "no_backup",
+                |m: &LoadDevice| { &m.no_backup },
+                |m: &mut LoadDevice| { &mut m.no_backup },
+            ));
             ::protobuf::reflect::MessageDescriptor::new_pb_name::<LoadDevice>(
                 "LoadDevice",
                 fields,
@@ -3825,14 +4790,15 @@ impl ::protobuf::Message for LoadDevice {
 
 impl ::protobuf::Clear for LoadDevice {
     fn clear(&mut self) {
-        self.mnemonic.clear();
-        self.node.clear();
+        self.mnemonics.clear();
         self.pin.clear();
         self.passphrase_protection = ::std::option::Option::None;
         self.language.clear();
         self.label.clear();
         self.skip_checksum = ::std::option::Option::None;
         self.u2f_counter = ::std::option::Option::None;
+        self.needs_backup = ::std::option::Option::None;
+        self.no_backup = ::std::option::Option::None;
         self.unknown_fields.clear();
     }
 }
@@ -3861,6 +4827,7 @@ pub struct ResetDevice {
     u2f_counter: ::std::option::Option<u32>,
     skip_backup: ::std::option::Option<bool>,
     no_backup: ::std::option::Option<bool>,
+    backup_type: ::std::option::Option<BackupType>,
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
@@ -3959,7 +4926,7 @@ impl ResetDevice {
     pub fn get_language(&self) -> &str {
         match self.language.as_ref() {
             Some(v) => &v,
-            None => "english",
+            None => "en-US",
         }
     }
     pub fn clear_language(&mut self) {
@@ -4081,6 +5048,25 @@ impl ResetDevice {
     pub fn set_no_backup(&mut self, v: bool) {
         self.no_backup = ::std::option::Option::Some(v);
     }
+
+    // optional .hw.trezor.messages.management.BackupType backup_type = 10;
+
+
+    pub fn get_backup_type(&self) -> BackupType {
+        self.backup_type.unwrap_or(BackupType::Bip39)
+    }
+    pub fn clear_backup_type(&mut self) {
+        self.backup_type = ::std::option::Option::None;
+    }
+
+    pub fn has_backup_type(&self) -> bool {
+        self.backup_type.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_backup_type(&mut self, v: BackupType) {
+        self.backup_type = ::std::option::Option::Some(v);
+    }
 }
 
 impl ::protobuf::Message for ResetDevice {
@@ -4147,6 +5133,9 @@ impl ::protobuf::Message for ResetDevice {
                     let tmp = is.read_bool()?;
                     self.no_backup = ::std::option::Option::Some(tmp);
                 },
+                10 => {
+                    ::protobuf::rt::read_proto2_enum_with_unknown_fields_into(wire_type, is, &mut self.backup_type, 10, &mut self.unknown_fields)?
+                },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
                 },
@@ -4186,6 +5175,9 @@ impl ::protobuf::Message for ResetDevice {
         if let Some(v) = self.no_backup {
             my_size += 2;
         }
+        if let Some(v) = self.backup_type {
+            my_size += ::protobuf::rt::enum_size(10, v);
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
@@ -4218,6 +5210,9 @@ impl ::protobuf::Message for ResetDevice {
         }
         if let Some(v) = self.no_backup {
             os.write_bool(9, v)?;
+        }
+        if let Some(v) = self.backup_type {
+            os.write_enum(10, ::protobuf::ProtobufEnum::value(&v))?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -4302,6 +5297,11 @@ impl ::protobuf::Message for ResetDevice {
                 |m: &ResetDevice| { &m.no_backup },
                 |m: &mut ResetDevice| { &mut m.no_backup },
             ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeEnum<BackupType>>(
+                "backup_type",
+                |m: &ResetDevice| { &m.backup_type },
+                |m: &mut ResetDevice| { &mut m.backup_type },
+            ));
             ::protobuf::reflect::MessageDescriptor::new_pb_name::<ResetDevice>(
                 "ResetDevice",
                 fields,
@@ -4327,6 +5327,7 @@ impl ::protobuf::Clear for ResetDevice {
         self.u2f_counter = ::std::option::Option::None;
         self.skip_backup = ::std::option::Option::None;
         self.no_backup = ::std::option::Option::None;
+        self.backup_type = ::std::option::Option::None;
         self.unknown_fields.clear();
     }
 }
@@ -4835,7 +5836,7 @@ impl RecoveryDevice {
     pub fn get_language(&self) -> &str {
         match self.language.as_ref() {
             Some(v) => &v,
-            None => "english",
+            None => "",
         }
     }
     pub fn clear_language(&mut self) {
@@ -5817,84 +6818,842 @@ impl ::protobuf::reflect::ProtobufValue for SetU2FCounter {
     }
 }
 
+#[derive(PartialEq,Clone,Default)]
+pub struct GetNextU2FCounter {
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a GetNextU2FCounter {
+    fn default() -> &'a GetNextU2FCounter {
+        <GetNextU2FCounter as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl GetNextU2FCounter {
+    pub fn new() -> GetNextU2FCounter {
+        ::std::default::Default::default()
+    }
+}
+
+impl ::protobuf::Message for GetNextU2FCounter {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: ::std::boxed::Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> GetNextU2FCounter {
+        GetNextU2FCounter::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
+        descriptor.get(|| {
+            let fields = ::std::vec::Vec::new();
+            ::protobuf::reflect::MessageDescriptor::new_pb_name::<GetNextU2FCounter>(
+                "GetNextU2FCounter",
+                fields,
+                file_descriptor_proto()
+            )
+        })
+    }
+
+    fn default_instance() -> &'static GetNextU2FCounter {
+        static instance: ::protobuf::rt::LazyV2<GetNextU2FCounter> = ::protobuf::rt::LazyV2::INIT;
+        instance.get(GetNextU2FCounter::new)
+    }
+}
+
+impl ::protobuf::Clear for GetNextU2FCounter {
+    fn clear(&mut self) {
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for GetNextU2FCounter {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for GetNextU2FCounter {
+    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
+        ::protobuf::reflect::ReflectValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct NextU2FCounter {
+    // message fields
+    u2f_counter: ::std::option::Option<u32>,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a NextU2FCounter {
+    fn default() -> &'a NextU2FCounter {
+        <NextU2FCounter as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl NextU2FCounter {
+    pub fn new() -> NextU2FCounter {
+        ::std::default::Default::default()
+    }
+
+    // optional uint32 u2f_counter = 1;
+
+
+    pub fn get_u2f_counter(&self) -> u32 {
+        self.u2f_counter.unwrap_or(0)
+    }
+    pub fn clear_u2f_counter(&mut self) {
+        self.u2f_counter = ::std::option::Option::None;
+    }
+
+    pub fn has_u2f_counter(&self) -> bool {
+        self.u2f_counter.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_u2f_counter(&mut self, v: u32) {
+        self.u2f_counter = ::std::option::Option::Some(v);
+    }
+}
+
+impl ::protobuf::Message for NextU2FCounter {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint32()?;
+                    self.u2f_counter = ::std::option::Option::Some(tmp);
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if let Some(v) = self.u2f_counter {
+            my_size += ::protobuf::rt::value_size(1, v, ::protobuf::wire_format::WireTypeVarint);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if let Some(v) = self.u2f_counter {
+            os.write_uint32(1, v)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: ::std::boxed::Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> NextU2FCounter {
+        NextU2FCounter::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
+        descriptor.get(|| {
+            let mut fields = ::std::vec::Vec::new();
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeUint32>(
+                "u2f_counter",
+                |m: &NextU2FCounter| { &m.u2f_counter },
+                |m: &mut NextU2FCounter| { &mut m.u2f_counter },
+            ));
+            ::protobuf::reflect::MessageDescriptor::new_pb_name::<NextU2FCounter>(
+                "NextU2FCounter",
+                fields,
+                file_descriptor_proto()
+            )
+        })
+    }
+
+    fn default_instance() -> &'static NextU2FCounter {
+        static instance: ::protobuf::rt::LazyV2<NextU2FCounter> = ::protobuf::rt::LazyV2::INIT;
+        instance.get(NextU2FCounter::new)
+    }
+}
+
+impl ::protobuf::Clear for NextU2FCounter {
+    fn clear(&mut self) {
+        self.u2f_counter = ::std::option::Option::None;
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for NextU2FCounter {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for NextU2FCounter {
+    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
+        ::protobuf::reflect::ReflectValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct DoPreauthorized {
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a DoPreauthorized {
+    fn default() -> &'a DoPreauthorized {
+        <DoPreauthorized as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl DoPreauthorized {
+    pub fn new() -> DoPreauthorized {
+        ::std::default::Default::default()
+    }
+}
+
+impl ::protobuf::Message for DoPreauthorized {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: ::std::boxed::Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> DoPreauthorized {
+        DoPreauthorized::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
+        descriptor.get(|| {
+            let fields = ::std::vec::Vec::new();
+            ::protobuf::reflect::MessageDescriptor::new_pb_name::<DoPreauthorized>(
+                "DoPreauthorized",
+                fields,
+                file_descriptor_proto()
+            )
+        })
+    }
+
+    fn default_instance() -> &'static DoPreauthorized {
+        static instance: ::protobuf::rt::LazyV2<DoPreauthorized> = ::protobuf::rt::LazyV2::INIT;
+        instance.get(DoPreauthorized::new)
+    }
+}
+
+impl ::protobuf::Clear for DoPreauthorized {
+    fn clear(&mut self) {
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for DoPreauthorized {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for DoPreauthorized {
+    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
+        ::protobuf::reflect::ReflectValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct PreauthorizedRequest {
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a PreauthorizedRequest {
+    fn default() -> &'a PreauthorizedRequest {
+        <PreauthorizedRequest as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl PreauthorizedRequest {
+    pub fn new() -> PreauthorizedRequest {
+        ::std::default::Default::default()
+    }
+}
+
+impl ::protobuf::Message for PreauthorizedRequest {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: ::std::boxed::Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> PreauthorizedRequest {
+        PreauthorizedRequest::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
+        descriptor.get(|| {
+            let fields = ::std::vec::Vec::new();
+            ::protobuf::reflect::MessageDescriptor::new_pb_name::<PreauthorizedRequest>(
+                "PreauthorizedRequest",
+                fields,
+                file_descriptor_proto()
+            )
+        })
+    }
+
+    fn default_instance() -> &'static PreauthorizedRequest {
+        static instance: ::protobuf::rt::LazyV2<PreauthorizedRequest> = ::protobuf::rt::LazyV2::INIT;
+        instance.get(PreauthorizedRequest::new)
+    }
+}
+
+impl ::protobuf::Clear for PreauthorizedRequest {
+    fn clear(&mut self) {
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for PreauthorizedRequest {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for PreauthorizedRequest {
+    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
+        ::protobuf::reflect::ReflectValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct CancelAuthorization {
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a CancelAuthorization {
+    fn default() -> &'a CancelAuthorization {
+        <CancelAuthorization as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl CancelAuthorization {
+    pub fn new() -> CancelAuthorization {
+        ::std::default::Default::default()
+    }
+}
+
+impl ::protobuf::Message for CancelAuthorization {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: ::std::boxed::Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> CancelAuthorization {
+        CancelAuthorization::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
+        descriptor.get(|| {
+            let fields = ::std::vec::Vec::new();
+            ::protobuf::reflect::MessageDescriptor::new_pb_name::<CancelAuthorization>(
+                "CancelAuthorization",
+                fields,
+                file_descriptor_proto()
+            )
+        })
+    }
+
+    fn default_instance() -> &'static CancelAuthorization {
+        static instance: ::protobuf::rt::LazyV2<CancelAuthorization> = ::protobuf::rt::LazyV2::INIT;
+        instance.get(CancelAuthorization::new)
+    }
+}
+
+impl ::protobuf::Clear for CancelAuthorization {
+    fn clear(&mut self) {
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for CancelAuthorization {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for CancelAuthorization {
+    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
+        ::protobuf::reflect::ReflectValueRef::Message(self)
+    }
+}
+
+#[derive(Clone,PartialEq,Eq,Debug,Hash)]
+pub enum BackupType {
+    Bip39 = 0,
+    Slip39_Basic = 1,
+    Slip39_Advanced = 2,
+}
+
+impl ::protobuf::ProtobufEnum for BackupType {
+    fn value(&self) -> i32 {
+        *self as i32
+    }
+
+    fn from_i32(value: i32) -> ::std::option::Option<BackupType> {
+        match value {
+            0 => ::std::option::Option::Some(BackupType::Bip39),
+            1 => ::std::option::Option::Some(BackupType::Slip39_Basic),
+            2 => ::std::option::Option::Some(BackupType::Slip39_Advanced),
+            _ => ::std::option::Option::None
+        }
+    }
+
+    fn values() -> &'static [Self] {
+        static values: &'static [BackupType] = &[
+            BackupType::Bip39,
+            BackupType::Slip39_Basic,
+            BackupType::Slip39_Advanced,
+        ];
+        values
+    }
+
+    fn enum_descriptor_static() -> &'static ::protobuf::reflect::EnumDescriptor {
+        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::EnumDescriptor> = ::protobuf::rt::LazyV2::INIT;
+        descriptor.get(|| {
+            ::protobuf::reflect::EnumDescriptor::new_pb_name::<BackupType>("BackupType", file_descriptor_proto())
+        })
+    }
+}
+
+impl ::std::marker::Copy for BackupType {
+}
+
+impl ::std::default::Default for BackupType {
+    fn default() -> Self {
+        BackupType::Bip39
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for BackupType {
+    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
+        ::protobuf::reflect::ReflectValueRef::Enum(::protobuf::ProtobufEnum::descriptor(self))
+    }
+}
+
+#[derive(Clone,PartialEq,Eq,Debug,Hash)]
+pub enum SafetyCheckLevel {
+    Strict = 0,
+    PromptAlways = 1,
+    PromptTemporarily = 2,
+}
+
+impl ::protobuf::ProtobufEnum for SafetyCheckLevel {
+    fn value(&self) -> i32 {
+        *self as i32
+    }
+
+    fn from_i32(value: i32) -> ::std::option::Option<SafetyCheckLevel> {
+        match value {
+            0 => ::std::option::Option::Some(SafetyCheckLevel::Strict),
+            1 => ::std::option::Option::Some(SafetyCheckLevel::PromptAlways),
+            2 => ::std::option::Option::Some(SafetyCheckLevel::PromptTemporarily),
+            _ => ::std::option::Option::None
+        }
+    }
+
+    fn values() -> &'static [Self] {
+        static values: &'static [SafetyCheckLevel] = &[
+            SafetyCheckLevel::Strict,
+            SafetyCheckLevel::PromptAlways,
+            SafetyCheckLevel::PromptTemporarily,
+        ];
+        values
+    }
+
+    fn enum_descriptor_static() -> &'static ::protobuf::reflect::EnumDescriptor {
+        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::EnumDescriptor> = ::protobuf::rt::LazyV2::INIT;
+        descriptor.get(|| {
+            ::protobuf::reflect::EnumDescriptor::new_pb_name::<SafetyCheckLevel>("SafetyCheckLevel", file_descriptor_proto())
+        })
+    }
+}
+
+impl ::std::marker::Copy for SafetyCheckLevel {
+}
+
+impl ::std::default::Default for SafetyCheckLevel {
+    fn default() -> Self {
+        SafetyCheckLevel::Strict
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for SafetyCheckLevel {
+    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
+        ::protobuf::reflect::ReflectValueRef::Enum(::protobuf::ProtobufEnum::descriptor(self))
+    }
+}
+
 static file_descriptor_proto_data: &'static [u8] = b"\
-    \n\x19messages-management.proto\x12\x1dhw.trezor.messages.management\x1a\
-    \x15messages-common.proto\"K\n\nInitialize\x12\x14\n\x05state\x18\x01\
-    \x20\x01(\x0cR\x05state\x12'\n\x0fskip_passphrase\x18\x02\x20\x01(\x08R\
-    \x0eskipPassphrase\"\r\n\x0bGetFeatures\"\x8c\x07\n\x08Features\x12\x16\
-    \n\x06vendor\x18\x01\x20\x01(\tR\x06vendor\x12#\n\rmajor_version\x18\x02\
-    \x20\x01(\rR\x0cmajorVersion\x12#\n\rminor_version\x18\x03\x20\x01(\rR\
-    \x0cminorVersion\x12#\n\rpatch_version\x18\x04\x20\x01(\rR\x0cpatchVersi\
-    on\x12'\n\x0fbootloader_mode\x18\x05\x20\x01(\x08R\x0ebootloaderMode\x12\
-    \x1b\n\tdevice_id\x18\x06\x20\x01(\tR\x08deviceId\x12%\n\x0epin_protecti\
-    on\x18\x07\x20\x01(\x08R\rpinProtection\x123\n\x15passphrase_protection\
-    \x18\x08\x20\x01(\x08R\x14passphraseProtection\x12\x1a\n\x08language\x18\
-    \t\x20\x01(\tR\x08language\x12\x14\n\x05label\x18\n\x20\x01(\tR\x05label\
-    \x12\x20\n\x0binitialized\x18\x0c\x20\x01(\x08R\x0binitialized\x12\x1a\n\
-    \x08revision\x18\r\x20\x01(\x0cR\x08revision\x12'\n\x0fbootloader_hash\
-    \x18\x0e\x20\x01(\x0cR\x0ebootloaderHash\x12\x1a\n\x08imported\x18\x0f\
-    \x20\x01(\x08R\x08imported\x12\x1d\n\npin_cached\x18\x10\x20\x01(\x08R\t\
-    pinCached\x12+\n\x11passphrase_cached\x18\x11\x20\x01(\x08R\x10passphras\
-    eCached\x12)\n\x10firmware_present\x18\x12\x20\x01(\x08R\x0ffirmwarePres\
-    ent\x12!\n\x0cneeds_backup\x18\x13\x20\x01(\x08R\x0bneedsBackup\x12\x14\
-    \n\x05flags\x18\x14\x20\x01(\rR\x05flags\x12\x14\n\x05model\x18\x15\x20\
-    \x01(\tR\x05model\x12\x19\n\x08fw_major\x18\x16\x20\x01(\rR\x07fwMajor\
-    \x12\x19\n\x08fw_minor\x18\x17\x20\x01(\rR\x07fwMinor\x12\x19\n\x08fw_pa\
-    tch\x18\x18\x20\x01(\rR\x07fwPatch\x12\x1b\n\tfw_vendor\x18\x19\x20\x01(\
-    \tR\x08fwVendor\x12$\n\x0efw_vendor_keys\x18\x1a\x20\x01(\x0cR\x0cfwVend\
-    orKeys\x12+\n\x11unfinished_backup\x18\x1b\x20\x01(\x08R\x10unfinishedBa\
-    ckup\x12\x1b\n\tno_backup\x18\x1c\x20\x01(\x08R\x08noBackup\"\x0e\n\x0cC\
-    learSession\"\xdc\x02\n\rApplySettings\x12\x1a\n\x08language\x18\x01\x20\
-    \x01(\tR\x08language\x12\x14\n\x05label\x18\x02\x20\x01(\tR\x05label\x12\
-    %\n\x0euse_passphrase\x18\x03\x20\x01(\x08R\rusePassphrase\x12\x1e\n\nho\
-    mescreen\x18\x04\x20\x01(\x0cR\nhomescreen\x12n\n\x11passphrase_source\
-    \x18\x05\x20\x01(\x0e2A.hw.trezor.messages.management.ApplySettings.Pass\
-    phraseSourceTypeR\x10passphraseSource\x12+\n\x12auto_lock_delay_ms\x18\
-    \x06\x20\x01(\rR\x0fautoLockDelayMs\"5\n\x14PassphraseSourceType\x12\x07\
-    \n\x03ASK\x10\0\x12\n\n\x06DEVICE\x10\x01\x12\x08\n\x04HOST\x10\x02\"\"\
-    \n\nApplyFlags\x12\x14\n\x05flags\x18\x01\x20\x01(\rR\x05flags\"#\n\tCha\
-    ngePin\x12\x16\n\x06remove\x18\x01\x20\x01(\x08R\x06remove\"\xa9\x01\n\
-    \x04Ping\x12\x18\n\x07message\x18\x01\x20\x01(\tR\x07message\x12+\n\x11b\
-    utton_protection\x18\x02\x20\x01(\x08R\x10buttonProtection\x12%\n\x0epin\
-    _protection\x18\x03\x20\x01(\x08R\rpinProtection\x123\n\x15passphrase_pr\
-    otection\x18\x04\x20\x01(\x08R\x14passphraseProtection\"\x08\n\x06Cancel\
-    \"\x20\n\nGetEntropy\x12\x12\n\x04size\x18\x01\x20\x02(\rR\x04size\"#\n\
-    \x07Entropy\x12\x18\n\x07entropy\x18\x01\x20\x02(\x0cR\x07entropy\"\x0c\
-    \n\nWipeDevice\"\xab\x02\n\nLoadDevice\x12\x1a\n\x08mnemonic\x18\x01\x20\
-    \x01(\tR\x08mnemonic\x129\n\x04node\x18\x02\x20\x01(\x0b2%.hw.trezor.mes\
-    sages.common.HDNodeTypeR\x04node\x12\x10\n\x03pin\x18\x03\x20\x01(\tR\
-    \x03pin\x123\n\x15passphrase_protection\x18\x04\x20\x01(\x08R\x14passphr\
-    aseProtection\x12#\n\x08language\x18\x05\x20\x01(\t:\x07englishR\x08lang\
-    uage\x12\x14\n\x05label\x18\x06\x20\x01(\tR\x05label\x12#\n\rskip_checks\
-    um\x18\x07\x20\x01(\x08R\x0cskipChecksum\x12\x1f\n\x0bu2f_counter\x18\
-    \x08\x20\x01(\rR\nu2fCounter\"\xcb\x02\n\x0bResetDevice\x12%\n\x0edispla\
-    y_random\x18\x01\x20\x01(\x08R\rdisplayRandom\x12\x1f\n\x08strength\x18\
+    \n\x19messages-management.proto\x12\x1dhw.trezor.messages.management\"+\
+    \n\nInitialize\x12\x1d\n\nsession_id\x18\x01\x20\x01(\x0cR\tsessionId\"\
+    \r\n\x0bGetFeatures\"\x8a\x0f\n\x08Features\x12\x16\n\x06vendor\x18\x01\
+    \x20\x01(\tR\x06vendor\x12#\n\rmajor_version\x18\x02\x20\x01(\rR\x0cmajo\
+    rVersion\x12#\n\rminor_version\x18\x03\x20\x01(\rR\x0cminorVersion\x12#\
+    \n\rpatch_version\x18\x04\x20\x01(\rR\x0cpatchVersion\x12'\n\x0fbootload\
+    er_mode\x18\x05\x20\x01(\x08R\x0ebootloaderMode\x12\x1b\n\tdevice_id\x18\
+    \x06\x20\x01(\tR\x08deviceId\x12%\n\x0epin_protection\x18\x07\x20\x01(\
+    \x08R\rpinProtection\x123\n\x15passphrase_protection\x18\x08\x20\x01(\
+    \x08R\x14passphraseProtection\x12\x1a\n\x08language\x18\t\x20\x01(\tR\
+    \x08language\x12\x14\n\x05label\x18\n\x20\x01(\tR\x05label\x12\x20\n\x0b\
+    initialized\x18\x0c\x20\x01(\x08R\x0binitialized\x12\x1a\n\x08revision\
+    \x18\r\x20\x01(\x0cR\x08revision\x12'\n\x0fbootloader_hash\x18\x0e\x20\
+    \x01(\x0cR\x0ebootloaderHash\x12\x1a\n\x08imported\x18\x0f\x20\x01(\x08R\
+    \x08imported\x12\x1a\n\x08unlocked\x18\x10\x20\x01(\x08R\x08unlocked\x12\
+    )\n\x10firmware_present\x18\x12\x20\x01(\x08R\x0ffirmwarePresent\x12!\n\
+    \x0cneeds_backup\x18\x13\x20\x01(\x08R\x0bneedsBackup\x12\x14\n\x05flags\
+    \x18\x14\x20\x01(\rR\x05flags\x12\x14\n\x05model\x18\x15\x20\x01(\tR\x05\
+    model\x12\x19\n\x08fw_major\x18\x16\x20\x01(\rR\x07fwMajor\x12\x19\n\x08\
+    fw_minor\x18\x17\x20\x01(\rR\x07fwMinor\x12\x19\n\x08fw_patch\x18\x18\
+    \x20\x01(\rR\x07fwPatch\x12\x1b\n\tfw_vendor\x18\x19\x20\x01(\tR\x08fwVe\
+    ndor\x12$\n\x0efw_vendor_keys\x18\x1a\x20\x01(\x0cR\x0cfwVendorKeys\x12+\
+    \n\x11unfinished_backup\x18\x1b\x20\x01(\x08R\x10unfinishedBackup\x12\
+    \x1b\n\tno_backup\x18\x1c\x20\x01(\x08R\x08noBackup\x12#\n\rrecovery_mod\
+    e\x18\x1d\x20\x01(\x08R\x0crecoveryMode\x12V\n\x0ccapabilities\x18\x1e\
+    \x20\x03(\x0e22.hw.trezor.messages.management.Features.CapabilityR\x0cca\
+    pabilities\x12J\n\x0bbackup_type\x18\x1f\x20\x01(\x0e2).hw.trezor.messag\
+    es.management.BackupTypeR\nbackupType\x12&\n\x0fsd_card_present\x18\x20\
+    \x20\x01(\x08R\rsdCardPresent\x12#\n\rsd_protection\x18!\x20\x01(\x08R\
+    \x0csdProtection\x120\n\x14wipe_code_protection\x18\"\x20\x01(\x08R\x12w\
+    ipeCodeProtection\x12\x1d\n\nsession_id\x18#\x20\x01(\x0cR\tsessionId\
+    \x12=\n\x1bpassphrase_always_on_device\x18$\x20\x01(\x08R\x18passphraseA\
+    lwaysOnDevice\x12T\n\rsafety_checks\x18%\x20\x01(\x0e2/.hw.trezor.messag\
+    es.management.SafetyCheckLevelR\x0csafetyChecks\x12+\n\x12auto_lock_dela\
+    y_ms\x18&\x20\x01(\rR\x0fautoLockDelayMs\x12)\n\x10display_rotation\x18'\
+    \x20\x01(\rR\x0fdisplayRotation\x123\n\x15experimental_features\x18(\x20\
+    \x01(\x08R\x14experimentalFeatures\"\xa2\x03\n\nCapability\x12\x16\n\x12\
+    Capability_Bitcoin\x10\x01\x12\x1b\n\x17Capability_Bitcoin_like\x10\x02\
+    \x12\x16\n\x12Capability_Binance\x10\x03\x12\x16\n\x12Capability_Cardano\
+    \x10\x04\x12\x15\n\x11Capability_Crypto\x10\x05\x12\x12\n\x0eCapability_\
+    EOS\x10\x06\x12\x17\n\x13Capability_Ethereum\x10\x07\x12\x13\n\x0fCapabi\
+    lity_Lisk\x10\x08\x12\x15\n\x11Capability_Monero\x10\t\x12\x12\n\x0eCapa\
+    bility_NEM\x10\n\x12\x15\n\x11Capability_Ripple\x10\x0b\x12\x16\n\x12Cap\
+    ability_Stellar\x10\x0c\x12\x14\n\x10Capability_Tezos\x10\r\x12\x12\n\
+    \x0eCapability_U2F\x10\x0e\x12\x15\n\x11Capability_Shamir\x10\x0f\x12\
+    \x1b\n\x17Capability_ShamirGroups\x10\x10\x12\x1e\n\x1aCapability_Passph\
+    raseEntry\x10\x11\"\x0c\n\nLockDevice\"\x0c\n\nEndSession\"\xaa\x03\n\rA\
+    pplySettings\x12\x1a\n\x08language\x18\x01\x20\x01(\tR\x08language\x12\
+    \x14\n\x05label\x18\x02\x20\x01(\tR\x05label\x12%\n\x0euse_passphrase\
+    \x18\x03\x20\x01(\x08R\rusePassphrase\x12\x1e\n\nhomescreen\x18\x04\x20\
+    \x01(\x0cR\nhomescreen\x12+\n\x12auto_lock_delay_ms\x18\x06\x20\x01(\rR\
+    \x0fautoLockDelayMs\x12)\n\x10display_rotation\x18\x07\x20\x01(\rR\x0fdi\
+    splayRotation\x12=\n\x1bpassphrase_always_on_device\x18\x08\x20\x01(\x08\
+    R\x18passphraseAlwaysOnDevice\x12T\n\rsafety_checks\x18\t\x20\x01(\x0e2/\
+    .hw.trezor.messages.management.SafetyCheckLevelR\x0csafetyChecks\x123\n\
+    \x15experimental_features\x18\n\x20\x01(\x08R\x14experimentalFeatures\"\
+    \"\n\nApplyFlags\x12\x14\n\x05flags\x18\x01\x20\x01(\rR\x05flags\"#\n\tC\
+    hangePin\x12\x16\n\x06remove\x18\x01\x20\x01(\x08R\x06remove\"(\n\x0eCha\
+    ngeWipeCode\x12\x16\n\x06remove\x18\x01\x20\x01(\x08R\x06remove\"\xaa\
+    \x01\n\tSdProtect\x12]\n\toperation\x18\x01\x20\x01(\x0e2?.hw.trezor.mes\
+    sages.management.SdProtect.SdProtectOperationTypeR\toperation\">\n\x16Sd\
+    ProtectOperationType\x12\x0b\n\x07DISABLE\x10\0\x12\n\n\x06ENABLE\x10\
+    \x01\x12\x0b\n\x07REFRESH\x10\x02\"M\n\x04Ping\x12\x18\n\x07message\x18\
+    \x01\x20\x01(\tR\x07message\x12+\n\x11button_protection\x18\x02\x20\x01(\
+    \x08R\x10buttonProtection\"\x08\n\x06Cancel\"\x20\n\nGetEntropy\x12\x12\
+    \n\x04size\x18\x01\x20\x02(\rR\x04size\"#\n\x07Entropy\x12\x18\n\x07entr\
+    opy\x18\x01\x20\x02(\x0cR\x07entropy\"\x0c\n\nWipeDevice\"\xb0\x02\n\nLo\
+    adDevice\x12\x1c\n\tmnemonics\x18\x01\x20\x03(\tR\tmnemonics\x12\x10\n\
+    \x03pin\x18\x03\x20\x01(\tR\x03pin\x123\n\x15passphrase_protection\x18\
+    \x04\x20\x01(\x08R\x14passphraseProtection\x12!\n\x08language\x18\x05\
+    \x20\x01(\t:\x05en-USR\x08language\x12\x14\n\x05label\x18\x06\x20\x01(\t\
+    R\x05label\x12#\n\rskip_checksum\x18\x07\x20\x01(\x08R\x0cskipChecksum\
+    \x12\x1f\n\x0bu2f_counter\x18\x08\x20\x01(\rR\nu2fCounter\x12!\n\x0cneed\
+    s_backup\x18\t\x20\x01(\x08R\x0bneedsBackup\x12\x1b\n\tno_backup\x18\n\
+    \x20\x01(\x08R\x08noBackup\"\x9c\x03\n\x0bResetDevice\x12%\n\x0edisplay_\
+    random\x18\x01\x20\x01(\x08R\rdisplayRandom\x12\x1f\n\x08strength\x18\
     \x02\x20\x01(\r:\x03256R\x08strength\x123\n\x15passphrase_protection\x18\
     \x03\x20\x01(\x08R\x14passphraseProtection\x12%\n\x0epin_protection\x18\
-    \x04\x20\x01(\x08R\rpinProtection\x12#\n\x08language\x18\x05\x20\x01(\t:\
-    \x07englishR\x08language\x12\x14\n\x05label\x18\x06\x20\x01(\tR\x05label\
+    \x04\x20\x01(\x08R\rpinProtection\x12!\n\x08language\x18\x05\x20\x01(\t:\
+    \x05en-USR\x08language\x12\x14\n\x05label\x18\x06\x20\x01(\tR\x05label\
     \x12\x1f\n\x0bu2f_counter\x18\x07\x20\x01(\rR\nu2fCounter\x12\x1f\n\x0bs\
     kip_backup\x18\x08\x20\x01(\x08R\nskipBackup\x12\x1b\n\tno_backup\x18\t\
-    \x20\x01(\x08R\x08noBackup\"\x0e\n\x0cBackupDevice\"\x10\n\x0eEntropyReq\
-    uest\"&\n\nEntropyAck\x12\x18\n\x07entropy\x18\x01\x20\x01(\x0cR\x07entr\
-    opy\"\xdd\x03\n\x0eRecoveryDevice\x12\x1d\n\nword_count\x18\x01\x20\x01(\
-    \rR\twordCount\x123\n\x15passphrase_protection\x18\x02\x20\x01(\x08R\x14\
-    passphraseProtection\x12%\n\x0epin_protection\x18\x03\x20\x01(\x08R\rpin\
-    Protection\x12#\n\x08language\x18\x04\x20\x01(\t:\x07englishR\x08languag\
-    e\x12\x14\n\x05label\x18\x05\x20\x01(\tR\x05label\x12)\n\x10enforce_word\
-    list\x18\x06\x20\x01(\x08R\x0fenforceWordlist\x12T\n\x04type\x18\x08\x20\
-    \x01(\x0e2@.hw.trezor.messages.management.RecoveryDevice.RecoveryDeviceT\
-    ypeR\x04type\x12\x1f\n\x0bu2f_counter\x18\t\x20\x01(\rR\nu2fCounter\x12\
-    \x17\n\x07dry_run\x18\n\x20\x01(\x08R\x06dryRun\"Z\n\x12RecoveryDeviceTy\
-    pe\x12%\n!RecoveryDeviceType_ScrambledWords\x10\0\x12\x1d\n\x19RecoveryD\
-    eviceType_Matrix\x10\x01\"\xc5\x01\n\x0bWordRequest\x12N\n\x04type\x18\
-    \x01\x20\x01(\x0e2:.hw.trezor.messages.management.WordRequest.WordReques\
-    tTypeR\x04type\"f\n\x0fWordRequestType\x12\x19\n\x15WordRequestType_Plai\
-    n\x10\0\x12\x1b\n\x17WordRequestType_Matrix9\x10\x01\x12\x1b\n\x17WordRe\
-    questType_Matrix6\x10\x02\"\x1d\n\x07WordAck\x12\x12\n\x04word\x18\x01\
-    \x20\x02(\tR\x04word\"0\n\rSetU2FCounter\x12\x1f\n\x0bu2f_counter\x18\
-    \x01\x20\x01(\rR\nu2fCounterB>\n#com.satoshilabs.trezor.lib.protobufB\
-    \x17TrezorMessageManagement\
+    \x20\x01(\x08R\x08noBackup\x12Q\n\x0bbackup_type\x18\n\x20\x01(\x0e2).hw\
+    .trezor.messages.management.BackupType:\x05Bip39R\nbackupType\"\x0e\n\
+    \x0cBackupDevice\"\x10\n\x0eEntropyRequest\"&\n\nEntropyAck\x12\x18\n\
+    \x07entropy\x18\x01\x20\x01(\x0cR\x07entropy\"\xd4\x03\n\x0eRecoveryDevi\
+    ce\x12\x1d\n\nword_count\x18\x01\x20\x01(\rR\twordCount\x123\n\x15passph\
+    rase_protection\x18\x02\x20\x01(\x08R\x14passphraseProtection\x12%\n\x0e\
+    pin_protection\x18\x03\x20\x01(\x08R\rpinProtection\x12\x1a\n\x08languag\
+    e\x18\x04\x20\x01(\tR\x08language\x12\x14\n\x05label\x18\x05\x20\x01(\tR\
+    \x05label\x12)\n\x10enforce_wordlist\x18\x06\x20\x01(\x08R\x0fenforceWor\
+    dlist\x12T\n\x04type\x18\x08\x20\x01(\x0e2@.hw.trezor.messages.managemen\
+    t.RecoveryDevice.RecoveryDeviceTypeR\x04type\x12\x1f\n\x0bu2f_counter\
+    \x18\t\x20\x01(\rR\nu2fCounter\x12\x17\n\x07dry_run\x18\n\x20\x01(\x08R\
+    \x06dryRun\"Z\n\x12RecoveryDeviceType\x12%\n!RecoveryDeviceType_Scramble\
+    dWords\x10\0\x12\x1d\n\x19RecoveryDeviceType_Matrix\x10\x01\"\xc5\x01\n\
+    \x0bWordRequest\x12N\n\x04type\x18\x01\x20\x01(\x0e2:.hw.trezor.messages\
+    .management.WordRequest.WordRequestTypeR\x04type\"f\n\x0fWordRequestType\
+    \x12\x19\n\x15WordRequestType_Plain\x10\0\x12\x1b\n\x17WordRequestType_M\
+    atrix9\x10\x01\x12\x1b\n\x17WordRequestType_Matrix6\x10\x02\"\x1d\n\x07W\
+    ordAck\x12\x12\n\x04word\x18\x01\x20\x02(\tR\x04word\"0\n\rSetU2FCounter\
+    \x12\x1f\n\x0bu2f_counter\x18\x01\x20\x01(\rR\nu2fCounter\"\x13\n\x11Get\
+    NextU2FCounter\"1\n\x0eNextU2FCounter\x12\x1f\n\x0bu2f_counter\x18\x01\
+    \x20\x01(\rR\nu2fCounter\"\x11\n\x0fDoPreauthorized\"\x16\n\x14Preauthor\
+    izedRequest\"\x15\n\x13CancelAuthorization*>\n\nBackupType\x12\t\n\x05Bi\
+    p39\x10\0\x12\x10\n\x0cSlip39_Basic\x10\x01\x12\x13\n\x0fSlip39_Advanced\
+    \x10\x02*G\n\x10SafetyCheckLevel\x12\n\n\x06Strict\x10\0\x12\x10\n\x0cPr\
+    omptAlways\x10\x01\x12\x15\n\x11PromptTemporarily\x10\x02B>\n#com.satosh\
+    ilabs.trezor.lib.protobufB\x17TrezorMessageManagement\
 ";
 
 static file_descriptor_proto_lazy: ::protobuf::rt::LazyV2<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::rt::LazyV2::INIT;

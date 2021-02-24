@@ -5,7 +5,23 @@ package hw.trezor.messages.management;
 option java_package = "com.satoshilabs.trezor.lib.protobuf";
 option java_outer_classname = "TrezorMessageManagement";
 
-import "messages-common.proto";
+/**
+ * Type of the mnemonic backup given/received by the device during reset/recovery.
+ */
+enum BackupType {
+    Bip39 = 0;              // also called "Single Backup", see BIP-0039
+    Slip39_Basic = 1;       // also called "Shamir Backup", see SLIP-0039
+    Slip39_Advanced = 2;    // also called "Super Shamir" or "Shamir with Groups", see SLIP-0039#two-level-scheme
+}
+
+/**
+ * Level of safety checks for unsafe actions like spending from invalid path namespace or setting high transaction fee.
+ */
+enum SafetyCheckLevel {
+    Strict = 0;             // disallow unsafe actions, this is the default
+    PromptAlways = 1;       // ask user before unsafe action
+    PromptTemporarily = 2;  // like PromptAlways but reverts to Strict after reboot
+}
 
 /**
  * Request: Reset device to default state and ask for device details
@@ -13,8 +29,7 @@ import "messages-common.proto";
  * @next Features
  */
 message Initialize {
-    optional bytes state = 1;           // assumed device state, clear session if set and different
-    optional bool skip_passphrase = 2;  // this session should always assume empty passphrase
+    optional bytes session_id = 1;           // assumed device session id; Trezor clears caches if it is different or empty
 }
 
 /**
@@ -44,8 +59,8 @@ message Features {
     optional bytes revision = 13;               // SCM revision of firmware
     optional bytes bootloader_hash = 14;        // hash of the bootloader
     optional bool imported = 15;                // was storage imported from an external source?
-    optional bool pin_cached = 16;              // is PIN already cached in session?
-    optional bool passphrase_cached = 17;       // is passphrase already cached in session?
+    optional bool unlocked = 16;                // is the device unlocked? called "pin_cached" previously
+//    optional bool passphrase_cached = 17;       // is passphrase already cached in session?  DEPRECATED
     optional bool firmware_present = 18;        // is valid firmware loaded?
     optional bool needs_backup = 19;            // does storage need backup? (equals to Storage.needs_backup)
     optional uint32 flags = 20;                 // device flags (equals to Storage.flags)
@@ -57,14 +72,55 @@ message Features {
     optional bytes fw_vendor_keys = 26;         // reported firmware vendor keys (their hash)
     optional bool unfinished_backup = 27;       // report unfinished backup (equals to Storage.unfinished_backup)
     optional bool no_backup = 28;               // report no backup (equals to Storage.no_backup)
+    optional bool recovery_mode = 29;           // is recovery mode in progress
+    repeated Capability capabilities = 30;      // list of supported capabilities
+    enum Capability {
+        Capability_Bitcoin = 1;
+        Capability_Bitcoin_like = 2;            // Altcoins based on the Bitcoin source code
+        Capability_Binance = 3;
+        Capability_Cardano = 4;
+        Capability_Crypto = 5;                  // generic crypto operations for GPG, SSH, etc.
+        Capability_EOS = 6;
+        Capability_Ethereum = 7;
+        Capability_Lisk = 8;
+        Capability_Monero = 9;
+        Capability_NEM = 10;
+        Capability_Ripple = 11;
+        Capability_Stellar = 12;
+        Capability_Tezos = 13;
+        Capability_U2F = 14;
+        Capability_Shamir = 15;
+        Capability_ShamirGroups = 16;
+        Capability_PassphraseEntry = 17;        // the device is capable of passphrase entry directly on the device
+    }
+    optional BackupType backup_type = 31;       // type of device backup (BIP-39 / SLIP-39 basic / SLIP-39 advanced)
+    optional bool sd_card_present = 32;         // is SD card present
+    optional bool sd_protection = 33;           // is SD Protect enabled
+    optional bool wipe_code_protection = 34;    // is wipe code protection enabled
+    optional bytes session_id = 35;
+    optional bool passphrase_always_on_device = 36;  // device enforces passphrase entry on Trezor
+    optional SafetyCheckLevel safety_checks = 37;            // safety check level, set to Prompt to limit path namespace enforcement
+    optional uint32 auto_lock_delay_ms = 38;    // number of milliseconds after which the device locks itself
+    optional uint32 display_rotation = 39;      // in degrees from North
+    optional bool experimental_features = 40;   // are experimental message types enabled?
 }
 
 /**
- * Request: clear session (removes cached PIN, passphrase, etc).
+ * Request: soft-lock the device. Following actions will require PIN. Passphrases remain cached.
  * @start
  * @next Success
  */
-message ClearSession {
+message LockDevice {
+}
+
+/**
+ * Request: end the current sesson. Following actions must call Initialize again.
+ * Cache for the current session is discarded, other sessions remain intact.
+ * Device is not PIN-locked.
+ * @start
+ * @next Success
+ */
+message EndSession {
 }
 
 /**
@@ -78,16 +134,12 @@ message ApplySettings {
     optional string label = 2;
     optional bool use_passphrase = 3;
     optional bytes homescreen = 4;
-    optional PassphraseSourceType passphrase_source = 5;
+//    optional PassphraseSourceType passphrase_source = 5;  DEPRECATED
     optional uint32 auto_lock_delay_ms = 6;
-    /**
-    * Structure representing passphrase source
-    */
-    enum PassphraseSourceType {
-        ASK = 0;
-        DEVICE = 1;
-        HOST = 2;
-    }
+    optional uint32 display_rotation = 7;  // in degrees from North
+    optional bool passphrase_always_on_device = 8;  // do not prompt for passphrase, enforce device entry
+    optional SafetyCheckLevel safety_checks = 9;  // Safety check level, set to Prompt to limit path namespace enforcement
+    optional bool experimental_features = 10;  // enable experimental message types
 }
 
 /**
@@ -111,6 +163,34 @@ message ChangePin {
 }
 
 /**
+ * Request: Starts workflow for setting/removing the wipe code
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message ChangeWipeCode {
+    optional bool remove = 1;   // is wipe code removal requested?
+}
+
+/**
+ * Request: Starts workflow for enabling/regenerating/disabling SD card protection
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message SdProtect {
+    optional SdProtectOperationType operation = 1;
+    /**
+    * Structure representing SD card protection operation
+    */
+    enum SdProtectOperationType {
+        DISABLE = 0;
+        ENABLE = 1;
+        REFRESH = 2;
+    }
+}
+
+/**
  * Request: Test if the device is alive, device sends back the message in Success response
  * @start
  * @next Success
@@ -118,8 +198,6 @@ message ChangePin {
 message Ping {
     optional string message = 1;                // message to send back in Success message
     optional bool button_protection = 2;        // ask for button press
-    optional bool pin_protection = 3;           // ask for PIN if set in device
-    optional bool passphrase_protection = 4;    // ask for passphrase if set in device
 }
 
 /**
@@ -164,14 +242,15 @@ message WipeDevice {
  * @next Failure
  */
 message LoadDevice {
-    optional string mnemonic = 1;                           // seed encoded as BIP-39 mnemonic (12, 18 or 24 words)
-    optional hw.trezor.messages.common.HDNodeType node = 2; // BIP-32 node
+    repeated string mnemonics = 1;                          // seed encoded as mnemonic (12, 18 or 24 words for BIP39, 20 or 33 for SLIP39)
     optional string pin = 3;                                // set PIN protection
     optional bool passphrase_protection = 4;                // enable master node encryption using passphrase
-    optional string language = 5 [default='english'];       // device language
+    optional string language = 5 [default='en-US'];         // device language (IETF BCP 47 language tag)
     optional string label = 6;                              // device label
     optional bool skip_checksum = 7;                        // do not test mnemonic for valid BIP-39 checksum
     optional uint32 u2f_counter = 8;                        // U2F counter
+    optional bool needs_backup = 9;                         // set "needs backup" flag
+    optional bool no_backup = 10;                           // indicate that no backup is going to be made
 }
 
 /**
@@ -181,15 +260,16 @@ message LoadDevice {
  * @next Failure
  */
 message ResetDevice {
-    optional bool display_random = 1;                   // display entropy generated by the device before asking for additional entropy
-    optional uint32 strength = 2 [default=256];         // strength of seed in bits
-    optional bool passphrase_protection = 3;            // enable master node encryption using passphrase
-    optional bool pin_protection = 4;                   // enable PIN protection
-    optional string language = 5 [default='english'];   // device language
-    optional string label = 6;                          // device label
-    optional uint32 u2f_counter = 7;                    // U2F counter
-    optional bool skip_backup = 8;                      // postpone seed backup to BackupDevice workflow
-    optional bool no_backup = 9;                        // indicate that no backup is going to be made
+    optional bool display_random = 1;                       // display entropy generated by the device before asking for additional entropy
+    optional uint32 strength = 2 [default=256];             // strength of seed in bits
+    optional bool passphrase_protection = 3;                // enable master node encryption using passphrase
+    optional bool pin_protection = 4;                       // enable PIN protection
+    optional string language = 5 [default='en-US'];         // device language (IETF BCP 47 language tag)
+    optional string label = 6;                              // device label
+    optional uint32 u2f_counter = 7;                        // U2F counter
+    optional bool skip_backup = 8;                          // postpone seed backup to BackupDevice workflow
+    optional bool no_backup = 9;                            // indicate that no backup is going to be made
+    optional BackupType backup_type = 10 [default=Bip39];   // type of the mnemonic backup
 }
 
 /**
@@ -225,7 +305,7 @@ message RecoveryDevice {
     optional uint32 word_count = 1;                     // number of words in BIP-39 mnemonic
     optional bool passphrase_protection = 2;            // enable master node encryption using passphrase
     optional bool pin_protection = 3;                   // enable PIN protection
-    optional string language = 4 [default='english'];   // device language
+    optional string language = 4;                       // device language (IETF BCP 47 language tag)
     optional string label = 5;                          // device label
     optional bool enforce_wordlist = 6;                 // enforce BIP-39 wordlist during the process
     // 7 reserved for unused recovery method
@@ -280,5 +360,48 @@ message WordAck {
  * @next Success
  */
 message SetU2FCounter {
-    optional uint32 u2f_counter = 1;    // counter
+    optional uint32 u2f_counter = 1;
+}
+
+/**
+ * Request: Set U2F counter
+ * @start
+ * @next NextU2FCounter
+ */
+message GetNextU2FCounter {
+}
+
+/**
+ * Request: Set U2F counter
+ * @end
+ */
+message NextU2FCounter {
+    optional uint32 u2f_counter = 1;
+}
+
+/**
+ * Request: Ask device to prepare for a preauthorized operation.
+ * @start
+ * @next PreauthorizedRequest
+ * @next Failure
+ */
+message DoPreauthorized {
+}
+
+/**
+ * Request: Device awaits a preauthorized operation.
+ * @start
+ * @next SignTx
+ * @next GetOwnershipProof
+ */
+message PreauthorizedRequest {
+}
+
+/**
+ * Request: Cancel any outstanding authorization in the current session.
+ * @start
+ * @next Success
+ * @next Failure
+ */
+message CancelAuthorization {
 }

@@ -764,6 +764,8 @@ pub struct TezosSignTx {
     pub transaction: ::protobuf::SingularPtrField<TezosSignTx_TezosTransactionOp>,
     pub origination: ::protobuf::SingularPtrField<TezosSignTx_TezosOriginationOp>,
     pub delegation: ::protobuf::SingularPtrField<TezosSignTx_TezosDelegationOp>,
+    pub proposal: ::protobuf::SingularPtrField<TezosSignTx_TezosProposalOp>,
+    pub ballot: ::protobuf::SingularPtrField<TezosSignTx_TezosBallotOp>,
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
@@ -972,6 +974,72 @@ impl TezosSignTx {
     pub fn take_delegation(&mut self) -> TezosSignTx_TezosDelegationOp {
         self.delegation.take().unwrap_or_else(|| TezosSignTx_TezosDelegationOp::new())
     }
+
+    // optional .hw.trezor.messages.tezos.TezosSignTx.TezosProposalOp proposal = 7;
+
+
+    pub fn get_proposal(&self) -> &TezosSignTx_TezosProposalOp {
+        self.proposal.as_ref().unwrap_or_else(|| <TezosSignTx_TezosProposalOp as ::protobuf::Message>::default_instance())
+    }
+    pub fn clear_proposal(&mut self) {
+        self.proposal.clear();
+    }
+
+    pub fn has_proposal(&self) -> bool {
+        self.proposal.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_proposal(&mut self, v: TezosSignTx_TezosProposalOp) {
+        self.proposal = ::protobuf::SingularPtrField::some(v);
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_proposal(&mut self) -> &mut TezosSignTx_TezosProposalOp {
+        if self.proposal.is_none() {
+            self.proposal.set_default();
+        }
+        self.proposal.as_mut().unwrap()
+    }
+
+    // Take field
+    pub fn take_proposal(&mut self) -> TezosSignTx_TezosProposalOp {
+        self.proposal.take().unwrap_or_else(|| TezosSignTx_TezosProposalOp::new())
+    }
+
+    // optional .hw.trezor.messages.tezos.TezosSignTx.TezosBallotOp ballot = 8;
+
+
+    pub fn get_ballot(&self) -> &TezosSignTx_TezosBallotOp {
+        self.ballot.as_ref().unwrap_or_else(|| <TezosSignTx_TezosBallotOp as ::protobuf::Message>::default_instance())
+    }
+    pub fn clear_ballot(&mut self) {
+        self.ballot.clear();
+    }
+
+    pub fn has_ballot(&self) -> bool {
+        self.ballot.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_ballot(&mut self, v: TezosSignTx_TezosBallotOp) {
+        self.ballot = ::protobuf::SingularPtrField::some(v);
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_ballot(&mut self) -> &mut TezosSignTx_TezosBallotOp {
+        if self.ballot.is_none() {
+            self.ballot.set_default();
+        }
+        self.ballot.as_mut().unwrap()
+    }
+
+    // Take field
+    pub fn take_ballot(&mut self) -> TezosSignTx_TezosBallotOp {
+        self.ballot.take().unwrap_or_else(|| TezosSignTx_TezosBallotOp::new())
+    }
 }
 
 impl ::protobuf::Message for TezosSignTx {
@@ -992,6 +1060,16 @@ impl ::protobuf::Message for TezosSignTx {
             }
         };
         for v in &self.delegation {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        for v in &self.proposal {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        for v in &self.ballot {
             if !v.is_initialized() {
                 return false;
             }
@@ -1020,6 +1098,12 @@ impl ::protobuf::Message for TezosSignTx {
                 },
                 6 => {
                     ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.delegation)?;
+                },
+                7 => {
+                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.proposal)?;
+                },
+                8 => {
+                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.ballot)?;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -1055,6 +1139,14 @@ impl ::protobuf::Message for TezosSignTx {
             let len = v.compute_size();
             my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
         }
+        if let Some(ref v) = self.proposal.as_ref() {
+            let len = v.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        }
+        if let Some(ref v) = self.ballot.as_ref() {
+            let len = v.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
@@ -1084,6 +1176,16 @@ impl ::protobuf::Message for TezosSignTx {
         }
         if let Some(ref v) = self.delegation.as_ref() {
             os.write_tag(6, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        }
+        if let Some(ref v) = self.proposal.as_ref() {
+            os.write_tag(7, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        }
+        if let Some(ref v) = self.ballot.as_ref() {
+            os.write_tag(8, ::protobuf::wire_format::WireTypeLengthDelimited)?;
             os.write_raw_varint32(v.get_cached_size())?;
             v.write_to_with_cached_sizes(os)?;
         }
@@ -1155,6 +1257,16 @@ impl ::protobuf::Message for TezosSignTx {
                 |m: &TezosSignTx| { &m.delegation },
                 |m: &mut TezosSignTx| { &mut m.delegation },
             ));
+            fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<TezosSignTx_TezosProposalOp>>(
+                "proposal",
+                |m: &TezosSignTx| { &m.proposal },
+                |m: &mut TezosSignTx| { &mut m.proposal },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<TezosSignTx_TezosBallotOp>>(
+                "ballot",
+                |m: &TezosSignTx| { &m.ballot },
+                |m: &mut TezosSignTx| { &mut m.ballot },
+            ));
             ::protobuf::reflect::MessageDescriptor::new_pb_name::<TezosSignTx>(
                 "TezosSignTx",
                 fields,
@@ -1177,6 +1289,8 @@ impl ::protobuf::Clear for TezosSignTx {
         self.transaction.clear();
         self.origination.clear();
         self.delegation.clear();
+        self.proposal.clear();
+        self.ballot.clear();
         self.unknown_fields.clear();
     }
 }
@@ -1450,7 +1564,7 @@ impl ::protobuf::reflect::ProtobufValue for TezosSignTx_TezosContractID_TezosCon
 #[derive(PartialEq,Clone,Default)]
 pub struct TezosSignTx_TezosRevealOp {
     // message fields
-    pub source: ::protobuf::SingularPtrField<TezosSignTx_TezosContractID>,
+    source: ::protobuf::SingularField<::std::vec::Vec<u8>>,
     fee: ::std::option::Option<u64>,
     counter: ::std::option::Option<u64>,
     gas_limit: ::std::option::Option<u64>,
@@ -1472,11 +1586,14 @@ impl TezosSignTx_TezosRevealOp {
         ::std::default::Default::default()
     }
 
-    // optional .hw.trezor.messages.tezos.TezosSignTx.TezosContractID source = 1;
+    // optional bytes source = 7;
 
 
-    pub fn get_source(&self) -> &TezosSignTx_TezosContractID {
-        self.source.as_ref().unwrap_or_else(|| <TezosSignTx_TezosContractID as ::protobuf::Message>::default_instance())
+    pub fn get_source(&self) -> &[u8] {
+        match self.source.as_ref() {
+            Some(v) => &v,
+            None => &[],
+        }
     }
     pub fn clear_source(&mut self) {
         self.source.clear();
@@ -1487,13 +1604,13 @@ impl TezosSignTx_TezosRevealOp {
     }
 
     // Param is passed by value, moved
-    pub fn set_source(&mut self, v: TezosSignTx_TezosContractID) {
-        self.source = ::protobuf::SingularPtrField::some(v);
+    pub fn set_source(&mut self, v: ::std::vec::Vec<u8>) {
+        self.source = ::protobuf::SingularField::some(v);
     }
 
     // Mutable pointer to the field.
     // If field is not initialized, it is initialized with default value first.
-    pub fn mut_source(&mut self) -> &mut TezosSignTx_TezosContractID {
+    pub fn mut_source(&mut self) -> &mut ::std::vec::Vec<u8> {
         if self.source.is_none() {
             self.source.set_default();
         }
@@ -1501,8 +1618,8 @@ impl TezosSignTx_TezosRevealOp {
     }
 
     // Take field
-    pub fn take_source(&mut self) -> TezosSignTx_TezosContractID {
-        self.source.take().unwrap_or_else(|| TezosSignTx_TezosContractID::new())
+    pub fn take_source(&mut self) -> ::std::vec::Vec<u8> {
+        self.source.take().unwrap_or_else(|| ::std::vec::Vec::new())
     }
 
     // optional uint64 fee = 2;
@@ -1620,11 +1737,6 @@ impl TezosSignTx_TezosRevealOp {
 
 impl ::protobuf::Message for TezosSignTx_TezosRevealOp {
     fn is_initialized(&self) -> bool {
-        for v in &self.source {
-            if !v.is_initialized() {
-                return false;
-            }
-        };
         true
     }
 
@@ -1632,8 +1744,8 @@ impl ::protobuf::Message for TezosSignTx_TezosRevealOp {
         while !is.eof()? {
             let (field_number, wire_type) = is.read_tag_unpack()?;
             match field_number {
-                1 => {
-                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.source)?;
+                7 => {
+                    ::protobuf::rt::read_singular_bytes_into(wire_type, is, &mut self.source)?;
                 },
                 2 => {
                     if wire_type != ::protobuf::wire_format::WireTypeVarint {
@@ -1679,8 +1791,7 @@ impl ::protobuf::Message for TezosSignTx_TezosRevealOp {
     fn compute_size(&self) -> u32 {
         let mut my_size = 0;
         if let Some(ref v) = self.source.as_ref() {
-            let len = v.compute_size();
-            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+            my_size += ::protobuf::rt::bytes_size(7, &v);
         }
         if let Some(v) = self.fee {
             my_size += ::protobuf::rt::value_size(2, v, ::protobuf::wire_format::WireTypeVarint);
@@ -1704,9 +1815,7 @@ impl ::protobuf::Message for TezosSignTx_TezosRevealOp {
 
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
         if let Some(ref v) = self.source.as_ref() {
-            os.write_tag(1, ::protobuf::wire_format::WireTypeLengthDelimited)?;
-            os.write_raw_varint32(v.get_cached_size())?;
-            v.write_to_with_cached_sizes(os)?;
+            os.write_bytes(7, &v)?;
         }
         if let Some(v) = self.fee {
             os.write_uint64(2, v)?;
@@ -1761,7 +1870,7 @@ impl ::protobuf::Message for TezosSignTx_TezosRevealOp {
         static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
         descriptor.get(|| {
             let mut fields = ::std::vec::Vec::new();
-            fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<TezosSignTx_TezosContractID>>(
+            fields.push(::protobuf::reflect::accessor::make_singular_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
                 "source",
                 |m: &TezosSignTx_TezosRevealOp| { &m.source },
                 |m: &mut TezosSignTx_TezosRevealOp| { &mut m.source },
@@ -1832,7 +1941,7 @@ impl ::protobuf::reflect::ProtobufValue for TezosSignTx_TezosRevealOp {
 #[derive(PartialEq,Clone,Default)]
 pub struct TezosSignTx_TezosTransactionOp {
     // message fields
-    pub source: ::protobuf::SingularPtrField<TezosSignTx_TezosContractID>,
+    source: ::protobuf::SingularField<::std::vec::Vec<u8>>,
     fee: ::std::option::Option<u64>,
     counter: ::std::option::Option<u64>,
     gas_limit: ::std::option::Option<u64>,
@@ -1840,6 +1949,7 @@ pub struct TezosSignTx_TezosTransactionOp {
     amount: ::std::option::Option<u64>,
     pub destination: ::protobuf::SingularPtrField<TezosSignTx_TezosContractID>,
     parameters: ::protobuf::SingularField<::std::vec::Vec<u8>>,
+    pub parameters_manager: ::protobuf::SingularPtrField<TezosSignTx_TezosTransactionOp_TezosParametersManager>,
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
@@ -1856,11 +1966,14 @@ impl TezosSignTx_TezosTransactionOp {
         ::std::default::Default::default()
     }
 
-    // optional .hw.trezor.messages.tezos.TezosSignTx.TezosContractID source = 1;
+    // optional bytes source = 9;
 
 
-    pub fn get_source(&self) -> &TezosSignTx_TezosContractID {
-        self.source.as_ref().unwrap_or_else(|| <TezosSignTx_TezosContractID as ::protobuf::Message>::default_instance())
+    pub fn get_source(&self) -> &[u8] {
+        match self.source.as_ref() {
+            Some(v) => &v,
+            None => &[],
+        }
     }
     pub fn clear_source(&mut self) {
         self.source.clear();
@@ -1871,13 +1984,13 @@ impl TezosSignTx_TezosTransactionOp {
     }
 
     // Param is passed by value, moved
-    pub fn set_source(&mut self, v: TezosSignTx_TezosContractID) {
-        self.source = ::protobuf::SingularPtrField::some(v);
+    pub fn set_source(&mut self, v: ::std::vec::Vec<u8>) {
+        self.source = ::protobuf::SingularField::some(v);
     }
 
     // Mutable pointer to the field.
     // If field is not initialized, it is initialized with default value first.
-    pub fn mut_source(&mut self) -> &mut TezosSignTx_TezosContractID {
+    pub fn mut_source(&mut self) -> &mut ::std::vec::Vec<u8> {
         if self.source.is_none() {
             self.source.set_default();
         }
@@ -1885,8 +1998,8 @@ impl TezosSignTx_TezosTransactionOp {
     }
 
     // Take field
-    pub fn take_source(&mut self) -> TezosSignTx_TezosContractID {
-        self.source.take().unwrap_or_else(|| TezosSignTx_TezosContractID::new())
+    pub fn take_source(&mut self) -> ::std::vec::Vec<u8> {
+        self.source.take().unwrap_or_else(|| ::std::vec::Vec::new())
     }
 
     // optional uint64 fee = 2;
@@ -2052,16 +2165,49 @@ impl TezosSignTx_TezosTransactionOp {
     pub fn take_parameters(&mut self) -> ::std::vec::Vec<u8> {
         self.parameters.take().unwrap_or_else(|| ::std::vec::Vec::new())
     }
+
+    // optional .hw.trezor.messages.tezos.TezosSignTx.TezosTransactionOp.TezosParametersManager parameters_manager = 10;
+
+
+    pub fn get_parameters_manager(&self) -> &TezosSignTx_TezosTransactionOp_TezosParametersManager {
+        self.parameters_manager.as_ref().unwrap_or_else(|| <TezosSignTx_TezosTransactionOp_TezosParametersManager as ::protobuf::Message>::default_instance())
+    }
+    pub fn clear_parameters_manager(&mut self) {
+        self.parameters_manager.clear();
+    }
+
+    pub fn has_parameters_manager(&self) -> bool {
+        self.parameters_manager.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_parameters_manager(&mut self, v: TezosSignTx_TezosTransactionOp_TezosParametersManager) {
+        self.parameters_manager = ::protobuf::SingularPtrField::some(v);
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_parameters_manager(&mut self) -> &mut TezosSignTx_TezosTransactionOp_TezosParametersManager {
+        if self.parameters_manager.is_none() {
+            self.parameters_manager.set_default();
+        }
+        self.parameters_manager.as_mut().unwrap()
+    }
+
+    // Take field
+    pub fn take_parameters_manager(&mut self) -> TezosSignTx_TezosTransactionOp_TezosParametersManager {
+        self.parameters_manager.take().unwrap_or_else(|| TezosSignTx_TezosTransactionOp_TezosParametersManager::new())
+    }
 }
 
 impl ::protobuf::Message for TezosSignTx_TezosTransactionOp {
     fn is_initialized(&self) -> bool {
-        for v in &self.source {
+        for v in &self.destination {
             if !v.is_initialized() {
                 return false;
             }
         };
-        for v in &self.destination {
+        for v in &self.parameters_manager {
             if !v.is_initialized() {
                 return false;
             }
@@ -2073,8 +2219,8 @@ impl ::protobuf::Message for TezosSignTx_TezosTransactionOp {
         while !is.eof()? {
             let (field_number, wire_type) = is.read_tag_unpack()?;
             match field_number {
-                1 => {
-                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.source)?;
+                9 => {
+                    ::protobuf::rt::read_singular_bytes_into(wire_type, is, &mut self.source)?;
                 },
                 2 => {
                     if wire_type != ::protobuf::wire_format::WireTypeVarint {
@@ -2117,6 +2263,9 @@ impl ::protobuf::Message for TezosSignTx_TezosTransactionOp {
                 8 => {
                     ::protobuf::rt::read_singular_bytes_into(wire_type, is, &mut self.parameters)?;
                 },
+                10 => {
+                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.parameters_manager)?;
+                },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
                 },
@@ -2130,8 +2279,7 @@ impl ::protobuf::Message for TezosSignTx_TezosTransactionOp {
     fn compute_size(&self) -> u32 {
         let mut my_size = 0;
         if let Some(ref v) = self.source.as_ref() {
-            let len = v.compute_size();
-            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+            my_size += ::protobuf::rt::bytes_size(9, &v);
         }
         if let Some(v) = self.fee {
             my_size += ::protobuf::rt::value_size(2, v, ::protobuf::wire_format::WireTypeVarint);
@@ -2155,6 +2303,10 @@ impl ::protobuf::Message for TezosSignTx_TezosTransactionOp {
         if let Some(ref v) = self.parameters.as_ref() {
             my_size += ::protobuf::rt::bytes_size(8, &v);
         }
+        if let Some(ref v) = self.parameters_manager.as_ref() {
+            let len = v.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
         my_size
@@ -2162,9 +2314,7 @@ impl ::protobuf::Message for TezosSignTx_TezosTransactionOp {
 
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
         if let Some(ref v) = self.source.as_ref() {
-            os.write_tag(1, ::protobuf::wire_format::WireTypeLengthDelimited)?;
-            os.write_raw_varint32(v.get_cached_size())?;
-            v.write_to_with_cached_sizes(os)?;
+            os.write_bytes(9, &v)?;
         }
         if let Some(v) = self.fee {
             os.write_uint64(2, v)?;
@@ -2188,6 +2338,11 @@ impl ::protobuf::Message for TezosSignTx_TezosTransactionOp {
         }
         if let Some(ref v) = self.parameters.as_ref() {
             os.write_bytes(8, &v)?;
+        }
+        if let Some(ref v) = self.parameters_manager.as_ref() {
+            os.write_tag(10, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -2227,7 +2382,7 @@ impl ::protobuf::Message for TezosSignTx_TezosTransactionOp {
         static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
         descriptor.get(|| {
             let mut fields = ::std::vec::Vec::new();
-            fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<TezosSignTx_TezosContractID>>(
+            fields.push(::protobuf::reflect::accessor::make_singular_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
                 "source",
                 |m: &TezosSignTx_TezosTransactionOp| { &m.source },
                 |m: &mut TezosSignTx_TezosTransactionOp| { &mut m.source },
@@ -2267,6 +2422,11 @@ impl ::protobuf::Message for TezosSignTx_TezosTransactionOp {
                 |m: &TezosSignTx_TezosTransactionOp| { &m.parameters },
                 |m: &mut TezosSignTx_TezosTransactionOp| { &mut m.parameters },
             ));
+            fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<TezosSignTx_TezosTransactionOp_TezosParametersManager>>(
+                "parameters_manager",
+                |m: &TezosSignTx_TezosTransactionOp| { &m.parameters_manager },
+                |m: &mut TezosSignTx_TezosTransactionOp| { &mut m.parameters_manager },
+            ));
             ::protobuf::reflect::MessageDescriptor::new_pb_name::<TezosSignTx_TezosTransactionOp>(
                 "TezosSignTx.TezosTransactionOp",
                 fields,
@@ -2291,6 +2451,7 @@ impl ::protobuf::Clear for TezosSignTx_TezosTransactionOp {
         self.amount = ::std::option::Option::None;
         self.destination.clear();
         self.parameters.clear();
+        self.parameters_manager.clear();
         self.unknown_fields.clear();
     }
 }
@@ -2308,9 +2469,487 @@ impl ::protobuf::reflect::ProtobufValue for TezosSignTx_TezosTransactionOp {
 }
 
 #[derive(PartialEq,Clone,Default)]
+pub struct TezosSignTx_TezosTransactionOp_TezosParametersManager {
+    // message fields
+    set_delegate: ::protobuf::SingularField<::std::vec::Vec<u8>>,
+    cancel_delegate: ::std::option::Option<bool>,
+    pub transfer: ::protobuf::SingularPtrField<TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer>,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a TezosSignTx_TezosTransactionOp_TezosParametersManager {
+    fn default() -> &'a TezosSignTx_TezosTransactionOp_TezosParametersManager {
+        <TezosSignTx_TezosTransactionOp_TezosParametersManager as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl TezosSignTx_TezosTransactionOp_TezosParametersManager {
+    pub fn new() -> TezosSignTx_TezosTransactionOp_TezosParametersManager {
+        ::std::default::Default::default()
+    }
+
+    // optional bytes set_delegate = 1;
+
+
+    pub fn get_set_delegate(&self) -> &[u8] {
+        match self.set_delegate.as_ref() {
+            Some(v) => &v,
+            None => &[],
+        }
+    }
+    pub fn clear_set_delegate(&mut self) {
+        self.set_delegate.clear();
+    }
+
+    pub fn has_set_delegate(&self) -> bool {
+        self.set_delegate.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_set_delegate(&mut self, v: ::std::vec::Vec<u8>) {
+        self.set_delegate = ::protobuf::SingularField::some(v);
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_set_delegate(&mut self) -> &mut ::std::vec::Vec<u8> {
+        if self.set_delegate.is_none() {
+            self.set_delegate.set_default();
+        }
+        self.set_delegate.as_mut().unwrap()
+    }
+
+    // Take field
+    pub fn take_set_delegate(&mut self) -> ::std::vec::Vec<u8> {
+        self.set_delegate.take().unwrap_or_else(|| ::std::vec::Vec::new())
+    }
+
+    // optional bool cancel_delegate = 2;
+
+
+    pub fn get_cancel_delegate(&self) -> bool {
+        self.cancel_delegate.unwrap_or(false)
+    }
+    pub fn clear_cancel_delegate(&mut self) {
+        self.cancel_delegate = ::std::option::Option::None;
+    }
+
+    pub fn has_cancel_delegate(&self) -> bool {
+        self.cancel_delegate.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_cancel_delegate(&mut self, v: bool) {
+        self.cancel_delegate = ::std::option::Option::Some(v);
+    }
+
+    // optional .hw.trezor.messages.tezos.TezosSignTx.TezosTransactionOp.TezosParametersManager.TezosManagerTransfer transfer = 3;
+
+
+    pub fn get_transfer(&self) -> &TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer {
+        self.transfer.as_ref().unwrap_or_else(|| <TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer as ::protobuf::Message>::default_instance())
+    }
+    pub fn clear_transfer(&mut self) {
+        self.transfer.clear();
+    }
+
+    pub fn has_transfer(&self) -> bool {
+        self.transfer.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_transfer(&mut self, v: TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer) {
+        self.transfer = ::protobuf::SingularPtrField::some(v);
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_transfer(&mut self) -> &mut TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer {
+        if self.transfer.is_none() {
+            self.transfer.set_default();
+        }
+        self.transfer.as_mut().unwrap()
+    }
+
+    // Take field
+    pub fn take_transfer(&mut self) -> TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer {
+        self.transfer.take().unwrap_or_else(|| TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer::new())
+    }
+}
+
+impl ::protobuf::Message for TezosSignTx_TezosTransactionOp_TezosParametersManager {
+    fn is_initialized(&self) -> bool {
+        for v in &self.transfer {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_bytes_into(wire_type, is, &mut self.set_delegate)?;
+                },
+                2 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_bool()?;
+                    self.cancel_delegate = ::std::option::Option::Some(tmp);
+                },
+                3 => {
+                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.transfer)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if let Some(ref v) = self.set_delegate.as_ref() {
+            my_size += ::protobuf::rt::bytes_size(1, &v);
+        }
+        if let Some(v) = self.cancel_delegate {
+            my_size += 2;
+        }
+        if let Some(ref v) = self.transfer.as_ref() {
+            let len = v.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if let Some(ref v) = self.set_delegate.as_ref() {
+            os.write_bytes(1, &v)?;
+        }
+        if let Some(v) = self.cancel_delegate {
+            os.write_bool(2, v)?;
+        }
+        if let Some(ref v) = self.transfer.as_ref() {
+            os.write_tag(3, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: ::std::boxed::Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> TezosSignTx_TezosTransactionOp_TezosParametersManager {
+        TezosSignTx_TezosTransactionOp_TezosParametersManager::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
+        descriptor.get(|| {
+            let mut fields = ::std::vec::Vec::new();
+            fields.push(::protobuf::reflect::accessor::make_singular_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                "set_delegate",
+                |m: &TezosSignTx_TezosTransactionOp_TezosParametersManager| { &m.set_delegate },
+                |m: &mut TezosSignTx_TezosTransactionOp_TezosParametersManager| { &mut m.set_delegate },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeBool>(
+                "cancel_delegate",
+                |m: &TezosSignTx_TezosTransactionOp_TezosParametersManager| { &m.cancel_delegate },
+                |m: &mut TezosSignTx_TezosTransactionOp_TezosParametersManager| { &mut m.cancel_delegate },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer>>(
+                "transfer",
+                |m: &TezosSignTx_TezosTransactionOp_TezosParametersManager| { &m.transfer },
+                |m: &mut TezosSignTx_TezosTransactionOp_TezosParametersManager| { &mut m.transfer },
+            ));
+            ::protobuf::reflect::MessageDescriptor::new_pb_name::<TezosSignTx_TezosTransactionOp_TezosParametersManager>(
+                "TezosSignTx.TezosTransactionOp.TezosParametersManager",
+                fields,
+                file_descriptor_proto()
+            )
+        })
+    }
+
+    fn default_instance() -> &'static TezosSignTx_TezosTransactionOp_TezosParametersManager {
+        static instance: ::protobuf::rt::LazyV2<TezosSignTx_TezosTransactionOp_TezosParametersManager> = ::protobuf::rt::LazyV2::INIT;
+        instance.get(TezosSignTx_TezosTransactionOp_TezosParametersManager::new)
+    }
+}
+
+impl ::protobuf::Clear for TezosSignTx_TezosTransactionOp_TezosParametersManager {
+    fn clear(&mut self) {
+        self.set_delegate.clear();
+        self.cancel_delegate = ::std::option::Option::None;
+        self.transfer.clear();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for TezosSignTx_TezosTransactionOp_TezosParametersManager {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for TezosSignTx_TezosTransactionOp_TezosParametersManager {
+    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
+        ::protobuf::reflect::ReflectValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer {
+    // message fields
+    pub destination: ::protobuf::SingularPtrField<TezosSignTx_TezosContractID>,
+    amount: ::std::option::Option<u64>,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer {
+    fn default() -> &'a TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer {
+        <TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer {
+    pub fn new() -> TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer {
+        ::std::default::Default::default()
+    }
+
+    // optional .hw.trezor.messages.tezos.TezosSignTx.TezosContractID destination = 1;
+
+
+    pub fn get_destination(&self) -> &TezosSignTx_TezosContractID {
+        self.destination.as_ref().unwrap_or_else(|| <TezosSignTx_TezosContractID as ::protobuf::Message>::default_instance())
+    }
+    pub fn clear_destination(&mut self) {
+        self.destination.clear();
+    }
+
+    pub fn has_destination(&self) -> bool {
+        self.destination.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_destination(&mut self, v: TezosSignTx_TezosContractID) {
+        self.destination = ::protobuf::SingularPtrField::some(v);
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_destination(&mut self) -> &mut TezosSignTx_TezosContractID {
+        if self.destination.is_none() {
+            self.destination.set_default();
+        }
+        self.destination.as_mut().unwrap()
+    }
+
+    // Take field
+    pub fn take_destination(&mut self) -> TezosSignTx_TezosContractID {
+        self.destination.take().unwrap_or_else(|| TezosSignTx_TezosContractID::new())
+    }
+
+    // optional uint64 amount = 2;
+
+
+    pub fn get_amount(&self) -> u64 {
+        self.amount.unwrap_or(0)
+    }
+    pub fn clear_amount(&mut self) {
+        self.amount = ::std::option::Option::None;
+    }
+
+    pub fn has_amount(&self) -> bool {
+        self.amount.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_amount(&mut self, v: u64) {
+        self.amount = ::std::option::Option::Some(v);
+    }
+}
+
+impl ::protobuf::Message for TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer {
+    fn is_initialized(&self) -> bool {
+        for v in &self.destination {
+            if !v.is_initialized() {
+                return false;
+            }
+        };
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.destination)?;
+                },
+                2 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.amount = ::std::option::Option::Some(tmp);
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if let Some(ref v) = self.destination.as_ref() {
+            let len = v.compute_size();
+            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+        }
+        if let Some(v) = self.amount {
+            my_size += ::protobuf::rt::value_size(2, v, ::protobuf::wire_format::WireTypeVarint);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if let Some(ref v) = self.destination.as_ref() {
+            os.write_tag(1, ::protobuf::wire_format::WireTypeLengthDelimited)?;
+            os.write_raw_varint32(v.get_cached_size())?;
+            v.write_to_with_cached_sizes(os)?;
+        }
+        if let Some(v) = self.amount {
+            os.write_uint64(2, v)?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: ::std::boxed::Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer {
+        TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
+        descriptor.get(|| {
+            let mut fields = ::std::vec::Vec::new();
+            fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<TezosSignTx_TezosContractID>>(
+                "destination",
+                |m: &TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer| { &m.destination },
+                |m: &mut TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer| { &mut m.destination },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                "amount",
+                |m: &TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer| { &m.amount },
+                |m: &mut TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer| { &mut m.amount },
+            ));
+            ::protobuf::reflect::MessageDescriptor::new_pb_name::<TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer>(
+                "TezosSignTx.TezosTransactionOp.TezosParametersManager.TezosManagerTransfer",
+                fields,
+                file_descriptor_proto()
+            )
+        })
+    }
+
+    fn default_instance() -> &'static TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer {
+        static instance: ::protobuf::rt::LazyV2<TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer> = ::protobuf::rt::LazyV2::INIT;
+        instance.get(TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer::new)
+    }
+}
+
+impl ::protobuf::Clear for TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer {
+    fn clear(&mut self) {
+        self.destination.clear();
+        self.amount = ::std::option::Option::None;
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer {
+    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
+        ::protobuf::reflect::ReflectValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
 pub struct TezosSignTx_TezosOriginationOp {
     // message fields
-    pub source: ::protobuf::SingularPtrField<TezosSignTx_TezosContractID>,
+    source: ::protobuf::SingularField<::std::vec::Vec<u8>>,
     fee: ::std::option::Option<u64>,
     counter: ::std::option::Option<u64>,
     gas_limit: ::std::option::Option<u64>,
@@ -2337,11 +2976,14 @@ impl TezosSignTx_TezosOriginationOp {
         ::std::default::Default::default()
     }
 
-    // optional .hw.trezor.messages.tezos.TezosSignTx.TezosContractID source = 1;
+    // optional bytes source = 12;
 
 
-    pub fn get_source(&self) -> &TezosSignTx_TezosContractID {
-        self.source.as_ref().unwrap_or_else(|| <TezosSignTx_TezosContractID as ::protobuf::Message>::default_instance())
+    pub fn get_source(&self) -> &[u8] {
+        match self.source.as_ref() {
+            Some(v) => &v,
+            None => &[],
+        }
     }
     pub fn clear_source(&mut self) {
         self.source.clear();
@@ -2352,13 +2994,13 @@ impl TezosSignTx_TezosOriginationOp {
     }
 
     // Param is passed by value, moved
-    pub fn set_source(&mut self, v: TezosSignTx_TezosContractID) {
-        self.source = ::protobuf::SingularPtrField::some(v);
+    pub fn set_source(&mut self, v: ::std::vec::Vec<u8>) {
+        self.source = ::protobuf::SingularField::some(v);
     }
 
     // Mutable pointer to the field.
     // If field is not initialized, it is initialized with default value first.
-    pub fn mut_source(&mut self) -> &mut TezosSignTx_TezosContractID {
+    pub fn mut_source(&mut self) -> &mut ::std::vec::Vec<u8> {
         if self.source.is_none() {
             self.source.set_default();
         }
@@ -2366,8 +3008,8 @@ impl TezosSignTx_TezosOriginationOp {
     }
 
     // Take field
-    pub fn take_source(&mut self) -> TezosSignTx_TezosContractID {
-        self.source.take().unwrap_or_else(|| TezosSignTx_TezosContractID::new())
+    pub fn take_source(&mut self) -> ::std::vec::Vec<u8> {
+        self.source.take().unwrap_or_else(|| ::std::vec::Vec::new())
     }
 
     // optional uint64 fee = 2;
@@ -2614,11 +3256,6 @@ impl TezosSignTx_TezosOriginationOp {
 
 impl ::protobuf::Message for TezosSignTx_TezosOriginationOp {
     fn is_initialized(&self) -> bool {
-        for v in &self.source {
-            if !v.is_initialized() {
-                return false;
-            }
-        };
         true
     }
 
@@ -2626,8 +3263,8 @@ impl ::protobuf::Message for TezosSignTx_TezosOriginationOp {
         while !is.eof()? {
             let (field_number, wire_type) = is.read_tag_unpack()?;
             match field_number {
-                1 => {
-                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.source)?;
+                12 => {
+                    ::protobuf::rt::read_singular_bytes_into(wire_type, is, &mut self.source)?;
                 },
                 2 => {
                     if wire_type != ::protobuf::wire_format::WireTypeVarint {
@@ -2700,8 +3337,7 @@ impl ::protobuf::Message for TezosSignTx_TezosOriginationOp {
     fn compute_size(&self) -> u32 {
         let mut my_size = 0;
         if let Some(ref v) = self.source.as_ref() {
-            let len = v.compute_size();
-            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+            my_size += ::protobuf::rt::bytes_size(12, &v);
         }
         if let Some(v) = self.fee {
             my_size += ::protobuf::rt::value_size(2, v, ::protobuf::wire_format::WireTypeVarint);
@@ -2740,9 +3376,7 @@ impl ::protobuf::Message for TezosSignTx_TezosOriginationOp {
 
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
         if let Some(ref v) = self.source.as_ref() {
-            os.write_tag(1, ::protobuf::wire_format::WireTypeLengthDelimited)?;
-            os.write_raw_varint32(v.get_cached_size())?;
-            v.write_to_with_cached_sizes(os)?;
+            os.write_bytes(12, &v)?;
         }
         if let Some(v) = self.fee {
             os.write_uint64(2, v)?;
@@ -2812,7 +3446,7 @@ impl ::protobuf::Message for TezosSignTx_TezosOriginationOp {
         static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
         descriptor.get(|| {
             let mut fields = ::std::vec::Vec::new();
-            fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<TezosSignTx_TezosContractID>>(
+            fields.push(::protobuf::reflect::accessor::make_singular_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
                 "source",
                 |m: &TezosSignTx_TezosOriginationOp| { &m.source },
                 |m: &mut TezosSignTx_TezosOriginationOp| { &mut m.source },
@@ -2913,7 +3547,7 @@ impl ::protobuf::reflect::ProtobufValue for TezosSignTx_TezosOriginationOp {
 #[derive(PartialEq,Clone,Default)]
 pub struct TezosSignTx_TezosDelegationOp {
     // message fields
-    pub source: ::protobuf::SingularPtrField<TezosSignTx_TezosContractID>,
+    source: ::protobuf::SingularField<::std::vec::Vec<u8>>,
     fee: ::std::option::Option<u64>,
     counter: ::std::option::Option<u64>,
     gas_limit: ::std::option::Option<u64>,
@@ -2935,11 +3569,14 @@ impl TezosSignTx_TezosDelegationOp {
         ::std::default::Default::default()
     }
 
-    // optional .hw.trezor.messages.tezos.TezosSignTx.TezosContractID source = 1;
+    // optional bytes source = 7;
 
 
-    pub fn get_source(&self) -> &TezosSignTx_TezosContractID {
-        self.source.as_ref().unwrap_or_else(|| <TezosSignTx_TezosContractID as ::protobuf::Message>::default_instance())
+    pub fn get_source(&self) -> &[u8] {
+        match self.source.as_ref() {
+            Some(v) => &v,
+            None => &[],
+        }
     }
     pub fn clear_source(&mut self) {
         self.source.clear();
@@ -2950,13 +3587,13 @@ impl TezosSignTx_TezosDelegationOp {
     }
 
     // Param is passed by value, moved
-    pub fn set_source(&mut self, v: TezosSignTx_TezosContractID) {
-        self.source = ::protobuf::SingularPtrField::some(v);
+    pub fn set_source(&mut self, v: ::std::vec::Vec<u8>) {
+        self.source = ::protobuf::SingularField::some(v);
     }
 
     // Mutable pointer to the field.
     // If field is not initialized, it is initialized with default value first.
-    pub fn mut_source(&mut self) -> &mut TezosSignTx_TezosContractID {
+    pub fn mut_source(&mut self) -> &mut ::std::vec::Vec<u8> {
         if self.source.is_none() {
             self.source.set_default();
         }
@@ -2964,8 +3601,8 @@ impl TezosSignTx_TezosDelegationOp {
     }
 
     // Take field
-    pub fn take_source(&mut self) -> TezosSignTx_TezosContractID {
-        self.source.take().unwrap_or_else(|| TezosSignTx_TezosContractID::new())
+    pub fn take_source(&mut self) -> ::std::vec::Vec<u8> {
+        self.source.take().unwrap_or_else(|| ::std::vec::Vec::new())
     }
 
     // optional uint64 fee = 2;
@@ -3083,11 +3720,6 @@ impl TezosSignTx_TezosDelegationOp {
 
 impl ::protobuf::Message for TezosSignTx_TezosDelegationOp {
     fn is_initialized(&self) -> bool {
-        for v in &self.source {
-            if !v.is_initialized() {
-                return false;
-            }
-        };
         true
     }
 
@@ -3095,8 +3727,8 @@ impl ::protobuf::Message for TezosSignTx_TezosDelegationOp {
         while !is.eof()? {
             let (field_number, wire_type) = is.read_tag_unpack()?;
             match field_number {
-                1 => {
-                    ::protobuf::rt::read_singular_message_into(wire_type, is, &mut self.source)?;
+                7 => {
+                    ::protobuf::rt::read_singular_bytes_into(wire_type, is, &mut self.source)?;
                 },
                 2 => {
                     if wire_type != ::protobuf::wire_format::WireTypeVarint {
@@ -3142,8 +3774,7 @@ impl ::protobuf::Message for TezosSignTx_TezosDelegationOp {
     fn compute_size(&self) -> u32 {
         let mut my_size = 0;
         if let Some(ref v) = self.source.as_ref() {
-            let len = v.compute_size();
-            my_size += 1 + ::protobuf::rt::compute_raw_varint32_size(len) + len;
+            my_size += ::protobuf::rt::bytes_size(7, &v);
         }
         if let Some(v) = self.fee {
             my_size += ::protobuf::rt::value_size(2, v, ::protobuf::wire_format::WireTypeVarint);
@@ -3167,9 +3798,7 @@ impl ::protobuf::Message for TezosSignTx_TezosDelegationOp {
 
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
         if let Some(ref v) = self.source.as_ref() {
-            os.write_tag(1, ::protobuf::wire_format::WireTypeLengthDelimited)?;
-            os.write_raw_varint32(v.get_cached_size())?;
-            v.write_to_with_cached_sizes(os)?;
+            os.write_bytes(7, &v)?;
         }
         if let Some(v) = self.fee {
             os.write_uint64(2, v)?;
@@ -3224,7 +3853,7 @@ impl ::protobuf::Message for TezosSignTx_TezosDelegationOp {
         static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
         descriptor.get(|| {
             let mut fields = ::std::vec::Vec::new();
-            fields.push(::protobuf::reflect::accessor::make_singular_ptr_field_accessor::<_, ::protobuf::types::ProtobufTypeMessage<TezosSignTx_TezosContractID>>(
+            fields.push(::protobuf::reflect::accessor::make_singular_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
                 "source",
                 |m: &TezosSignTx_TezosDelegationOp| { &m.source },
                 |m: &mut TezosSignTx_TezosDelegationOp| { &mut m.source },
@@ -3289,6 +3918,603 @@ impl ::std::fmt::Debug for TezosSignTx_TezosDelegationOp {
 impl ::protobuf::reflect::ProtobufValue for TezosSignTx_TezosDelegationOp {
     fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
         ::protobuf::reflect::ReflectValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct TezosSignTx_TezosProposalOp {
+    // message fields
+    source: ::protobuf::SingularField<::std::vec::Vec<u8>>,
+    period: ::std::option::Option<u64>,
+    pub proposals: ::protobuf::RepeatedField<::std::vec::Vec<u8>>,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a TezosSignTx_TezosProposalOp {
+    fn default() -> &'a TezosSignTx_TezosProposalOp {
+        <TezosSignTx_TezosProposalOp as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl TezosSignTx_TezosProposalOp {
+    pub fn new() -> TezosSignTx_TezosProposalOp {
+        ::std::default::Default::default()
+    }
+
+    // optional bytes source = 1;
+
+
+    pub fn get_source(&self) -> &[u8] {
+        match self.source.as_ref() {
+            Some(v) => &v,
+            None => &[],
+        }
+    }
+    pub fn clear_source(&mut self) {
+        self.source.clear();
+    }
+
+    pub fn has_source(&self) -> bool {
+        self.source.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_source(&mut self, v: ::std::vec::Vec<u8>) {
+        self.source = ::protobuf::SingularField::some(v);
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_source(&mut self) -> &mut ::std::vec::Vec<u8> {
+        if self.source.is_none() {
+            self.source.set_default();
+        }
+        self.source.as_mut().unwrap()
+    }
+
+    // Take field
+    pub fn take_source(&mut self) -> ::std::vec::Vec<u8> {
+        self.source.take().unwrap_or_else(|| ::std::vec::Vec::new())
+    }
+
+    // optional uint64 period = 2;
+
+
+    pub fn get_period(&self) -> u64 {
+        self.period.unwrap_or(0)
+    }
+    pub fn clear_period(&mut self) {
+        self.period = ::std::option::Option::None;
+    }
+
+    pub fn has_period(&self) -> bool {
+        self.period.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_period(&mut self, v: u64) {
+        self.period = ::std::option::Option::Some(v);
+    }
+
+    // repeated bytes proposals = 4;
+
+
+    pub fn get_proposals(&self) -> &[::std::vec::Vec<u8>] {
+        &self.proposals
+    }
+    pub fn clear_proposals(&mut self) {
+        self.proposals.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_proposals(&mut self, v: ::protobuf::RepeatedField<::std::vec::Vec<u8>>) {
+        self.proposals = v;
+    }
+
+    // Mutable pointer to the field.
+    pub fn mut_proposals(&mut self) -> &mut ::protobuf::RepeatedField<::std::vec::Vec<u8>> {
+        &mut self.proposals
+    }
+
+    // Take field
+    pub fn take_proposals(&mut self) -> ::protobuf::RepeatedField<::std::vec::Vec<u8>> {
+        ::std::mem::replace(&mut self.proposals, ::protobuf::RepeatedField::new())
+    }
+}
+
+impl ::protobuf::Message for TezosSignTx_TezosProposalOp {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_bytes_into(wire_type, is, &mut self.source)?;
+                },
+                2 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.period = ::std::option::Option::Some(tmp);
+                },
+                4 => {
+                    ::protobuf::rt::read_repeated_bytes_into(wire_type, is, &mut self.proposals)?;
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if let Some(ref v) = self.source.as_ref() {
+            my_size += ::protobuf::rt::bytes_size(1, &v);
+        }
+        if let Some(v) = self.period {
+            my_size += ::protobuf::rt::value_size(2, v, ::protobuf::wire_format::WireTypeVarint);
+        }
+        for value in &self.proposals {
+            my_size += ::protobuf::rt::bytes_size(4, &value);
+        };
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if let Some(ref v) = self.source.as_ref() {
+            os.write_bytes(1, &v)?;
+        }
+        if let Some(v) = self.period {
+            os.write_uint64(2, v)?;
+        }
+        for v in &self.proposals {
+            os.write_bytes(4, &v)?;
+        };
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: ::std::boxed::Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> TezosSignTx_TezosProposalOp {
+        TezosSignTx_TezosProposalOp::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
+        descriptor.get(|| {
+            let mut fields = ::std::vec::Vec::new();
+            fields.push(::protobuf::reflect::accessor::make_singular_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                "source",
+                |m: &TezosSignTx_TezosProposalOp| { &m.source },
+                |m: &mut TezosSignTx_TezosProposalOp| { &mut m.source },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                "period",
+                |m: &TezosSignTx_TezosProposalOp| { &m.period },
+                |m: &mut TezosSignTx_TezosProposalOp| { &mut m.period },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_repeated_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                "proposals",
+                |m: &TezosSignTx_TezosProposalOp| { &m.proposals },
+                |m: &mut TezosSignTx_TezosProposalOp| { &mut m.proposals },
+            ));
+            ::protobuf::reflect::MessageDescriptor::new_pb_name::<TezosSignTx_TezosProposalOp>(
+                "TezosSignTx.TezosProposalOp",
+                fields,
+                file_descriptor_proto()
+            )
+        })
+    }
+
+    fn default_instance() -> &'static TezosSignTx_TezosProposalOp {
+        static instance: ::protobuf::rt::LazyV2<TezosSignTx_TezosProposalOp> = ::protobuf::rt::LazyV2::INIT;
+        instance.get(TezosSignTx_TezosProposalOp::new)
+    }
+}
+
+impl ::protobuf::Clear for TezosSignTx_TezosProposalOp {
+    fn clear(&mut self) {
+        self.source.clear();
+        self.period = ::std::option::Option::None;
+        self.proposals.clear();
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for TezosSignTx_TezosProposalOp {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for TezosSignTx_TezosProposalOp {
+    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
+        ::protobuf::reflect::ReflectValueRef::Message(self)
+    }
+}
+
+#[derive(PartialEq,Clone,Default)]
+pub struct TezosSignTx_TezosBallotOp {
+    // message fields
+    source: ::protobuf::SingularField<::std::vec::Vec<u8>>,
+    period: ::std::option::Option<u64>,
+    proposal: ::protobuf::SingularField<::std::vec::Vec<u8>>,
+    ballot: ::std::option::Option<TezosSignTx_TezosBallotOp_TezosBallotType>,
+    // special fields
+    pub unknown_fields: ::protobuf::UnknownFields,
+    pub cached_size: ::protobuf::CachedSize,
+}
+
+impl<'a> ::std::default::Default for &'a TezosSignTx_TezosBallotOp {
+    fn default() -> &'a TezosSignTx_TezosBallotOp {
+        <TezosSignTx_TezosBallotOp as ::protobuf::Message>::default_instance()
+    }
+}
+
+impl TezosSignTx_TezosBallotOp {
+    pub fn new() -> TezosSignTx_TezosBallotOp {
+        ::std::default::Default::default()
+    }
+
+    // optional bytes source = 1;
+
+
+    pub fn get_source(&self) -> &[u8] {
+        match self.source.as_ref() {
+            Some(v) => &v,
+            None => &[],
+        }
+    }
+    pub fn clear_source(&mut self) {
+        self.source.clear();
+    }
+
+    pub fn has_source(&self) -> bool {
+        self.source.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_source(&mut self, v: ::std::vec::Vec<u8>) {
+        self.source = ::protobuf::SingularField::some(v);
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_source(&mut self) -> &mut ::std::vec::Vec<u8> {
+        if self.source.is_none() {
+            self.source.set_default();
+        }
+        self.source.as_mut().unwrap()
+    }
+
+    // Take field
+    pub fn take_source(&mut self) -> ::std::vec::Vec<u8> {
+        self.source.take().unwrap_or_else(|| ::std::vec::Vec::new())
+    }
+
+    // optional uint64 period = 2;
+
+
+    pub fn get_period(&self) -> u64 {
+        self.period.unwrap_or(0)
+    }
+    pub fn clear_period(&mut self) {
+        self.period = ::std::option::Option::None;
+    }
+
+    pub fn has_period(&self) -> bool {
+        self.period.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_period(&mut self, v: u64) {
+        self.period = ::std::option::Option::Some(v);
+    }
+
+    // optional bytes proposal = 3;
+
+
+    pub fn get_proposal(&self) -> &[u8] {
+        match self.proposal.as_ref() {
+            Some(v) => &v,
+            None => &[],
+        }
+    }
+    pub fn clear_proposal(&mut self) {
+        self.proposal.clear();
+    }
+
+    pub fn has_proposal(&self) -> bool {
+        self.proposal.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_proposal(&mut self, v: ::std::vec::Vec<u8>) {
+        self.proposal = ::protobuf::SingularField::some(v);
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_proposal(&mut self) -> &mut ::std::vec::Vec<u8> {
+        if self.proposal.is_none() {
+            self.proposal.set_default();
+        }
+        self.proposal.as_mut().unwrap()
+    }
+
+    // Take field
+    pub fn take_proposal(&mut self) -> ::std::vec::Vec<u8> {
+        self.proposal.take().unwrap_or_else(|| ::std::vec::Vec::new())
+    }
+
+    // optional .hw.trezor.messages.tezos.TezosSignTx.TezosBallotOp.TezosBallotType ballot = 4;
+
+
+    pub fn get_ballot(&self) -> TezosSignTx_TezosBallotOp_TezosBallotType {
+        self.ballot.unwrap_or(TezosSignTx_TezosBallotOp_TezosBallotType::Yay)
+    }
+    pub fn clear_ballot(&mut self) {
+        self.ballot = ::std::option::Option::None;
+    }
+
+    pub fn has_ballot(&self) -> bool {
+        self.ballot.is_some()
+    }
+
+    // Param is passed by value, moved
+    pub fn set_ballot(&mut self, v: TezosSignTx_TezosBallotOp_TezosBallotType) {
+        self.ballot = ::std::option::Option::Some(v);
+    }
+}
+
+impl ::protobuf::Message for TezosSignTx_TezosBallotOp {
+    fn is_initialized(&self) -> bool {
+        true
+    }
+
+    fn merge_from(&mut self, is: &mut ::protobuf::CodedInputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        while !is.eof()? {
+            let (field_number, wire_type) = is.read_tag_unpack()?;
+            match field_number {
+                1 => {
+                    ::protobuf::rt::read_singular_bytes_into(wire_type, is, &mut self.source)?;
+                },
+                2 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_uint64()?;
+                    self.period = ::std::option::Option::Some(tmp);
+                },
+                3 => {
+                    ::protobuf::rt::read_singular_bytes_into(wire_type, is, &mut self.proposal)?;
+                },
+                4 => {
+                    ::protobuf::rt::read_proto2_enum_with_unknown_fields_into(wire_type, is, &mut self.ballot, 4, &mut self.unknown_fields)?
+                },
+                _ => {
+                    ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
+                },
+            };
+        }
+        ::std::result::Result::Ok(())
+    }
+
+    // Compute sizes of nested messages
+    #[allow(unused_variables)]
+    fn compute_size(&self) -> u32 {
+        let mut my_size = 0;
+        if let Some(ref v) = self.source.as_ref() {
+            my_size += ::protobuf::rt::bytes_size(1, &v);
+        }
+        if let Some(v) = self.period {
+            my_size += ::protobuf::rt::value_size(2, v, ::protobuf::wire_format::WireTypeVarint);
+        }
+        if let Some(ref v) = self.proposal.as_ref() {
+            my_size += ::protobuf::rt::bytes_size(3, &v);
+        }
+        if let Some(v) = self.ballot {
+            my_size += ::protobuf::rt::enum_size(4, v);
+        }
+        my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
+        self.cached_size.set(my_size);
+        my_size
+    }
+
+    fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
+        if let Some(ref v) = self.source.as_ref() {
+            os.write_bytes(1, &v)?;
+        }
+        if let Some(v) = self.period {
+            os.write_uint64(2, v)?;
+        }
+        if let Some(ref v) = self.proposal.as_ref() {
+            os.write_bytes(3, &v)?;
+        }
+        if let Some(v) = self.ballot {
+            os.write_enum(4, ::protobuf::ProtobufEnum::value(&v))?;
+        }
+        os.write_unknown_fields(self.get_unknown_fields())?;
+        ::std::result::Result::Ok(())
+    }
+
+    fn get_cached_size(&self) -> u32 {
+        self.cached_size.get()
+    }
+
+    fn get_unknown_fields(&self) -> &::protobuf::UnknownFields {
+        &self.unknown_fields
+    }
+
+    fn mut_unknown_fields(&mut self) -> &mut ::protobuf::UnknownFields {
+        &mut self.unknown_fields
+    }
+
+    fn as_any(&self) -> &dyn (::std::any::Any) {
+        self as &dyn (::std::any::Any)
+    }
+    fn as_any_mut(&mut self) -> &mut dyn (::std::any::Any) {
+        self as &mut dyn (::std::any::Any)
+    }
+    fn into_any(self: ::std::boxed::Box<Self>) -> ::std::boxed::Box<dyn (::std::any::Any)> {
+        self
+    }
+
+    fn descriptor(&self) -> &'static ::protobuf::reflect::MessageDescriptor {
+        Self::descriptor_static()
+    }
+
+    fn new() -> TezosSignTx_TezosBallotOp {
+        TezosSignTx_TezosBallotOp::new()
+    }
+
+    fn descriptor_static() -> &'static ::protobuf::reflect::MessageDescriptor {
+        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::MessageDescriptor> = ::protobuf::rt::LazyV2::INIT;
+        descriptor.get(|| {
+            let mut fields = ::std::vec::Vec::new();
+            fields.push(::protobuf::reflect::accessor::make_singular_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                "source",
+                |m: &TezosSignTx_TezosBallotOp| { &m.source },
+                |m: &mut TezosSignTx_TezosBallotOp| { &mut m.source },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeUint64>(
+                "period",
+                |m: &TezosSignTx_TezosBallotOp| { &m.period },
+                |m: &mut TezosSignTx_TezosBallotOp| { &mut m.period },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_singular_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                "proposal",
+                |m: &TezosSignTx_TezosBallotOp| { &m.proposal },
+                |m: &mut TezosSignTx_TezosBallotOp| { &mut m.proposal },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_option_accessor::<_, ::protobuf::types::ProtobufTypeEnum<TezosSignTx_TezosBallotOp_TezosBallotType>>(
+                "ballot",
+                |m: &TezosSignTx_TezosBallotOp| { &m.ballot },
+                |m: &mut TezosSignTx_TezosBallotOp| { &mut m.ballot },
+            ));
+            ::protobuf::reflect::MessageDescriptor::new_pb_name::<TezosSignTx_TezosBallotOp>(
+                "TezosSignTx.TezosBallotOp",
+                fields,
+                file_descriptor_proto()
+            )
+        })
+    }
+
+    fn default_instance() -> &'static TezosSignTx_TezosBallotOp {
+        static instance: ::protobuf::rt::LazyV2<TezosSignTx_TezosBallotOp> = ::protobuf::rt::LazyV2::INIT;
+        instance.get(TezosSignTx_TezosBallotOp::new)
+    }
+}
+
+impl ::protobuf::Clear for TezosSignTx_TezosBallotOp {
+    fn clear(&mut self) {
+        self.source.clear();
+        self.period = ::std::option::Option::None;
+        self.proposal.clear();
+        self.ballot = ::std::option::Option::None;
+        self.unknown_fields.clear();
+    }
+}
+
+impl ::std::fmt::Debug for TezosSignTx_TezosBallotOp {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::protobuf::text_format::fmt(self, f)
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for TezosSignTx_TezosBallotOp {
+    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
+        ::protobuf::reflect::ReflectValueRef::Message(self)
+    }
+}
+
+#[derive(Clone,PartialEq,Eq,Debug,Hash)]
+pub enum TezosSignTx_TezosBallotOp_TezosBallotType {
+    Yay = 0,
+    Nay = 1,
+    Pass = 2,
+}
+
+impl ::protobuf::ProtobufEnum for TezosSignTx_TezosBallotOp_TezosBallotType {
+    fn value(&self) -> i32 {
+        *self as i32
+    }
+
+    fn from_i32(value: i32) -> ::std::option::Option<TezosSignTx_TezosBallotOp_TezosBallotType> {
+        match value {
+            0 => ::std::option::Option::Some(TezosSignTx_TezosBallotOp_TezosBallotType::Yay),
+            1 => ::std::option::Option::Some(TezosSignTx_TezosBallotOp_TezosBallotType::Nay),
+            2 => ::std::option::Option::Some(TezosSignTx_TezosBallotOp_TezosBallotType::Pass),
+            _ => ::std::option::Option::None
+        }
+    }
+
+    fn values() -> &'static [Self] {
+        static values: &'static [TezosSignTx_TezosBallotOp_TezosBallotType] = &[
+            TezosSignTx_TezosBallotOp_TezosBallotType::Yay,
+            TezosSignTx_TezosBallotOp_TezosBallotType::Nay,
+            TezosSignTx_TezosBallotOp_TezosBallotType::Pass,
+        ];
+        values
+    }
+
+    fn enum_descriptor_static() -> &'static ::protobuf::reflect::EnumDescriptor {
+        static descriptor: ::protobuf::rt::LazyV2<::protobuf::reflect::EnumDescriptor> = ::protobuf::rt::LazyV2::INIT;
+        descriptor.get(|| {
+            ::protobuf::reflect::EnumDescriptor::new_pb_name::<TezosSignTx_TezosBallotOp_TezosBallotType>("TezosSignTx.TezosBallotOp.TezosBallotType", file_descriptor_proto())
+        })
+    }
+}
+
+impl ::std::marker::Copy for TezosSignTx_TezosBallotOp_TezosBallotType {
+}
+
+impl ::std::default::Default for TezosSignTx_TezosBallotOp_TezosBallotType {
+    fn default() -> Self {
+        TezosSignTx_TezosBallotOp_TezosBallotType::Yay
+    }
+}
+
+impl ::protobuf::reflect::ProtobufValue for TezosSignTx_TezosBallotOp_TezosBallotType {
+    fn as_ref(&self) -> ::protobuf::reflect::ReflectValueRef {
+        ::protobuf::reflect::ReflectValueRef::Enum(::protobuf::ProtobufEnum::descriptor(self))
     }
 }
 
@@ -3572,7 +4798,7 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     ss\x12\x18\n\x07address\x18\x01\x20\x01(\tR\x07address\"S\n\x11TezosGetP\
     ublicKey\x12\x1b\n\taddress_n\x18\x01\x20\x03(\rR\x08addressN\x12!\n\x0c\
     show_display\x18\x02\x20\x01(\x08R\x0bshowDisplay\"/\n\x0eTezosPublicKey\
-    \x12\x1d\n\npublic_key\x18\x01\x20\x01(\tR\tpublicKey\"\xa1\x0e\n\x0bTez\
+    \x12\x1d\n\npublic_key\x18\x01\x20\x01(\tR\tpublicKey\"\xa4\x14\n\x0bTez\
     osSignTx\x12\x1b\n\taddress_n\x18\x01\x20\x03(\rR\x08addressN\x12\x16\n\
     \x06branch\x18\x02\x20\x01(\x0cR\x06branch\x12K\n\x06reveal\x18\x03\x20\
     \x01(\x0b23.hw.trezor.messages.tezos.TezosSignTx.TezosRevealOpR\x06revea\
@@ -3580,44 +4806,62 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     TezosSignTx.TezosTransactionOpR\x0btransaction\x12Z\n\x0borigination\x18\
     \x05\x20\x01(\x0b28.hw.trezor.messages.tezos.TezosSignTx.TezosOriginatio\
     nOpR\x0borigination\x12W\n\ndelegation\x18\x06\x20\x01(\x0b27.hw.trezor.\
-    messages.tezos.TezosSignTx.TezosDelegationOpR\ndelegation\x1a\xb3\x01\n\
-    \x0fTezosContractID\x12Y\n\x03tag\x18\x01\x20\x01(\x0e2G.hw.trezor.messa\
-    ges.tezos.TezosSignTx.TezosContractID.TezosContractTypeR\x03tag\x12\x12\
-    \n\x04hash\x18\x02\x20\x01(\x0cR\x04hash\"1\n\x11TezosContractType\x12\
-    \x0c\n\x08Implicit\x10\0\x12\x0e\n\nOriginated\x10\x01\x1a\xeb\x01\n\rTe\
-    zosRevealOp\x12M\n\x06source\x18\x01\x20\x01(\x0b25.hw.trezor.messages.t\
-    ezos.TezosSignTx.TezosContractIDR\x06source\x12\x10\n\x03fee\x18\x02\x20\
-    \x01(\x04R\x03fee\x12\x18\n\x07counter\x18\x03\x20\x01(\x04R\x07counter\
-    \x12\x1b\n\tgas_limit\x18\x04\x20\x01(\x04R\x08gasLimit\x12#\n\rstorage_\
-    limit\x18\x05\x20\x01(\x04R\x0cstorageLimit\x12\x1d\n\npublic_key\x18\
-    \x06\x20\x01(\x0cR\tpublicKey\x1a\xe2\x02\n\x12TezosTransactionOp\x12M\n\
-    \x06source\x18\x01\x20\x01(\x0b25.hw.trezor.messages.tezos.TezosSignTx.T\
-    ezosContractIDR\x06source\x12\x10\n\x03fee\x18\x02\x20\x01(\x04R\x03fee\
-    \x12\x18\n\x07counter\x18\x03\x20\x01(\x04R\x07counter\x12\x1b\n\tgas_li\
-    mit\x18\x04\x20\x01(\x04R\x08gasLimit\x12#\n\rstorage_limit\x18\x05\x20\
-    \x01(\x04R\x0cstorageLimit\x12\x16\n\x06amount\x18\x06\x20\x01(\x04R\x06\
-    amount\x12W\n\x0bdestination\x18\x07\x20\x01(\x0b25.hw.trezor.messages.t\
-    ezos.TezosSignTx.TezosContractIDR\x0bdestination\x12\x1e\n\nparameters\
-    \x18\x08\x20\x01(\x0cR\nparameters\x1a\x86\x03\n\x12TezosOriginationOp\
-    \x12M\n\x06source\x18\x01\x20\x01(\x0b25.hw.trezor.messages.tezos.TezosS\
-    ignTx.TezosContractIDR\x06source\x12\x10\n\x03fee\x18\x02\x20\x01(\x04R\
-    \x03fee\x12\x18\n\x07counter\x18\x03\x20\x01(\x04R\x07counter\x12\x1b\n\
-    \tgas_limit\x18\x04\x20\x01(\x04R\x08gasLimit\x12#\n\rstorage_limit\x18\
-    \x05\x20\x01(\x04R\x0cstorageLimit\x12%\n\x0emanager_pubkey\x18\x06\x20\
-    \x01(\x0cR\rmanagerPubkey\x12\x18\n\x07balance\x18\x07\x20\x01(\x04R\x07\
-    balance\x12\x1c\n\tspendable\x18\x08\x20\x01(\x08R\tspendable\x12\x20\n\
-    \x0bdelegatable\x18\t\x20\x01(\x08R\x0bdelegatable\x12\x1a\n\x08delegate\
-    \x18\n\x20\x01(\x0cR\x08delegate\x12\x16\n\x06script\x18\x0b\x20\x01(\
-    \x0cR\x06script\x1a\xec\x01\n\x11TezosDelegationOp\x12M\n\x06source\x18\
-    \x01\x20\x01(\x0b25.hw.trezor.messages.tezos.TezosSignTx.TezosContractID\
-    R\x06source\x12\x10\n\x03fee\x18\x02\x20\x01(\x04R\x03fee\x12\x18\n\x07c\
-    ounter\x18\x03\x20\x01(\x04R\x07counter\x12\x1b\n\tgas_limit\x18\x04\x20\
-    \x01(\x04R\x08gasLimit\x12#\n\rstorage_limit\x18\x05\x20\x01(\x04R\x0cst\
-    orageLimit\x12\x1a\n\x08delegate\x18\x06\x20\x01(\x0cR\x08delegate\"|\n\
-    \rTezosSignedTx\x12\x1c\n\tsignature\x18\x01\x20\x01(\tR\tsignature\x12&\
-    \n\x0fsig_op_contents\x18\x02\x20\x01(\x0cR\rsigOpContents\x12%\n\x0eope\
-    ration_hash\x18\x03\x20\x01(\tR\roperationHashB9\n#com.satoshilabs.trezo\
-    r.lib.protobufB\x12TrezorMessageTezos\
+    messages.tezos.TezosSignTx.TezosDelegationOpR\ndelegation\x12Q\n\x08prop\
+    osal\x18\x07\x20\x01(\x0b25.hw.trezor.messages.tezos.TezosSignTx.TezosPr\
+    oposalOpR\x08proposal\x12K\n\x06ballot\x18\x08\x20\x01(\x0b23.hw.trezor.\
+    messages.tezos.TezosSignTx.TezosBallotOpR\x06ballot\x1a\xb3\x01\n\x0fTez\
+    osContractID\x12Y\n\x03tag\x18\x01\x20\x01(\x0e2G.hw.trezor.messages.tez\
+    os.TezosSignTx.TezosContractID.TezosContractTypeR\x03tag\x12\x12\n\x04ha\
+    sh\x18\x02\x20\x01(\x0cR\x04hash\"1\n\x11TezosContractType\x12\x0c\n\x08\
+    Implicit\x10\0\x12\x0e\n\nOriginated\x10\x01\x1a\xb4\x01\n\rTezosRevealO\
+    p\x12\x16\n\x06source\x18\x07\x20\x01(\x0cR\x06source\x12\x10\n\x03fee\
+    \x18\x02\x20\x01(\x04R\x03fee\x12\x18\n\x07counter\x18\x03\x20\x01(\x04R\
+    \x07counter\x12\x1b\n\tgas_limit\x18\x04\x20\x01(\x04R\x08gasLimit\x12#\
+    \n\rstorage_limit\x18\x05\x20\x01(\x04R\x0cstorageLimit\x12\x1d\n\npubli\
+    c_key\x18\x06\x20\x01(\x0cR\tpublicKey\x1a\x9f\x06\n\x12TezosTransaction\
+    Op\x12\x16\n\x06source\x18\t\x20\x01(\x0cR\x06source\x12\x10\n\x03fee\
+    \x18\x02\x20\x01(\x04R\x03fee\x12\x18\n\x07counter\x18\x03\x20\x01(\x04R\
+    \x07counter\x12\x1b\n\tgas_limit\x18\x04\x20\x01(\x04R\x08gasLimit\x12#\
+    \n\rstorage_limit\x18\x05\x20\x01(\x04R\x0cstorageLimit\x12\x16\n\x06amo\
+    unt\x18\x06\x20\x01(\x04R\x06amount\x12W\n\x0bdestination\x18\x07\x20\
+    \x01(\x0b25.hw.trezor.messages.tezos.TezosSignTx.TezosContractIDR\x0bdes\
+    tination\x12\x1e\n\nparameters\x18\x08\x20\x01(\x0cR\nparameters\x12~\n\
+    \x12parameters_manager\x18\n\x20\x01(\x0b2O.hw.trezor.messages.tezos.Tez\
+    osSignTx.TezosTransactionOp.TezosParametersManagerR\x11parametersManager\
+    \x1a\xf1\x02\n\x16TezosParametersManager\x12!\n\x0cset_delegate\x18\x01\
+    \x20\x01(\x0cR\x0bsetDelegate\x12'\n\x0fcancel_delegate\x18\x02\x20\x01(\
+    \x08R\x0ecancelDelegate\x12\x80\x01\n\x08transfer\x18\x03\x20\x01(\x0b2d\
+    .hw.trezor.messages.tezos.TezosSignTx.TezosTransactionOp.TezosParameters\
+    Manager.TezosManagerTransferR\x08transfer\x1a\x87\x01\n\x14TezosManagerT\
+    ransfer\x12W\n\x0bdestination\x18\x01\x20\x01(\x0b25.hw.trezor.messages.\
+    tezos.TezosSignTx.TezosContractIDR\x0bdestination\x12\x16\n\x06amount\
+    \x18\x02\x20\x01(\x04R\x06amount\x1a\xcf\x02\n\x12TezosOriginationOp\x12\
+    \x16\n\x06source\x18\x0c\x20\x01(\x0cR\x06source\x12\x10\n\x03fee\x18\
+    \x02\x20\x01(\x04R\x03fee\x12\x18\n\x07counter\x18\x03\x20\x01(\x04R\x07\
+    counter\x12\x1b\n\tgas_limit\x18\x04\x20\x01(\x04R\x08gasLimit\x12#\n\rs\
+    torage_limit\x18\x05\x20\x01(\x04R\x0cstorageLimit\x12%\n\x0emanager_pub\
+    key\x18\x06\x20\x01(\x0cR\rmanagerPubkey\x12\x18\n\x07balance\x18\x07\
+    \x20\x01(\x04R\x07balance\x12\x1c\n\tspendable\x18\x08\x20\x01(\x08R\tsp\
+    endable\x12\x20\n\x0bdelegatable\x18\t\x20\x01(\x08R\x0bdelegatable\x12\
+    \x1a\n\x08delegate\x18\n\x20\x01(\x0cR\x08delegate\x12\x16\n\x06script\
+    \x18\x0b\x20\x01(\x0cR\x06script\x1a\xb5\x01\n\x11TezosDelegationOp\x12\
+    \x16\n\x06source\x18\x07\x20\x01(\x0cR\x06source\x12\x10\n\x03fee\x18\
+    \x02\x20\x01(\x04R\x03fee\x12\x18\n\x07counter\x18\x03\x20\x01(\x04R\x07\
+    counter\x12\x1b\n\tgas_limit\x18\x04\x20\x01(\x04R\x08gasLimit\x12#\n\rs\
+    torage_limit\x18\x05\x20\x01(\x04R\x0cstorageLimit\x12\x1a\n\x08delegate\
+    \x18\x06\x20\x01(\x0cR\x08delegate\x1a_\n\x0fTezosProposalOp\x12\x16\n\
+    \x06source\x18\x01\x20\x01(\x0cR\x06source\x12\x16\n\x06period\x18\x02\
+    \x20\x01(\x04R\x06period\x12\x1c\n\tproposals\x18\x04\x20\x03(\x0cR\tpro\
+    posals\x1a\xe7\x01\n\rTezosBallotOp\x12\x16\n\x06source\x18\x01\x20\x01(\
+    \x0cR\x06source\x12\x16\n\x06period\x18\x02\x20\x01(\x04R\x06period\x12\
+    \x1a\n\x08proposal\x18\x03\x20\x01(\x0cR\x08proposal\x12[\n\x06ballot\
+    \x18\x04\x20\x01(\x0e2C.hw.trezor.messages.tezos.TezosSignTx.TezosBallot\
+    Op.TezosBallotTypeR\x06ballot\"-\n\x0fTezosBallotType\x12\x07\n\x03Yay\
+    \x10\0\x12\x07\n\x03Nay\x10\x01\x12\x08\n\x04Pass\x10\x02\"|\n\rTezosSig\
+    nedTx\x12\x1c\n\tsignature\x18\x01\x20\x01(\tR\tsignature\x12&\n\x0fsig_\
+    op_contents\x18\x02\x20\x01(\x0cR\rsigOpContents\x12%\n\x0eoperation_has\
+    h\x18\x03\x20\x01(\tR\roperationHashB9\n#com.satoshilabs.trezor.lib.prot\
+    obufB\x12TrezorMessageTezos\
 ";
 
 static file_descriptor_proto_lazy: ::protobuf::rt::LazyV2<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::rt::LazyV2::INIT;
