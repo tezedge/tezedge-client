@@ -15,7 +15,7 @@ pub struct GetAddress {
     #[structopt(short = "T", long)]
     trezor: bool,
 
-    /// E.g. m/44'/1729'/0'
+    /// E.g. "m/44'/1729'/0'"
     #[structopt(short, long)]
     path: String
 }
@@ -53,9 +53,7 @@ impl GetAddress {
 
         let address = trezor_execute(
             trezor.get_address(path.clone()),
-        )
-            .get_address()
-            .to_string();
+        );
 
         println!("{}", address);
     }

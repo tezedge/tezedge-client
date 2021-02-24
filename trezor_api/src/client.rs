@@ -274,10 +274,12 @@ impl Trezor {
     pub fn get_address(
         &mut self,
         path: Vec<u32>,
-    ) -> Result<TrezorResponse<TezosAddress, TezosAddress>> {
+    ) -> Result<TrezorResponse<String, TezosAddress>> {
         let mut req = protos::TezosGetAddress::new();
         req.set_address_n(path);
 
-        self.call(req, Box::new(|_, m| Ok(m)))
+        self.call(req, Box::new(|_, m| {
+            Ok(m.get_address().to_string())
+        }))
     }
 }
