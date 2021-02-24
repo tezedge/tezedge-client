@@ -5,6 +5,8 @@
 pub enum Error {
 	/// Error from libusb.
 	Usb(rusb::Error),
+    /// Error from Udp
+    Udp(std::io::Error),
 	/// The device to connect to was not found.
 	DeviceNotFound,
 	/// The device is no longer available.

@@ -12,6 +12,9 @@ pub use protocol::*;
 pub mod usb;
 use usb::*;
 
+pub mod udp;
+use udp::*;
+
 pub const DEV_TREZOR_ONE: (u16, u16) = (0x534C, 0x0001);
 pub const DEV_TREZOR_T: (u16, u16) = (0x1209, 0x53C1);
 // pub const DEV_TREZOR2_BL: (u16, u16) = (0x1209, 0x53C0);
@@ -22,12 +25,14 @@ pub const DEV_TREZOR_T: (u16, u16) = (0x1209, 0x53C1);
 pub enum AvailableDeviceTransport {
 	// Hid(hid::AvailableHidTransport),
 	Usb(AvailableUsbTransport),
+	Udp(AvailableUdpTransport),
 }
 
 impl fmt::Display for AvailableDeviceTransport {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		match self {
 			Self::Usb(ref t) => write!(f, "{}", t),
+			Self::Udp(ref t) => write!(f, "{}", t),
 		}
 	}
 }
@@ -69,6 +74,7 @@ pub trait Transport {
 
 pub fn connect(device: &AvailableDevice) -> Result<Box<Transport>, Error> {
     match &device.transport {
-        AvailableDeviceTransport::Usb(usb) => UsbTransport::connect(device),
+        AvailableDeviceTransport::Usb(_) => UsbTransport::connect(device),
+        AvailableDeviceTransport::Udp(_) => UdpTransport::connect(device),
     }
 }
