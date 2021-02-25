@@ -71,13 +71,11 @@ impl HttpApi {
     }
 
     /// Get manager key
-    fn get_manager_key_url<S>(&self, key: S) -> String
-        where S: AsRef<str>,
-    {
+    fn get_manager_key_url(&self, pkh: &PublicKeyHash) -> String {
         format!(
             "{}/chains/main/blocks/head/context/contracts/{}/manager_key",
             self.base_url,
-            key.as_ref(),
+            pkh.to_base58check(),
         )
     }
 
@@ -211,10 +209,8 @@ impl GetCounterForKey for HttpApi {
 
 // TODO: receiving NULL, probably because node isn't synced
 impl GetManagerKey for HttpApi {
-    fn get_manager_key<S>(&self, key: S) -> GetManagerKeyResult
-        where S: AsRef<str>,
-    {
-        Ok(self.client.get(&self.get_manager_key_url(key))
+    fn get_manager_key(&self, pkh: &PublicKeyHash) -> GetManagerKeyResult {
+        Ok(self.client.get(&self.get_manager_key_url(pkh))
            .call()
            .unwrap()
            .into_json::<Option<String>>()
