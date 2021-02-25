@@ -1,4 +1,5 @@
 use serde::{Serialize, Deserialize};
+use trezor_api::protos::{TezosSignTx_TezosContractID, TezosSignTx_TezosTransactionOp};
 
 use crate::PublicKeyHash;
 
@@ -85,9 +86,45 @@ impl Default for NewTransactionOperationBuilder {
 pub struct NewTransactionOperation {
     pub source: PublicKeyHash,
     pub destination: PublicKeyHash,
+    // TODO: replace with u64
     pub amount: String,
+    // TODO: replace with u64
     pub fee: String,
+    // TODO: replace with u64
     pub counter: String,
+    // TODO: replace with u64
     pub gas_limit: String,
+    // TODO: replace with u64
     pub storage_limit: String,
+}
+
+impl Into<TezosSignTx_TezosTransactionOp> for NewTransactionOperation {
+    fn into(self) -> TezosSignTx_TezosTransactionOp {
+        let mut new_tx = TezosSignTx_TezosTransactionOp::new();
+
+        let mut source: Vec<_> = self.source.into();
+        // implicit public key hash prefix prefix
+        source.insert(0, 0);
+
+        let mut dest: Vec<_> = self.destination.into();
+        // implicit public key hash prefix prefix
+        dest.insert(0, 0);
+        let mut destination = TezosSignTx_TezosContractID::new();
+        destination.set_tag(trezor_api::protos::TezosSignTx_TezosContractID_TezosContractType::Implicit);
+        destination.set_hash(dest);
+        // let mut destination: Vec<_> = self.destination.into();
+        // implicit public key hash prefix prefix
+        // source.insert(0, 0);
+
+        new_tx.set_source(source);
+        new_tx.set_destination(destination);
+
+        new_tx.set_counter(self.counter.parse().unwrap());
+        new_tx.set_fee(self.fee.parse().unwrap());
+        new_tx.set_amount(self.amount.parse().unwrap());
+        new_tx.set_gas_limit(self.gas_limit.parse().unwrap());
+        new_tx.set_storage_limit(self.storage_limit.parse().unwrap());
+
+        new_tx
+    }
 }

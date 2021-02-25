@@ -1,7 +1,8 @@
 use structopt::StructOpt;
 
-use crate::common::{exit_with_error, parse_derivation_path};
-use crate::trezor::{find_trezor_device, trezor_execute};
+use lib::ToBase58Check;
+
+use crate::common::parse_derivation_path;
 
 /// Get address
 ///
@@ -22,16 +23,11 @@ pub struct GetAddress {
 
 impl GetAddress {
     pub fn execute(self) {
-        let mut trezor = find_trezor_device()
-            .connect()
-            .unwrap();
-        trezor.init_device().unwrap();
-
         let path = parse_derivation_path(&self.path);
-
-        let address = trezor_execute(
-            trezor.get_address(path.clone()),
-        );
+        let address = crate::trezor::get_pkh(
+            &mut crate::trezor::find_device_and_connect(),
+            path,
+        ).to_base58check();
 
         println!("{}", address);
     }

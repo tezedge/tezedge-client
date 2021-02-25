@@ -1,7 +1,9 @@
-use sodiumoxide::crypto;
+use sodiumoxide::{crypto, hex};
 use crypto::sign::ed25519;
 
 pub use ed25519::Signature;
+
+use trezor_api::protos::TezosSignedTx;
 
 #[derive(Debug, Clone)]
 pub struct OperationSignatureInfo {
@@ -11,6 +13,18 @@ pub struct OperationSignatureInfo {
     pub operation_with_signature: String,
     /// operation signature encoded with base58check with prefix (`Prefix::edsig`).
     pub signature: String,
+}
+
+impl From<TezosSignedTx> for OperationSignatureInfo {
+    fn from(sig_info: TezosSignedTx) -> Self {
+        OperationSignatureInfo {
+            operation_hash: sig_info.get_operation_hash().to_string(),
+            operation_with_signature: hex::encode(
+                sig_info.get_sig_op_contents(),
+            ),
+            signature: sig_info.get_signature().to_string(),
+        }
+    }
 }
 
 pub type SignOperationResult = Result<OperationSignatureInfo, ()>;

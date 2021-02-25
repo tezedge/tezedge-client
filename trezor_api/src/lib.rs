@@ -1,5 +1,4 @@
 use std::fmt;
-use rusb::{DeviceDescriptor, UsbContext};
 
 pub mod protos;
 pub mod messages;
@@ -86,6 +85,8 @@ impl fmt::Display for TrezorModel {
 pub fn find_devices() -> Result<Vec<AvailableDevice>> {
     let mut devices = Vec::new();
     use transport::usb::UsbTransport;
+    // use transport::udp::UdpTransport;
     devices.extend(UsbTransport::find_devices().map_err(|e| Error::TransportConnect(e))?);
+    // devices.extend(UdpTransport::find_devices().map_err(|e| Error::TransportConnect(e))?);
     Ok(devices)
 }

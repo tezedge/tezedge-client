@@ -1,6 +1,6 @@
 use std::convert::TryInto;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use trezor_api::protos::TezosSignTx_TezosContractID;
+use trezor_api::protos::{TezosSignTx_TezosContractID, TezosSignTx_TezosContractID_TezosContractType};
 
 use crate::crypto::{Prefix, WithPrefix, WithoutPrefix};
 use crate::{FromBase58Check, ToBase58Check};
@@ -61,10 +61,17 @@ impl<'de> Deserialize<'de> for PublicKeyHash {
     }
 }
 
+impl Into<Vec<u8>> for PublicKeyHash {
+    fn into(self) -> Vec<u8> {
+        self.as_ref().to_vec()
+    }
+}
+
 impl Into<TezosSignTx_TezosContractID> for PublicKeyHash {
     fn into(self) -> TezosSignTx_TezosContractID {
         let mut contract_id = TezosSignTx_TezosContractID::new();
         contract_id.set_hash(self.as_ref().to_vec());
+        contract_id.set_tag(TezosSignTx_TezosContractID_TezosContractType::Implicit);
 
         contract_id
     }

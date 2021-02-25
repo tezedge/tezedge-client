@@ -1,7 +1,18 @@
 use std::thread;
 use std::time::Duration;
 use std::sync::mpsc;
-use console::Term;
+use console::{Term, style};
+
+pub fn wait_for_action_spinner() -> SpinnerBuilder {
+    SpinnerBuilder::new()
+        .with_spinner_chars(vec![
+            style("   ").red(),
+            style(">  ").red(),
+            style(">> ").red(),
+            style(">>>").red(),
+        ])
+        .with_interval_ms(300)
+}
 
 enum SpinnerMsg {}
 

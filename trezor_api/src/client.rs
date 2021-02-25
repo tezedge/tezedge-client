@@ -5,12 +5,16 @@ use sodiumoxide::hex;
 use crate::transport::{ProtoMessage, Transport};
 use crate::messages::TrezorMessage;
 use super::{protos, TrezorModel, Error, Result};
-use protos::{MessageType::*, TezosAddress, TezosSignTx, TezosSignedTx};
+use protos::MessageType::*;
 
 // Some types with raw protos that we use in the public interface so they have to be exported.
 pub use protos::ButtonRequest_ButtonRequestType as ButtonRequestType;
 pub use protos::Features;
 pub use protos::PinMatrixRequest_PinMatrixRequestType as PinMatrixRequestType;
+pub use protos::{
+    TezosAddress, TezosPublicKey,
+    TezosSignTx, TezosSignedTx
+};
 
 /// The different options for the number of words in a seed phrase.
 pub enum WordCount {
@@ -281,5 +285,24 @@ impl Trezor {
         self.call(req, Box::new(|_, m| {
             Ok(m.get_address().to_string())
         }))
+    }
+
+    pub fn get_public_key(
+        &mut self,
+        path: Vec<u32>,
+    ) -> Result<TrezorResponse<String, TezosPublicKey>> {
+        let mut req = protos::TezosGetPublicKey::new();
+        req.set_address_n(path);
+
+        self.call(req, Box::new(|_, m| {
+			Ok(m.get_public_key().to_string())
+		}))
+    }
+
+    pub fn sign_tx(
+        &mut self,
+        tx: TezosSignTx,
+    ) -> Result<TrezorResponse<TezosSignedTx, TezosSignedTx>> {
+        self.call(tx, Box::new(|_, m| Ok(m)))
     }
 }

@@ -1,7 +1,5 @@
 //! # Error Handling
 
-use std::error;
-use std::fmt;
 use std::result;
 
 use protobuf::error::ProtobufError;

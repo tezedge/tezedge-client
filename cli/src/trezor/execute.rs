@@ -1,23 +1,7 @@
-use console::style;
-
-use lib::trezor_api;
-pub use trezor_api::{Result, TrezorResponse};
-pub use trezor_api::messages::TrezorMessage;
-
+use lib::trezor_api::{Result, TrezorResponse};
+use lib::trezor_api::messages::TrezorMessage;
+use crate::spinner::wait_for_action_spinner;
 use crate::common::exit_with_error;
-use crate::spinner::SpinnerBuilder;
-
-pub fn find_trezor_device() -> trezor_api::AvailableDevice {
-    let mut devices = trezor_api::find_devices().unwrap();
-
-    // TODO: only allow trezor T
-    match devices.len() {
-        0 => exit_with_error("Trezor not connected"),
-        1 => devices.remove(0),
-        // TODO: show select with filtering to choose between devices
-        _ => exit_with_error("More than one Trezor connected (unsupported for now)"),
-    }
-}
 
 // TODO: at the moment if before calling "ack" or before response comes for "ack",
 // process crashes or is terminated for some reason, Trezor seems to get stuck.
@@ -25,14 +9,7 @@ pub fn find_trezor_device() -> trezor_api::AvailableDevice {
 pub fn trezor_execute<T, R>(mut response: Result<TrezorResponse<T, R>>) -> T
     where R: TrezorMessage,
 {
-    let spinner = SpinnerBuilder::new()
-        .with_spinner_chars(vec![
-            style("   ").red(),
-            style(">  ").red(),
-            style(">> ").red(),
-            style(">>>").red(),
-        ])
-        .with_interval_ms(300);
+    let spinner = wait_for_action_spinner();
 
     loop {
         // TODO: handle transport errors
