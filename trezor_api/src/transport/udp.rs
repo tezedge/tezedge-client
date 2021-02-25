@@ -75,9 +75,9 @@ impl UdpTransport {
             .map_err(|err| Error::Udp(err))?;
 
         let read_timeout = Duration::from_millis(READ_TIMEOUT_MS);
-        let write_timeout = Duration::from_millis(READ_TIMEOUT_MS);
-        socket.set_read_timeout(Some(read_timeout));
-        socket.set_write_timeout(Some(write_timeout));
+        let write_timeout = Duration::from_millis(WRITE_TIMEOUT_MS);
+        let _ = socket.set_read_timeout(Some(read_timeout));
+        let _ = socket.set_write_timeout(Some(write_timeout));
 
 		Ok(Box::new(UdpTransport {
 			protocol: ProtocolV1 {

@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::Serialize;
 
 use super::{NewRevealOperation, NewTransactionOperation};
 

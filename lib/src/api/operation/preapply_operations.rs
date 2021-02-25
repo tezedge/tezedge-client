@@ -1,6 +1,6 @@
 // use serde::{Serialize, Deserialize};
 
-use crate::{BlockHash, NewOperation, NewOperationGroup};
+use crate::{BlockHash, NewOperationGroup};
 
 pub type PreapplyOperationsResult = Result<serde_json::Value, ()>;
 

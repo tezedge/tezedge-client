@@ -7,7 +7,7 @@ mod error;
 pub use error::*;
 
 pub mod transport;
-use transport::{Transport, AvailableDeviceTransport};
+use transport::AvailableDeviceTransport;
 
 mod client;
 pub use client::*;

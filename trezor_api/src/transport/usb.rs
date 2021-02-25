@@ -128,7 +128,7 @@ impl UsbTransport {
 	}
 
 	/// Connect to a device over the USB transport.
-	pub fn connect(device: &AvailableDevice) -> Result<Box<Transport>, Error> {
+	pub fn connect(device: &AvailableDevice) -> Result<Box<dyn Transport>, Error> {
 		let transport = match device.transport {
 			AvailableDeviceTransport::Usb(ref t) => t,
 			_ => panic!("passed wrong AvailableDevice in UsbTransport::connect"),
@@ -156,7 +156,6 @@ impl UsbTransport {
 				.ok_or(Error::DeviceDisconnected)?;
 			// Check if there is not another device connected on this bus.
 			let dev_desc = dev.device_descriptor()?;
-			let dev_id = (dev_desc.vendor_id(), dev_desc.product_id());
 			if TrezorModel::from_device_descriptor(&dev_desc).as_ref() != Some(&device.model) {
 				return Err(Error::DeviceDisconnected);
 			}
