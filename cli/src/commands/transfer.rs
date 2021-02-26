@@ -3,10 +3,13 @@ use std::time::Duration;
 use structopt::StructOpt;
 use console::{style, Term};
 
-use lib::{NewRevealOperationBuilder, ToBase58Check, api::*, signer::OperationSignatureInfo, trezor_api::TezosSignTx};
+use lib::{BlockHash, NewRevealOperationBuilder};
 use lib::{PublicKeyHash, PublicKey, PrivateKey, NewOperationGroup, NewTransactionOperationBuilder};
 use lib::utils::parse_float_amount;
-use lib::signer::{SignOperation, LocalSigner};
+use lib::signer::{SignOperation, LocalSigner, OperationSignatureInfo};
+use lib::trezor_api::{Trezor, TezosSignTx};
+use lib::http_api::HttpApi;
+use lib::api::*;
 
 use crate::spinner::SpinnerBuilder;
 use crate::common::{exit_with_error, parse_derivation_path};
@@ -16,17 +19,17 @@ use crate::trezor::trezor_execute;
 /// Create a transaction
 ///
 /// Outputs transaction hash to stdout in case of success.
-#[derive(StructOpt, Debug, Clone)]
+#[derive(StructOpt)]
 pub struct Transfer {
     /// Verbose mode (-v, -vv, -vvv, etc.)
     #[structopt(short, long, parse(from_occurrences))]
-    verbose: u8,
+    pub verbose: u8,
 
     #[structopt(short = "E", long)]
-    endpoint: String,
+    pub endpoint: String,
 
     #[structopt(long = "trezor")]
-    use_trezor: bool,
+    pub use_trezor: bool,
 
     /// Address to transfer tezos from.
     ///
@@ -34,21 +37,35 @@ pub struct Transfer {
     ///
     /// Or if --trezor flag is set, key derivation path**, like: "m/44'/1729'/0'"
     #[structopt(short, long)]
-    from: String,
+    pub from: String,
 
     #[structopt(short, long)]
-    to: String,
+    pub to: String,
 
     #[structopt(short, long)]
-    amount: String,
+    pub amount: String,
 
     #[structopt(long)]
-    fee: String,
+    pub fee: String,
+
+    // NOT cli arguments
+
+    #[structopt(skip)]
+    _trezor: Option<Trezor>,
+
+    #[structopt(skip)]
+    _api: Option<HttpApi>,
+
+    #[structopt(skip)]
+    counter: Option<u64>,
+
+    #[structopt(skip)]
+    key_path: Option<Vec<u32>>,
 }
 
 // TODO: replace with query to persistent encrypted store for keys
-fn get_keys_by_pkh(pkh: &PublicKeyHash) -> Result<(PublicKey, PrivateKey), ()> {
-    if pkh != &PublicKeyHash::from_base58check("tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU").unwrap() {
+fn get_keys_by_pkh(pkh: &String) -> Result<(PublicKey, PrivateKey), ()> {
+    if pkh != "tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU" {
         return Err(());
     }
     let pub_key = "edpktywJsAeturPxoFkDEerF6bi7N41ZnQyMrmNLQ3GZx2w6nn8eCZ";
@@ -61,93 +78,120 @@ fn get_keys_by_pkh(pkh: &PublicKeyHash) -> Result<(PublicKey, PrivateKey), ()> {
 }
 
 impl Transfer {
-    // TODO: fix transfer not working to new account
-    pub fn execute(self) {
-        let Transfer {
-            // TODO: use verbose to print additional info
-            verbose: _,
-            endpoint,
-            use_trezor,
-            to,
-            from: raw_from,
-            amount: raw_amount,
-            fee: raw_fee,
-        } = self;
+    fn api(&mut self) -> &mut HttpApi {
+        let endpoint = self.endpoint.clone();
+        self._api.get_or_insert_with(|| {
+            HttpApi::new(endpoint)
+        })
+    }
 
-        let mut trezor = None;
-        // key derivation path when using trezor
-        let mut key_path = None;
+    fn trezor(&mut self) -> &mut Trezor {
+        self._trezor.get_or_insert_with(|| {
+            crate::trezor::find_device_and_connect()
+        })
+    }
 
-        let from = if use_trezor {
-            if !raw_from.starts_with("m/") {
+    fn get_from_pkh(&mut self) -> PublicKeyHash {
+        if self.use_trezor {
+            let raw_key_path = &self.from;
+
+            if !raw_key_path.starts_with("m/") {
                 exit_with_error(format!(
                     "when using Trezor, {} needs to be key derivation path like: \"{}\", but got: \"{}\"",
                     style("--from").bold(),
                     style("m/44'/1729'/0'").green(),
-                    style(raw_from).red(),
+                    style(raw_key_path).red(),
                 ));
             }
-            trezor = Some(crate::trezor::find_device_and_connect());
-            let path = parse_derivation_path(&raw_from);
-            key_path = Some(path.clone());
-            crate::trezor::get_pkh(trezor.as_mut().unwrap(), path)
+
+            let key_path = parse_derivation_path(raw_key_path);
+            self.key_path = Some(key_path.clone());
+            crate::trezor::get_pkh(self.trezor(), key_path)
         } else {
-            match PublicKeyHash::from_base58check(&raw_from) {
+            match PublicKeyHash::from_base58check(&self.from) {
                 Ok(pkh) => pkh,
                 Err(_) => {
                     exit_with_error(format!(
                         "invalid {} public key hash: {}",
                         style("--from").bold(),
-                        style(raw_from).magenta(),
+                        style(&self.from).red(),
                     ));
                 }
             }
-        };
+        }
+    }
 
-        let to = match PublicKeyHash::from_base58check(&to) {
+    fn get_to_pkh(&self) -> PublicKeyHash {
+        match PublicKeyHash::from_base58check(&self.to) {
             Ok(pkh) => pkh,
             Err(_) => {
                 exit_with_error(format!(
                     "invalid {} public key hash: {}",
                     style("--to").bold(),
-                    style(to).magenta(),
+                    style(&self.to).red(),
                 ));
             }
-        };
+        }
+    }
 
-        let amount = match parse_float_amount(&raw_amount) {
+    fn get_amount(&self) -> String {
+        match parse_float_amount(&self.amount) {
             Ok(amount) => amount,
             Err(_) => {
                 exit_with_error(format!(
                     "invalid amount: {}",
-                    style(&raw_amount).bold()
+                    style(&self.amount).bold()
                 ));
             }
-        };
+        }
+    }
 
-        let fee = match parse_float_amount(&raw_fee) {
+    fn get_fee(&self) -> String {
+        match parse_float_amount(&self.fee) {
             Ok(amount) => amount,
             Err(_) => {
                 exit_with_error(format!(
                     "invalid fee: {}",
-                    style(&raw_amount).bold()
+                    style(&self.fee).bold()
                 ));
             }
-        };
+        }
+    }
 
-        // TODO: accept this as generic parameter instead
-        let client = lib::http_api::HttpApi::new(endpoint);
+    fn get_protocol_info(&mut self) -> ProtocolInfo {
+        self.api().get_protocol_info().unwrap()
+    }
+
+    fn get_head_block_hash(&mut self) -> BlockHash {
+        self.api().get_head_block_hash().unwrap()
+    }
+
+    fn get_counter(&mut self, pkh: &PublicKeyHash) -> u64 {
+        let counter = self.counter.unwrap_or_else(|| {
+            self.api().get_counter_for_key(&pkh).unwrap()
+        }) + 1;
+        self.counter = Some(counter);
+        counter
+    }
+
+    fn get_manager_key(&mut self, pkh: &PublicKeyHash) -> Option<String> {
+        self.api().get_manager_key(&pkh).unwrap()
+    }
+
+    fn build_operation_group(&mut self) -> NewOperationGroup {
+        let from = self.get_from_pkh();
+        let to = self.get_to_pkh();
+        let amount = self.get_amount();
+        let fee = self.get_fee();
 
         let spinner = SpinnerBuilder::new()
             .with_prefix(style("[1/4]").bold().dim())
             .with_text("fetching necessary data from the node")
             .start();
 
-        let protocol_info = client.get_protocol_info().unwrap();
-        let mut counter = client.get_counter_for_key(&from).unwrap();
-        let constants = client.get_constants().unwrap();
-        let head_block_hash = client.get_head_block_hash().unwrap();
-        let manager_key = client.get_manager_key(&from).unwrap();
+        let protocol_info = self.get_protocol_info();
+        let head_block_hash = self.get_head_block_hash();
+        let manager_key = self.get_manager_key(&from);
 
         spinner.finish();
         eprintln!(
@@ -157,83 +201,87 @@ impl Transfer {
             "fetched necessary data from the node",
         );
 
-        let mut operation_group = NewOperationGroup::new(head_block_hash.clone());
+        let mut operation_group = NewOperationGroup::new(
+            head_block_hash.clone(),
+            protocol_info.next_protocol_hash,
+        );
 
-        counter += 1;
         let tx_op = NewTransactionOperationBuilder::new()
             .source(from.clone())
             .destination(to.clone())
             .amount(amount.to_string())
             .fee(fee.to_string())
-            .counter(counter.to_string())
+            .counter(self.get_counter(&from).to_string())
             .gas_limit(50000.to_string())
-            .storage_limit(constants.hard_storage_limit_per_operation.to_string())
+            .storage_limit(50000.to_string())
             .build()
             .unwrap();
         operation_group = operation_group.with_transaction(tx_op);
 
         if manager_key.is_none() {
-            counter += 1;
+            let key_path = self.key_path.clone().unwrap();
             let reveal_op = NewRevealOperationBuilder::new()
                 .source(from.clone())
                 .public_key(
                     PublicKey::from_base58check(
                         &trezor_execute(
-                            trezor.as_mut().unwrap().get_public_key(key_path.as_ref().unwrap().clone())
-                        )
-                    ).unwrap()
+                            self.trezor().get_public_key(key_path),
+                        ),
+                    ).unwrap(),
                 )
                 .fee(fee.to_string())
-                .counter(counter.to_string())
+                .counter(self.get_counter(&from).to_string())
                 .gas_limit(50000.to_string())
-                .storage_limit(constants.hard_storage_limit_per_operation.to_string())
+                .storage_limit(50000.to_string())
                 .build()
                 .unwrap();
             operation_group = operation_group.with_reveal(reveal_op);
         }
 
-        let sig_info = {
-            if !use_trezor {
-                let _spinner = SpinnerBuilder::new()
-                    .with_prefix(style("[2/4]").bold().dim())
-                    .with_text("forging the operation and signing")
-                    .start();
-                let forged_operation = client.forge_operations(&head_block_hash, &operation_group).unwrap();
+        operation_group
+    }
 
-                let local_signer = {
-                    let (pub_key, priv_key) = match get_keys_by_pkh(&from) {
-                        Ok(keys) => keys,
-                        Err(_) => {
-                            exit_with_error(format!(
-                                "no local wallet with public key hash: {}",
-                                style(from.to_base58check()).bold()
-                            ));
-                        }
-                    };
-                    LocalSigner::new(pub_key, priv_key)
+    fn sign_operation(
+        &mut self,
+        operation_group: &NewOperationGroup,
+    ) -> OperationSignatureInfo {
+        let sig_info = if !self.use_trezor {
+            let _spinner = SpinnerBuilder::new()
+                .with_prefix(style("[2/4]").bold().dim())
+                .with_text("forging the operation and signing")
+                .start();
+            let forged_operation = self.api().forge_operations(&operation_group).unwrap();
+
+            let local_signer = {
+                let (pub_key, priv_key) = match get_keys_by_pkh(&self.from) {
+                    Ok(keys) => keys,
+                    Err(_) => {
+                        exit_with_error(format!(
+                            "no local wallet with public key hash: {}",
+                            style(&self.from).bold()
+                        ));
+                    }
                 };
+                LocalSigner::new(pub_key, priv_key)
+            };
 
-                local_signer.sign_operation(forged_operation.clone()).unwrap()
-            } else {
-                eprintln!(
-                    "{} -   {}",
-                    style("[2/4]").bold().dim(),
-                    "forging and signing transaction using Trezor",
-                );
-                let mut tx: TezosSignTx = operation_group.clone().into();
-                tx.set_address_n(key_path.unwrap().clone());
-                let result = OperationSignatureInfo::from(
-                    trezor_execute(trezor.as_mut().unwrap().sign_tx(tx))
-                );
+            local_signer.sign_operation(forged_operation.clone()).unwrap()
+        } else {
+            eprintln!(
+                "{} -   {}",
+                style("[2/4]").bold().dim(),
+                "forging and signing transaction using Trezor",
+            );
+            let mut tx: TezosSignTx = operation_group.clone().into();
+            tx.set_address_n(self.key_path.clone().unwrap());
+            let result = OperationSignatureInfo::from(
+                trezor_execute(self.trezor().sign_tx(tx))
+            );
 
-                Term::stderr().clear_last_lines(1).unwrap();
+            Term::stderr().clear_last_lines(1).unwrap();
 
-                result
-            }
+            result
         };
-        let signature = sig_info.signature.clone();
-        let operation_with_signature = sig_info.operation_with_signature.clone();
-        let operation_hash = sig_info.operation_hash.clone();
 
         eprintln!(
             "{} {} {}",
@@ -242,28 +290,10 @@ impl Transfer {
             "operation forged and signed",
         );
 
-        let spinner = SpinnerBuilder::new()
-            .with_prefix(style("[3/4]").bold().dim())
-            .with_text("applying and injecting the operation")
-            .start();
+        sig_info
+    }
 
-        client.preapply_operations(
-            &protocol_info.next_protocol_hash,
-            &head_block_hash,
-            &signature,
-            &operation_group,
-        ).unwrap();
-
-        client.inject_operations(&operation_with_signature).unwrap();
-
-        spinner.finish();
-        eprintln!(
-            "{} {} {}",
-            style("[3/4]").bold().green(),
-            emojies::TICK,
-            "applied and injected the operation",
-        );
-
+    fn confirm_operation(&mut self, operation_hash: &str) {
         let spinner = SpinnerBuilder::new()
             .with_prefix(style("[4/4]").bold().dim())
             .with_text("waiting for confirmation")
@@ -272,7 +302,7 @@ impl Transfer {
         for _ in 0..10 {
             thread::sleep(Duration::from_secs(2));
 
-            let status = client.get_pending_operation_status(&operation_hash).unwrap();
+            let status = self.api().get_pending_operation_status(&operation_hash).unwrap();
             match status {
                 PendingOperationStatus::Refused => {
                     exit_with_error("transaction refused");
@@ -292,10 +322,37 @@ impl Transfer {
             emojies::TICK,
             "operation confirmed",
         );
-        eprintln!();
+    }
+
+    pub fn execute(mut self) {
+        let operation_group = self.build_operation_group();
+        let OperationSignatureInfo {
+            operation_hash,
+            operation_with_signature,
+            signature,
+        } = self.sign_operation(&operation_group);
+
+        let spinner = SpinnerBuilder::new()
+            .with_prefix(style("[3/4]").bold().dim())
+            .with_text("applying and injecting the operation")
+            .start();
+
+        self.api().preapply_operations(&operation_group, &signature).unwrap();
+
+        self.api().inject_operations(&operation_with_signature).unwrap();
+
+        spinner.finish();
+        eprintln!(
+            "{} {} {}",
+            style("[3/4]").bold().green(),
+            emojies::TICK,
+            "applied and injected the operation",
+        );
+
+        self.confirm_operation(&operation_hash);
 
         eprintln!(
-            "  {}View operation at: {}/{}",
+            "\n  {}View operation at: {}/{}",
             emojies::FINGER_POINTER_RIGHT,
             style("https://delphinet.tezblock.io/transaction").cyan(),
             style(&operation_hash).cyan(),

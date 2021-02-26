@@ -7,15 +7,17 @@ use super::{NewOperation, NewRevealOperation, NewTransactionOperation};
 
 #[derive(Serialize, Debug, Clone)]
 pub struct NewOperationGroup {
-    branch: BlockHash,
-    reveal: Option<NewRevealOperation>,
-    transaction: Option<NewTransactionOperation>,
+    pub branch: BlockHash,
+    pub next_protocol_hash: String,
+    pub reveal: Option<NewRevealOperation>,
+    pub transaction: Option<NewTransactionOperation>,
 }
 
 impl NewOperationGroup {
-    pub fn new(branch: BlockHash) -> Self {
+    pub fn new(branch: BlockHash, next_protocol_hash: String) -> Self {
         Self {
             branch,
+            next_protocol_hash,
             reveal: None,
             transaction: None,
         }

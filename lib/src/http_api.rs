@@ -88,11 +88,11 @@ impl HttpApi {
 
     // TODO: add /monitor/bootstrapped  endpoint
 
-    fn forge_operations_url(&self, last_block_hash: &BlockHash) -> String {
+    fn forge_operations_url(&self, branch: &BlockHash) -> String {
         format!(
             "{}/chains/main/blocks/{}/helpers/forge/operations",
             self.base_url,
-            last_block_hash.to_base58check(),
+            branch.to_base58check(),
         )
     }
 
@@ -257,13 +257,12 @@ impl GetPendingOperationStatus for HttpApi {
 impl ForgeOperations for HttpApi {
     fn forge_operations(
         &self,
-        last_block_hash: &BlockHash,
         operation_group: &NewOperationGroup,
     ) -> ForgeOperationsResult
     {
-        Ok(self.client.post(&self.forge_operations_url(last_block_hash))
+        Ok(self.client.post(&self.forge_operations_url(&operation_group.branch))
            .send_json(ureq::json!({
-               "branch": last_block_hash,
+               "branch": &operation_group.branch,
                "contents": operation_group.to_operations_vec()
                    .into_iter()
                    .map(|op| NewOperationWithKind::from(op))
@@ -278,16 +277,14 @@ impl ForgeOperations for HttpApi {
 impl PreapplyOperations for HttpApi {
     fn preapply_operations(
         &self,
-        next_protocol_hash: &str,
-        last_block_hash: &BlockHash,
-        signature: &str,
         operation_group: &NewOperationGroup,
+        signature: &str,
     ) -> PreapplyOperationsResult
     {
         Ok(self.client.post(&self.preapply_operations_url())
            .send_json(ureq::json!([{
-               "protocol": next_protocol_hash,
-               "branch": last_block_hash,
+               "protocol": &operation_group.next_protocol_hash,
+               "branch": &operation_group.branch,
                "signature": signature,
                "contents": operation_group.to_operations_vec()
                    .into_iter()
