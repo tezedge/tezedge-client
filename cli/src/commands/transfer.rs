@@ -220,25 +220,30 @@ impl Transfer {
 
         if manager_key.is_none() {
             let key_path = self.key_path.clone().unwrap();
-            let reveal_op = NewRevealOperationBuilder::new()
+            let mut reveal_op = NewRevealOperationBuilder::new()
                 .source(from.clone())
-                .public_key(
+                .fee(fee.to_string())
+                .counter(self.get_counter(&from).to_string())
+                .gas_limit(50000.to_string())
+                .storage_limit(50000.to_string());
+
+            if self.use_trezor {
+                reveal_op = reveal_op.public_key(
                     PublicKey::from_base58check(
                         &trezor_execute(
                             self.trezor().get_public_key(key_path),
                         ),
                     ).unwrap(),
-                )
-                .fee(fee.to_string())
-                .counter(self.get_counter(&from).to_string())
-                .gas_limit(50000.to_string())
-                .storage_limit(50000.to_string())
-                .build()
-                .unwrap();
-            operation_group = operation_group.with_reveal(reveal_op);
+                );
+            } else {
+                reveal_op = reveal_op.public_key(
+                    get_keys_by_pkh(&self.from).unwrap().0,
+                );
+            }
+            operation_group.with_reveal(reveal_op.build().unwrap())
+        } else {
+            operation_group
         }
-
-        operation_group
     }
 
     fn sign_operation(
