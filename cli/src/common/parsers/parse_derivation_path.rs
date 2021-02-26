@@ -1,15 +1,4 @@
-use std::process;
-use std::fmt::Display;
-use console::style;
-
-pub fn exit_with_error<E: Display>(error: E) -> ! {
-    eprintln!(
-        "{} {}",
-        style("[ERROR]").red().bold(),
-        error,
-    );
-    process::exit(1)
-}
+use crate::common::exit_with_error;
 
 // TODO: better parsing
 pub fn parse_derivation_path(path: &str) -> Vec<u32> {
