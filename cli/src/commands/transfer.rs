@@ -134,7 +134,7 @@ impl Transfer {
         }
     }
 
-    fn get_amount(&self) -> String {
+    fn get_amount(&self) -> u64 {
         match parse_float_amount(&self.amount) {
             Ok(amount) => amount,
             Err(_) => {
@@ -146,7 +146,7 @@ impl Transfer {
         }
     }
 
-    fn get_fee(&self) -> String {
+    fn get_fee(&self) -> u64 {
         match parse_float_amount(&self.fee) {
             Ok(amount) => amount,
             Err(_) => {
@@ -209,11 +209,11 @@ impl Transfer {
         let tx_op = NewTransactionOperationBuilder::new()
             .source(from.clone())
             .destination(to.clone())
-            .amount(amount.to_string())
-            .fee(fee.to_string())
-            .counter(self.get_counter(&from).to_string())
-            .gas_limit(50000.to_string())
-            .storage_limit(50000.to_string())
+            .amount(amount)
+            .fee(fee)
+            .counter(self.get_counter(&from))
+            .gas_limit(50000)
+            .storage_limit(50000)
             .build()
             .unwrap();
         operation_group = operation_group.with_transaction(tx_op);
@@ -222,10 +222,10 @@ impl Transfer {
             let key_path = self.key_path.clone().unwrap();
             let mut reveal_op = NewRevealOperationBuilder::new()
                 .source(from.clone())
-                .fee(fee.to_string())
-                .counter(self.get_counter(&from).to_string())
-                .gas_limit(50000.to_string())
-                .storage_limit(50000.to_string());
+                .fee(fee)
+                .counter(self.get_counter(&from))
+                .gas_limit(50000)
+                .storage_limit(50000);
 
             if self.use_trezor {
                 reveal_op = reveal_op.public_key(

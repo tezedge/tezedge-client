@@ -7,11 +7,11 @@ use crate::PublicKeyHash;
 pub struct NewTransactionOperationBuilder {
     source: Option<PublicKeyHash>,
     destination: Option<PublicKeyHash>,
-    amount: Option<String>,
-    fee: Option<String>,
-    counter: Option<String>,
-    gas_limit: Option<String>,
-    storage_limit: Option<String>,
+    amount: Option<u64>,
+    fee: Option<u64>,
+    counter: Option<u64>,
+    gas_limit: Option<u64>,
+    storage_limit: Option<u64>,
 }
 
 impl NewTransactionOperationBuilder {
@@ -29,27 +29,27 @@ impl NewTransactionOperationBuilder {
         self
     }
 
-    pub fn amount(mut self, amount: String) -> Self {
+    pub fn amount(mut self, amount: u64) -> Self {
         self.amount = Some(amount);
         self
     }
 
-    pub fn fee(mut self, fee: String) -> Self {
+    pub fn fee(mut self, fee: u64) -> Self {
         self.fee = Some(fee);
         self
     }
 
-    pub fn counter(mut self, counter: String) -> Self {
+    pub fn counter(mut self, counter: u64) -> Self {
         self.counter = Some(counter);
         self
     }
 
-    pub fn gas_limit(mut self, gas_limit: String) -> Self {
+    pub fn gas_limit(mut self, gas_limit: u64) -> Self {
         self.gas_limit = Some(gas_limit);
         self
     }
 
-    pub fn storage_limit(mut self, storage_limit: String) -> Self {
+    pub fn storage_limit(mut self, storage_limit: u64) -> Self {
         self.storage_limit = Some(storage_limit);
         self
     }
@@ -86,16 +86,16 @@ impl Default for NewTransactionOperationBuilder {
 pub struct NewTransactionOperation {
     pub source: PublicKeyHash,
     pub destination: PublicKeyHash,
-    // TODO: replace with u64
-    pub amount: String,
-    // TODO: replace with u64
-    pub fee: String,
-    // TODO: replace with u64
-    pub counter: String,
-    // TODO: replace with u64
-    pub gas_limit: String,
-    // TODO: replace with u64
-    pub storage_limit: String,
+    #[serde(with = "crate::utils::serde_amount")]
+    pub amount: u64,
+    #[serde(with = "crate::utils::serde_amount")]
+    pub fee: u64,
+    #[serde(with = "crate::utils::serde_str")]
+    pub counter: u64,
+    #[serde(with = "crate::utils::serde_str")]
+    pub gas_limit: u64,
+    #[serde(with = "crate::utils::serde_str")]
+    pub storage_limit: u64,
 }
 
 impl Into<TezosSignTx_TezosTransactionOp> for NewTransactionOperation {
@@ -112,18 +112,15 @@ impl Into<TezosSignTx_TezosTransactionOp> for NewTransactionOperation {
         let mut destination = TezosSignTx_TezosContractID::new();
         destination.set_tag(trezor_api::protos::TezosSignTx_TezosContractID_TezosContractType::Implicit);
         destination.set_hash(dest);
-        // let mut destination: Vec<_> = self.destination.into();
-        // implicit public key hash prefix prefix
-        // source.insert(0, 0);
 
         new_tx.set_source(source);
         new_tx.set_destination(destination);
 
-        new_tx.set_counter(self.counter.parse().unwrap());
-        new_tx.set_fee(self.fee.parse().unwrap());
-        new_tx.set_amount(self.amount.parse().unwrap());
-        new_tx.set_gas_limit(self.gas_limit.parse().unwrap());
-        new_tx.set_storage_limit(self.storage_limit.parse().unwrap());
+        new_tx.set_counter(self.counter);
+        new_tx.set_fee(self.fee);
+        new_tx.set_amount(self.amount);
+        new_tx.set_gas_limit(self.gas_limit);
+        new_tx.set_storage_limit(self.storage_limit);
 
         new_tx
     }

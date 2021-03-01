@@ -7,10 +7,10 @@ use crate::{PublicKey, PublicKeyHash};
 pub struct NewRevealOperationBuilder {
     source: Option<PublicKeyHash>,
     public_key: Option<PublicKey>,
-    fee: Option<String>,
-    counter: Option<String>,
-    gas_limit: Option<String>,
-    storage_limit: Option<String>,
+    fee: Option<u64>,
+    counter: Option<u64>,
+    gas_limit: Option<u64>,
+    storage_limit: Option<u64>,
 }
 
 impl NewRevealOperationBuilder {
@@ -28,22 +28,22 @@ impl NewRevealOperationBuilder {
         self
     }
 
-    pub fn fee(mut self, fee: String) -> Self {
+    pub fn fee(mut self, fee: u64) -> Self {
         self.fee = Some(fee);
         self
     }
 
-    pub fn counter(mut self, counter: String) -> Self {
+    pub fn counter(mut self, counter: u64) -> Self {
         self.counter = Some(counter);
         self
     }
 
-    pub fn gas_limit(mut self, gas_limit: String) -> Self {
+    pub fn gas_limit(mut self, gas_limit: u64) -> Self {
         self.gas_limit = Some(gas_limit);
         self
     }
 
-    pub fn storage_limit(mut self, storage_limit: String) -> Self {
+    pub fn storage_limit(mut self, storage_limit: u64) -> Self {
         self.storage_limit = Some(storage_limit);
         self
     }
@@ -78,10 +78,14 @@ impl Default for NewRevealOperationBuilder {
 pub struct NewRevealOperation {
     pub source: PublicKeyHash,
     pub public_key: PublicKey,
-    pub fee: String,
-    pub counter: String,
-    pub gas_limit: String,
-    pub storage_limit: String,
+    #[serde(with = "crate::utils::serde_amount")]
+    pub fee: u64,
+    #[serde(with = "crate::utils::serde_str")]
+    pub counter: u64,
+    #[serde(with = "crate::utils::serde_str")]
+    pub gas_limit: u64,
+    #[serde(with = "crate::utils::serde_str")]
+    pub storage_limit: u64,
 }
 
 impl Into<TezosSignTx_TezosRevealOp> for NewRevealOperation {
@@ -91,16 +95,16 @@ impl Into<TezosSignTx_TezosRevealOp> for NewRevealOperation {
         let mut source: Vec<_> = self.source.into();
         // implicit public key prefix prefix
         source.insert(0, 0);
-        
+
         let mut public_key = self.public_key.as_ref().to_vec();
         public_key.insert(0, 0);
 
         new_op.set_source(source);
         new_op.set_public_key(public_key);
-        new_op.set_counter(self.counter.parse().unwrap());
-        new_op.set_fee(self.fee.parse().unwrap());
-        new_op.set_gas_limit(self.gas_limit.parse().unwrap());
-        new_op.set_storage_limit(self.storage_limit.parse().unwrap());
+        new_op.set_counter(self.counter);
+        new_op.set_fee(self.fee);
+        new_op.set_gas_limit(self.gas_limit);
+        new_op.set_storage_limit(self.storage_limit);
 
         new_op
     }
