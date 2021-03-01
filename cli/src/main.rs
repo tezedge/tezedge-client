@@ -15,5 +15,6 @@ fn main() {
     match command {
         Command::Address(c) => c.execute(),
         Command::Transfer(c) => c.execute(),
+        Command::Delegate(c) => c.execute(),
     }
 }

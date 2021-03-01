@@ -5,7 +5,7 @@ use console::{style, Term};
 
 use lib::{
     BlockHash, PublicKeyHash, PublicKey, PrivateKey,
-    NewRevealOperationBuilder, NewTransactionOperationBuilder, NewOperationGroup,
+    NewDelegationOperationBuilder, NewRevealOperationBuilder, NewOperationGroup,
 };
 use lib::utils::parse_float_amount;
 use lib::signer::{SignOperation, LocalSigner, OperationSignatureInfo};
@@ -18,11 +18,9 @@ use crate::common::{exit_with_error, parse_derivation_path};
 use crate::emojies;
 use crate::trezor::trezor_execute;
 
-/// Create a transaction
-///
-/// Outputs transaction hash to stdout in case of success.
+/// Delegate balance to baker
 #[derive(StructOpt)]
-pub struct Transfer {
+pub struct Delegate {
     /// Verbose mode (-v, -vv, -vvv, etc.)
     #[structopt(short, long, parse(from_occurrences))]
     pub verbose: u8,
@@ -33,7 +31,7 @@ pub struct Transfer {
     #[structopt(long = "trezor")]
     pub use_trezor: bool,
 
-    /// Address to transfer tezos from.
+    /// Address to delegate tezos from.
     ///
     /// Can either be public key hash: tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU
     ///
@@ -43,9 +41,6 @@ pub struct Transfer {
 
     #[structopt(short, long)]
     pub to: String,
-
-    #[structopt(short, long)]
-    pub amount: String,
 
     #[structopt(long)]
     pub fee: String,
@@ -79,7 +74,7 @@ fn get_keys_by_pkh(pkh: &String) -> Result<(PublicKey, PrivateKey), ()> {
     ))
 }
 
-impl Transfer {
+impl Delegate {
     fn api(&mut self) -> &mut HttpApi {
         let endpoint = self.endpoint.clone();
         self._api.get_or_insert_with(|| {
@@ -136,18 +131,6 @@ impl Transfer {
         }
     }
 
-    fn get_amount(&self) -> u64 {
-        match parse_float_amount(&self.amount) {
-            Ok(amount) => amount,
-            Err(_) => {
-                exit_with_error(format!(
-                    "invalid amount: {}",
-                    style(&self.amount).bold()
-                ));
-            }
-        }
-    }
-
     fn get_fee(&self) -> u64 {
         match parse_float_amount(&self.fee) {
             Ok(amount) => amount,
@@ -183,7 +166,6 @@ impl Transfer {
     fn build_operation_group(&mut self) -> NewOperationGroup {
         let from = self.get_from_pkh();
         let to = self.get_to_pkh();
-        let amount = self.get_amount();
         let fee = self.get_fee();
 
         let spinner = SpinnerBuilder::new()
@@ -208,17 +190,16 @@ impl Transfer {
             protocol_info.next_protocol_hash,
         );
 
-        let tx_op = NewTransactionOperationBuilder::new()
+        let delegation_op = NewDelegationOperationBuilder::new()
             .source(from.clone())
-            .destination(to.clone())
-            .amount(amount)
+            .delegate_to(to.clone())
             .fee(fee)
             .counter(self.get_counter(&from))
             .gas_limit(50000)
             .storage_limit(50000)
             .build()
             .unwrap();
-        operation_group = operation_group.with_transaction(tx_op);
+        operation_group = operation_group.with_delegation(delegation_op);
 
         if manager_key.is_none() {
             let key_path = self.key_path.clone().unwrap();
