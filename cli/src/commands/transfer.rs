@@ -221,7 +221,6 @@ impl Transfer {
         operation_group = operation_group.with_transaction(tx_op);
 
         if manager_key.is_none() {
-            let key_path = self.key_path.clone().unwrap();
             let mut reveal_op = NewRevealOperationBuilder::new()
                 .source(from.clone())
                 .fee(fee)
@@ -230,6 +229,7 @@ impl Transfer {
                 .storage_limit(50000);
 
             if self.use_trezor {
+                let key_path = self.key_path.clone().unwrap();
                 reveal_op = reveal_op.public_key(
                     PublicKey::from_base58check(
                         &trezor_execute(
