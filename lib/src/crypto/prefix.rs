@@ -1,6 +1,7 @@
 use failure::Fail;
 
 #[allow(non_camel_case_types)]
+#[derive(Debug, Clone, Copy)]
 pub enum Prefix {
     tz1,
     tz2,
@@ -14,6 +15,39 @@ pub enum Prefix {
     edsk32,
     edsig,
     operation,
+}
+
+impl Prefix {
+    /// Find the matching prefix for given bytes.
+    pub fn of(value: &[u8]) -> Option<Prefix> {
+        if value.starts_with(Prefix::tz1.as_ref()) {
+            Some(Prefix::tz1)
+        } else if value.starts_with(Prefix::tz2.as_ref()) {
+            Some(Prefix::tz2)
+        } else if value.starts_with(Prefix::tz3.as_ref()) {
+            Some(Prefix::tz3)
+        } else if value.starts_with(Prefix::KT1.as_ref()) {
+            Some(Prefix::KT1)
+        } else if value.starts_with(Prefix::B.as_ref()) {
+            Some(Prefix::B)
+        } else if value.starts_with(Prefix::edpk.as_ref()) {
+            Some(Prefix::edpk)
+        } else if value.starts_with(Prefix::sppk.as_ref()) {
+            Some(Prefix::sppk)
+        } else if value.starts_with(Prefix::p2pk.as_ref()) {
+            Some(Prefix::p2pk)
+        } else if value.starts_with(Prefix::edsk64.as_ref()) {
+            Some(Prefix::edsk64)
+        } else if value.starts_with(Prefix::edsk32.as_ref()) {
+            Some(Prefix::edsk32)
+        } else if value.starts_with(Prefix::edsig.as_ref()) {
+            Some(Prefix::edsig)
+        } else if value.starts_with(Prefix::operation.as_ref()) {
+            Some(Prefix::operation)
+        } else {
+            None
+        }
+    }
 }
 
 impl AsRef<[u8]> for Prefix {
@@ -57,12 +91,23 @@ impl WithPrefix for [u8] {
 pub trait WithoutPrefix {
     type Target;
 
+    /// remove any known `Prefix`
+    fn without_any_prefix(&self) -> Result<(Prefix, Self::Target), NotMatchingPrefixError>;
+
     /// returns value with prefix removed.
     fn without_prefix(&self, prefix: Prefix) -> Result<Self::Target, NotMatchingPrefixError>;
 }
 
 impl WithoutPrefix for [u8] {
     type Target = Vec<u8>;
+
+    fn without_any_prefix(&self) -> Result<(Prefix, Self::Target), NotMatchingPrefixError> {
+        if let Some(prefix) = Prefix::of(self) {
+            Ok((prefix, self.without_prefix(prefix)?))
+        } else {
+            Err(NotMatchingPrefixError)
+        }
+    }
 
     fn without_prefix(&self, prefix: Prefix) -> Result<Self::Target, NotMatchingPrefixError> {
         let prefix_bytes: &[u8] = prefix.as_ref();

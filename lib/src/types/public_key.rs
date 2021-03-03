@@ -7,24 +7,35 @@ use super::FromPrefixedBase58CheckError;
 
 type PublicKeyInner = [u8; 32];
 
-#[derive(Debug, Clone)]
-pub struct PublicKey(PublicKeyInner);
+#[allow(non_camel_case_types)]
+#[derive(PartialEq, Debug, Clone)]
+pub enum PublicKey {
+    edpk(PublicKeyInner),
+    sppk(PublicKeyInner),
+    p2pk(PublicKeyInner),
+}
 
 impl PublicKey {
     pub fn from_base58check(encoded: &str) -> Result<Self, FromPrefixedBase58CheckError> {
-        let key_bytes: PublicKeyInner = encoded
+        let (prefix, bytes_vec) = encoded
             .from_base58check()?
-            .without_prefix(Prefix::edpk)?
-            .try_into()
+            .without_any_prefix()?;
+
+        let inner = bytes_vec.try_into()
             .or(Err(FromPrefixedBase58CheckError::InvalidSize))?;
 
-        Ok(Self(key_bytes))
+        match prefix {
+            Prefix::edpk => Ok(Self::edpk(inner)),
+            Prefix::sppk => Ok(Self::sppk(inner)),
+            Prefix::p2pk => Ok(Self::p2pk(inner)),
+            _ => Err(FromPrefixedBase58CheckError::NotMatchingPrefix)
+        }
     }
 }
 
 impl ToBase58Check for PublicKey {
     fn to_base58check(&self) -> String {
-        self.0
+        self.as_ref()
             .with_prefix(Prefix::edpk)
             .to_base58check()
     }
@@ -32,7 +43,11 @@ impl ToBase58Check for PublicKey {
 
 impl AsRef<PublicKeyInner> for PublicKey {
     fn as_ref(&self) -> &PublicKeyInner {
-        &self.0
+        match self {
+            Self::edpk(k) => &k,
+            Self::sppk(k) => &k,
+            Self::p2pk(k) => &k,
+        }
     }
 }
 

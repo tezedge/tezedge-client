@@ -6,6 +6,9 @@ use crate::PublicKeyHash;
 #[derive(Debug, Clone)]
 pub struct NewDelegationOperationBuilder {
     source: Option<PublicKeyHash>,
+    /// Optional.
+    ///
+    /// If set to `None`, account will stop delegating to anyone.
     delegate_to: Option<PublicKeyHash>,
     fee: Option<u64>,
     counter: Option<u64>,
@@ -52,7 +55,7 @@ impl NewDelegationOperationBuilder {
         // TODO: proper error handling
         Ok(NewDelegationOperation {
             source: self.source.unwrap(),
-            delegate_to: self.delegate_to.unwrap(),
+            delegate_to: self.delegate_to,
             fee: self.fee.unwrap(),
             counter: self.counter.unwrap(),
             gas_limit: self.gas_limit.unwrap(),
@@ -78,7 +81,7 @@ impl Default for NewDelegationOperationBuilder {
 pub struct NewDelegationOperation {
     pub source: PublicKeyHash,
     #[serde(rename = "delegate")]
-    pub delegate_to: PublicKeyHash,
+    pub delegate_to: Option<PublicKeyHash>,
     #[serde(with = "crate::utils::serde_amount")]
     pub fee: u64,
     #[serde(with = "crate::utils::serde_str")]
@@ -94,16 +97,18 @@ impl Into<TezosSignTx_TezosDelegationOp> for NewDelegationOperation {
         let mut new_op = TezosSignTx_TezosDelegationOp::new();
 
         let mut source: Vec<_> = self.source.into();
-        // implicit public key hash prefix prefix
+        // implicit public key hash prefix prefix.
+        // TODO: research what this prefix is (maybe other types need other prefix).
         source.insert(0, 0);
 
-        let mut delegate_to: Vec<_> = self.delegate_to.into();
-        // implicit public key hash prefix prefix
-        delegate_to.insert(0, 0);
+        if let Some(delegate_to) = self.delegate_to {
+            let mut delegate_to: Vec<_> = delegate_to.into();
+            // implicit public key hash prefix prefix
+            delegate_to.insert(0, 0);
+            new_op.set_delegate(delegate_to);
+        }
 
         new_op.set_source(source);
-        new_op.set_delegate(delegate_to);
-
         new_op.set_counter(self.counter);
         new_op.set_fee(self.fee);
         new_op.set_gas_limit(self.gas_limit);
