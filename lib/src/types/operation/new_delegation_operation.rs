@@ -1,15 +1,15 @@
 use serde::{Serialize, Deserialize};
 use trezor_api::protos::TezosSignTx_TezosDelegationOp;
 
-use crate::PublicKeyHash;
+use crate::{Address, ImplicitAddress};
 
 #[derive(Debug, Clone)]
 pub struct NewDelegationOperationBuilder {
-    source: Option<PublicKeyHash>,
+    source: Option<ImplicitAddress>,
     /// Optional.
     ///
     /// If set to `None`, account will stop delegating to anyone.
-    delegate_to: Option<PublicKeyHash>,
+    delegate_to: Option<ImplicitAddress>,
     fee: Option<u64>,
     counter: Option<u64>,
     gas_limit: Option<u64>,
@@ -21,12 +21,12 @@ impl NewDelegationOperationBuilder {
         Default::default()
     }
 
-    pub fn source(mut self, source: PublicKeyHash) -> Self {
+    pub fn source(mut self, source: ImplicitAddress) -> Self {
         self.source = Some(source);
         self
     }
 
-    pub fn delegate_to(mut self, to: PublicKeyHash) -> Self {
+    pub fn delegate_to(mut self, to: ImplicitAddress) -> Self {
         self.delegate_to = Some(to);
         self
     }
@@ -79,9 +79,9 @@ impl Default for NewDelegationOperationBuilder {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NewDelegationOperation {
-    pub source: PublicKeyHash,
+    pub source: ImplicitAddress,
     #[serde(rename = "delegate")]
-    pub delegate_to: Option<PublicKeyHash>,
+    pub delegate_to: Option<ImplicitAddress>,
     #[serde(with = "crate::utils::serde_amount")]
     pub fee: u64,
     #[serde(with = "crate::utils::serde_str")]

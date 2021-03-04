@@ -4,8 +4,14 @@ pub use from_prefixed_base58check_error::*;
 mod block_hash;
 pub use block_hash::*;
 
-mod public_key_hash;
-pub use public_key_hash::*;
+mod implicit_address;
+pub use implicit_address::*;
+
+mod originated_address;
+pub use originated_address::*;
+
+mod address;
+pub use address::*;
 
 mod public_key;
 pub use public_key::*;

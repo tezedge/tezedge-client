@@ -24,7 +24,7 @@ pub struct GetAddress {
 impl GetAddress {
     pub fn execute(self) {
         let path = parse_derivation_path(&self.path);
-        let address = crate::trezor::get_pkh(
+        let address = crate::trezor::get_address(
             &mut crate::trezor::find_device_and_connect(),
             path,
         ).to_base58check();

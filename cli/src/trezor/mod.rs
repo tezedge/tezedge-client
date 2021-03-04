@@ -1,5 +1,5 @@
-mod get_pkh;
-pub use get_pkh::*;
+mod get_address;
+pub use get_address::*;
 
 mod execute;
 pub use execute::*;

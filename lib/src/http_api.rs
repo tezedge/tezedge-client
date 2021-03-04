@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use serde_json::Value as SerdeValue;
 
-use crate::{BlockHash, NewOperationGroup, NewOperationWithKind, PublicKeyHash, ToBase58Check};
+use crate::{BlockHash, NewOperationGroup, NewOperationWithKind, Address, ToBase58Check};
 use crate::api::{
     GetVersionInfo, GetVersionInfoResult, VersionInfo, NodeVersion, NetworkVersion, CommitInfo,
     GetConstants, GetConstantsResult,
@@ -62,7 +62,7 @@ impl HttpApi {
         )
     }
 
-    fn get_counter_for_key_url(&self, key: &PublicKeyHash) -> String {
+    fn get_counter_for_key_url(&self, key: &Address) -> String {
         format!(
             "{}/chains/main/blocks/head/context/contracts/{}/counter",
             self.base_url,
@@ -71,11 +71,11 @@ impl HttpApi {
     }
 
     /// Get manager key
-    fn get_manager_key_url(&self, pkh: &PublicKeyHash) -> String {
+    fn get_manager_key_url(&self, addr: &Address) -> String {
         format!(
             "{}/chains/main/blocks/head/context/contracts/{}/manager_key",
             self.base_url,
-            pkh.to_base58check(),
+            addr.to_base58check(),
         )
     }
 
@@ -196,7 +196,7 @@ impl GetChainID for HttpApi {
 }
 
 impl GetCounterForKey for HttpApi {
-    fn get_counter_for_key(&self, key: &PublicKeyHash) -> GetCounterForKeyResult {
+    fn get_counter_for_key(&self, key: &Address) -> GetCounterForKeyResult {
         Ok(self.client.get(&self.get_counter_for_key_url(key))
            .call()
            .unwrap()
@@ -209,8 +209,8 @@ impl GetCounterForKey for HttpApi {
 
 // TODO: receiving NULL, probably because node isn't synced
 impl GetManagerKey for HttpApi {
-    fn get_manager_key(&self, pkh: &PublicKeyHash) -> GetManagerKeyResult {
-        Ok(self.client.get(&self.get_manager_key_url(pkh))
+    fn get_manager_key(&self, addr: &Address) -> GetManagerKeyResult {
+        Ok(self.client.get(&self.get_manager_key_url(addr))
            .call()
            .unwrap()
            .into_json::<Option<String>>()

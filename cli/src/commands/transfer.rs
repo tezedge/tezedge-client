@@ -4,7 +4,7 @@ use structopt::StructOpt;
 use console::{style, Term};
 
 use lib::{
-    BlockHash, PublicKeyHash, PublicKey, PrivateKey,
+    BlockHash, Address, PublicKey, PrivateKey,
     NewRevealOperationBuilder, NewTransactionOperationBuilder, NewOperationGroup,
 };
 use lib::utils::parse_float_amount;
@@ -66,8 +66,8 @@ pub struct Transfer {
 }
 
 // TODO: replace with query to persistent encrypted store for keys
-fn get_keys_by_pkh(pkh: &String) -> Result<(PublicKey, PrivateKey), ()> {
-    if pkh != "tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU" {
+fn get_keys_by_addr(addr: &String) -> Result<(PublicKey, PrivateKey), ()> {
+    if addr != "tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU" {
         return Err(());
     }
     let pub_key = "edpktywJsAeturPxoFkDEerF6bi7N41ZnQyMrmNLQ3GZx2w6nn8eCZ";
@@ -93,7 +93,7 @@ impl Transfer {
         })
     }
 
-    fn get_from_pkh(&mut self) -> PublicKeyHash {
+    fn get_from_addr(&mut self) -> Address {
         if self.use_trezor {
             let raw_key_path = &self.from;
 
@@ -108,10 +108,10 @@ impl Transfer {
 
             let key_path = parse_derivation_path(raw_key_path);
             self.key_path = Some(key_path.clone());
-            crate::trezor::get_pkh(self.trezor(), key_path)
+            crate::trezor::get_address(self.trezor(), key_path).into()
         } else {
-            match PublicKeyHash::from_base58check(&self.from) {
-                Ok(pkh) => pkh,
+            match Address::from_base58check(&self.from) {
+                Ok(addr) => addr,
                 Err(_) => {
                     exit_with_error(format!(
                         "invalid {} public key hash: {}",
@@ -123,9 +123,9 @@ impl Transfer {
         }
     }
 
-    fn get_to_pkh(&self) -> PublicKeyHash {
-        match PublicKeyHash::from_base58check(&self.to) {
-            Ok(pkh) => pkh,
+    fn get_to_addr(&self) -> Address {
+        match Address::from_base58check(&self.to) {
+            Ok(addr) => addr,
             Err(_) => {
                 exit_with_error(format!(
                     "invalid {} public key hash: {}",
@@ -168,21 +168,21 @@ impl Transfer {
         self.api().get_head_block_hash().unwrap()
     }
 
-    fn get_counter(&mut self, pkh: &PublicKeyHash) -> u64 {
+    fn get_counter(&mut self, addr: &Address) -> u64 {
         let counter = self.counter.unwrap_or_else(|| {
-            self.api().get_counter_for_key(&pkh).unwrap()
+            self.api().get_counter_for_key(&addr).unwrap()
         }) + 1;
         self.counter = Some(counter);
         counter
     }
 
-    fn get_manager_key(&mut self, pkh: &PublicKeyHash) -> Option<String> {
-        self.api().get_manager_key(&pkh).unwrap()
+    fn get_manager_key(&mut self, addr: &Address) -> Option<String> {
+        self.api().get_manager_key(&addr).unwrap()
     }
 
     fn build_operation_group(&mut self) -> NewOperationGroup {
-        let from = self.get_from_pkh();
-        let to = self.get_to_pkh();
+        let from = self.get_from_addr();
+        let to = self.get_to_addr();
         let amount = self.get_amount();
         let fee = self.get_fee();
 
@@ -209,7 +209,7 @@ impl Transfer {
         );
 
         let tx_op = NewTransactionOperationBuilder::new()
-            .source(from.clone())
+            .source(from.clone().as_implicit().unwrap())
             .destination(to.clone())
             .amount(amount)
             .fee(fee)
@@ -220,9 +220,9 @@ impl Transfer {
             .unwrap();
         operation_group = operation_group.with_transaction(tx_op);
 
-        if manager_key.is_none() {
+        if from.is_implicit() && manager_key.is_none() {
             let mut reveal_op = NewRevealOperationBuilder::new()
-                .source(from.clone())
+                .source(from.clone().as_implicit().unwrap())
                 .fee(fee)
                 .counter(self.get_counter(&from))
                 .gas_limit(50000)
@@ -239,7 +239,7 @@ impl Transfer {
                 );
             } else {
                 reveal_op = reveal_op.public_key(
-                    get_keys_by_pkh(&self.from).unwrap().0,
+                    get_keys_by_addr(&self.from).unwrap().0,
                 );
             }
             operation_group.with_reveal(reveal_op.build().unwrap())
@@ -260,7 +260,7 @@ impl Transfer {
             let forged_operation = self.api().forge_operations(&operation_group).unwrap();
 
             let local_signer = {
-                let (pub_key, priv_key) = match get_keys_by_pkh(&self.from) {
+                let (pub_key, priv_key) = match get_keys_by_addr(&self.from) {
                     Ok(keys) => keys,
                     Err(_) => {
                         exit_with_error(format!(

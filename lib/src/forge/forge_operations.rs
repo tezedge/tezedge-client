@@ -1,5 +1,6 @@
 use crate::{
-    NewOperationGroup, NewOperation, PublicKey, PublicKeyHash,
+    Address, ImplicitAddress, OriginatedAddress,
+    NewOperationGroup, NewOperation, PublicKey,
     NewDelegationOperation, NewRevealOperation, NewTransactionOperation,
 };
 use super::{Forge, ForgeNat, Forged};
@@ -26,22 +27,43 @@ impl ForgeNat for OperationTag {
     }
 }
 
-fn forge_address(pkh: &PublicKeyHash, compact: bool) -> Forged {
-    let bytes = match pkh {
-        PublicKeyHash::tz1(key) => [vec![0, 0], key.to_vec()].concat(),
-        PublicKeyHash::tz2(key) => [vec![0, 1], key.to_vec()].concat(),
-        PublicKeyHash::tz3(key) => [vec![0, 2], key.to_vec()].concat(),
-        PublicKeyHash::KT1(key) => [vec![1], key.to_vec(), vec![0]].concat(),
-    };
-    Forged(if compact { bytes[1..].to_vec() } else { bytes })
+impl Forge for ImplicitAddress {
+    /// Forge an implicit(tz1, tz2, tz3) address.
+    fn forge(&self) -> Forged {
+        Forged(match self {
+            ImplicitAddress::tz1(key) => [vec![0], key.to_vec()].concat(),
+            ImplicitAddress::tz2(key) => [vec![1], key.to_vec()].concat(),
+            ImplicitAddress::tz3(key) => [vec![2], key.to_vec()].concat(),
+        })
+    }
 }
 
-fn forge_delegate_pkh(pkh: &Option<PublicKeyHash>) -> Forged {
-    Forged(match pkh.as_ref() {
-        Some(pkh) => {
+impl Forge for Address {
+    /// Forge implicit(tz1, tz2, tz3) or originated(KT1) address.
+    ///
+    /// Some fields that don't allow KT1 address, `ImplicitAddress::forge()`
+    /// should be used instead as this adds extra prefix `0` to output
+    /// and the result will be invalid.
+    fn forge(&self) -> Forged {
+        Forged(match self {
+            Address::Implicit(addr) => {
+                [vec![0], addr.forge().take()].concat()
+            }
+            Address::Originated(key) => {
+                [vec![1], key.as_ref().to_vec(), vec![0]].concat()
+            }
+        })
+    }
+}
+
+/// Address needs to be implicit(tz1, tz2, tz3). To delegate from originated(KT1) address
+/// use [NewTransactionParameters::SetDelegate](crate::NewTransactionParameters::SetDelegate)
+fn forge_delegate_addr(addr: &Option<ImplicitAddress>) -> Forged {
+    Forged(match addr.as_ref() {
+        Some(addr) => {
             [
                 true.forge().take(),
-                forge_address(pkh, true).take(),
+                addr.forge().take(),
             ].concat()
         }
         None => false.forge().take(),
@@ -58,12 +80,11 @@ impl Forge for PublicKey {
     }
 }
 
-
 impl Forge for NewRevealOperation {
     fn forge(&self) -> Forged {
         Forged([
             OperationTag::Reveal.forge_nat().take(),
-            forge_address(&self.source, true).take(),
+            self.source.forge().take(),
             self.fee.forge_nat().take(),
             self.counter.forge_nat().take(),
             self.gas_limit.forge_nat().take(),
@@ -77,13 +98,13 @@ impl Forge for NewTransactionOperation {
     fn forge(&self) -> Forged {
         Forged([
             OperationTag::Transaction.forge_nat().take(),
-            forge_address(&self.source, true).take(),
+            self.source.forge().take(),
             self.fee.forge_nat().take(),
             self.counter.forge_nat().take(),
             self.gas_limit.forge_nat().take(),
             self.storage_limit.forge_nat().take(),
             self.amount.forge_nat().take(),
-            forge_address(&self.destination, false).take(),
+            self.destination.forge().take(),
             // TODO: replace with forging parameters. At the moment
             // no additional parameters are used, when they will be,
             // this needs to be changed as well.
@@ -96,12 +117,12 @@ impl Forge for NewDelegationOperation {
     fn forge(&self) -> Forged {
         Forged([
             OperationTag::Delegation.forge_nat().take(),
-            forge_address(&self.source, true).take(),
+            self.source.forge().take(),
             self.fee.forge_nat().take(),
             self.counter.forge_nat().take(),
             self.gas_limit.forge_nat().take(),
             self.storage_limit.forge_nat().take(),
-            forge_delegate_pkh(&self.delegate_to).take()
+            forge_delegate_addr(&self.delegate_to).take()
         ].concat())
     }
 }

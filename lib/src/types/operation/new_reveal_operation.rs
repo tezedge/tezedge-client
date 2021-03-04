@@ -1,11 +1,11 @@
 use serde::Serialize;
 use trezor_api::protos::TezosSignTx_TezosRevealOp;
 
-use crate::{PublicKey, PublicKeyHash};
+use crate::{PublicKey, ImplicitAddress};
 
 #[derive(Debug, Clone)]
 pub struct NewRevealOperationBuilder {
-    source: Option<PublicKeyHash>,
+    source: Option<ImplicitAddress>,
     public_key: Option<PublicKey>,
     fee: Option<u64>,
     counter: Option<u64>,
@@ -18,7 +18,7 @@ impl NewRevealOperationBuilder {
         Default::default()
     }
 
-    pub fn source(mut self, source: PublicKeyHash) -> Self {
+    pub fn source(mut self, source: ImplicitAddress) -> Self {
         self.source = Some(source);
         self
     }
@@ -76,7 +76,7 @@ impl Default for NewRevealOperationBuilder {
 
 #[derive(Serialize, Debug, Clone)]
 pub struct NewRevealOperation {
-    pub source: PublicKeyHash,
+    pub source: ImplicitAddress,
     pub public_key: PublicKey,
     #[serde(with = "crate::utils::serde_amount")]
     pub fee: u64,

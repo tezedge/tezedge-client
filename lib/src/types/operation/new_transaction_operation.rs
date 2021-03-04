@@ -1,12 +1,12 @@
 use serde::{Serialize, Deserialize};
 use trezor_api::protos::{TezosSignTx_TezosContractID, TezosSignTx_TezosTransactionOp};
 
-use crate::PublicKeyHash;
+use crate::{Address, ImplicitAddress};
 
 #[derive(Debug, Clone)]
 pub struct NewTransactionOperationBuilder {
-    source: Option<PublicKeyHash>,
-    destination: Option<PublicKeyHash>,
+    source: Option<ImplicitAddress>,
+    destination: Option<Address>,
     amount: Option<u64>,
     fee: Option<u64>,
     counter: Option<u64>,
@@ -19,12 +19,12 @@ impl NewTransactionOperationBuilder {
         Default::default()
     }
 
-    pub fn source(mut self, source: PublicKeyHash) -> Self {
+    pub fn source(mut self, source: ImplicitAddress) -> Self {
         self.source = Some(source);
         self
     }
 
-    pub fn destination(mut self, destination: PublicKeyHash) -> Self {
+    pub fn destination(mut self, destination: Address) -> Self {
         self.destination = Some(destination);
         self
     }
@@ -84,8 +84,8 @@ impl Default for NewTransactionOperationBuilder {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NewTransactionOperation {
-    pub source: PublicKeyHash,
-    pub destination: PublicKeyHash,
+    pub source: ImplicitAddress,
+    pub destination: Address,
     #[serde(with = "crate::utils::serde_amount")]
     pub amount: u64,
     #[serde(with = "crate::utils::serde_amount")]
