@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 use trezor_api::protos::{TezosSignTx_TezosContractID, TezosSignTx_TezosTransactionOp};
 
-use crate::{Address, ImplicitAddress};
+use crate::{Forge, Address, ImplicitAddress, NewTransactionParameters};
 
 #[derive(Debug, Clone)]
 pub struct NewTransactionOperationBuilder {
@@ -102,20 +102,8 @@ impl Into<TezosSignTx_TezosTransactionOp> for NewTransactionOperation {
     fn into(self) -> TezosSignTx_TezosTransactionOp {
         let mut new_tx = TezosSignTx_TezosTransactionOp::new();
 
-        let mut source: Vec<_> = self.source.into();
-        // implicit public key hash prefix prefix
-        source.insert(0, 0);
-
-        let mut dest: Vec<_> = self.destination.into();
-        // implicit public key hash prefix prefix
-        dest.insert(0, 0);
-        let mut destination = TezosSignTx_TezosContractID::new();
-        destination.set_tag(trezor_api::protos::TezosSignTx_TezosContractID_TezosContractType::Implicit);
-        destination.set_hash(dest);
-
-        new_tx.set_source(source);
-        new_tx.set_destination(destination);
-
+        new_tx.set_source(self.source.forge().take());
+        new_tx.set_destination(self.destination.into());
         new_tx.set_counter(self.counter);
         new_tx.set_fee(self.fee);
         new_tx.set_amount(self.amount);

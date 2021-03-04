@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 use trezor_api::protos::TezosSignTx_TezosDelegationOp;
 
-use crate::{Address, ImplicitAddress};
+use crate::{Forge, Address, ImplicitAddress};
 
 #[derive(Debug, Clone)]
 pub struct NewDelegationOperationBuilder {
@@ -96,19 +96,11 @@ impl Into<TezosSignTx_TezosDelegationOp> for NewDelegationOperation {
     fn into(self) -> TezosSignTx_TezosDelegationOp {
         let mut new_op = TezosSignTx_TezosDelegationOp::new();
 
-        let mut source: Vec<_> = self.source.into();
-        // implicit public key hash prefix prefix.
-        // TODO: research what this prefix is (maybe other types need other prefix).
-        source.insert(0, 0);
-
         if let Some(delegate_to) = self.delegate_to {
-            let mut delegate_to: Vec<_> = delegate_to.into();
-            // implicit public key hash prefix prefix
-            delegate_to.insert(0, 0);
-            new_op.set_delegate(delegate_to);
+            new_op.set_delegate(delegate_to.forge().take());
         }
 
-        new_op.set_source(source);
+        new_op.set_source(self.source.forge().take());
         new_op.set_counter(self.counter);
         new_op.set_fee(self.fee);
         new_op.set_gas_limit(self.gas_limit);

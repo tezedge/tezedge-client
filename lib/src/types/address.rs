@@ -2,8 +2,8 @@ use std::convert::TryInto;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use trezor_api::protos::{TezosSignTx_TezosContractID, TezosSignTx_TezosContractID_TezosContractType};
 
-use crate::{ImplicitAddress, OriginatedAddress, crypto::{Prefix, WithPrefix, WithoutPrefix}};
-use crate::{FromBase58Check, ToBase58Check};
+use crate::{Forge, FromBase58Check, ToBase58Check, ImplicitAddress, OriginatedAddress};
+use crate::crypto::{Prefix, WithPrefix, WithoutPrefix};
 use super::FromPrefixedBase58CheckError;
 
 #[allow(non_camel_case_types)]
@@ -111,21 +111,11 @@ impl From<OriginatedAddress> for Address {
     }
 }
 
-impl Into<Vec<u8>> for Address {
-    fn into(self) -> Vec<u8> {
-        self.as_ref().to_vec()
-    }
-}
-
 impl Into<TezosSignTx_TezosContractID> for Address {
     fn into(self) -> TezosSignTx_TezosContractID {
-        let mut contract_id = TezosSignTx_TezosContractID::new();
-        contract_id.set_hash(self.as_ref().to_vec());
-        contract_id.set_tag(match &self {
-            Self::Implicit(_) => TezosSignTx_TezosContractID_TezosContractType::Implicit,
-            Self::Originated(_) => TezosSignTx_TezosContractID_TezosContractType::Originated,
-        });
-
-        contract_id
+        match self {
+            Self::Implicit(addr) => addr.into(),
+            Self::Originated(addr) => addr.into(),
+        }
     }
 }

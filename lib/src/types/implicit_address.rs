@@ -3,7 +3,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use trezor_api::protos::{TezosSignTx_TezosContractID, TezosSignTx_TezosContractID_TezosContractType};
 
 use crate::crypto::{Prefix, WithPrefix, WithoutPrefix};
-use crate::{FromBase58Check, ToBase58Check};
+use crate::{Forge, FromBase58Check, ToBase58Check};
 use super::FromPrefixedBase58CheckError;
 
 type ImplicitAddressInner = [u8; 20];
@@ -81,16 +81,10 @@ impl<'de> Deserialize<'de> for ImplicitAddress {
     }
 }
 
-impl Into<Vec<u8>> for ImplicitAddress {
-    fn into(self) -> Vec<u8> {
-        self.as_ref().to_vec()
-    }
-}
-
 impl Into<TezosSignTx_TezosContractID> for ImplicitAddress {
     fn into(self) -> TezosSignTx_TezosContractID {
         let mut contract_id = TezosSignTx_TezosContractID::new();
-        contract_id.set_hash(self.as_ref().to_vec());
+        contract_id.set_hash(self.forge().take());
         contract_id.set_tag(TezosSignTx_TezosContractID_TezosContractType::Implicit);
 
         contract_id
