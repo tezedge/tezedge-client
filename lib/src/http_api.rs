@@ -311,13 +311,13 @@ impl ForgeOperations for HttpApi {
     ) -> ForgeOperationsResult
     {
         Ok(self.client.post(&self.forge_operations_url(&operation_group.branch))
-           .send_json(dbg!(ureq::json!({
+           .send_json(ureq::json!({
                "branch": &operation_group.branch,
                "contents": operation_group.to_operations_vec()
                    .into_iter()
                    .map(|op| NewOperationWithKind::from(op))
                    .collect::<Vec<_>>(),
-           })))
+           }))
            .unwrap()
            .into_json()
            .unwrap())
