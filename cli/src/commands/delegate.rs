@@ -136,7 +136,7 @@ impl Delegate {
         } else {
             // TODO: add cli argument to specify key_path there.
             eprintln!(
-                "{} in order to transfer using trezor, you need to manually enter the {}, from which the {} was derived.\n\n      For more about key derivation path see: {}\n",
+                "{} in order to delegate using trezor, you need to manually enter the {}, from which the {} was derived.\n\n      For more about key derivation path see: {}\n",
                 style("help:").yellow(),
                 style("path").green(),
                 style("--from").bold(),
@@ -234,7 +234,7 @@ impl Delegate {
                     let manager = match self.api().get_manager_address(&addr.clone().into()) {
                         Ok(x) => x.into(),
                         // TODO: more instructive error
-                        Err(_) => exit_with_error("transfering funds from contract originated after Babylon protocol change, isn't supported.")
+                        Err(_) => exit_with_error("delegating funds from contract originated after Babylon protocol change, isn't supported.")
                     };
                     addr.with_manager(manager).into()
                 }
