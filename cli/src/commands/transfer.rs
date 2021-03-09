@@ -65,6 +65,9 @@ pub struct Transfer {
 
     #[structopt(skip)]
     key_path: Option<Vec<u32>>,
+
+    #[structopt(skip)]
+    manager_addr: Option<ImplicitAddress>,
 }
 
 // TODO: replace with query to persistent encrypted store for keys
@@ -116,7 +119,12 @@ impl Transfer {
 
     fn get_manager_addr(&mut self) -> ImplicitAddress {
         let addr = self.get_from_addr();
-        self.api().get_manager_address(&addr).unwrap()
+        let manager = match self.manager_addr.clone() {
+            Some(mgr) => { return mgr },
+            None => self.api().get_manager_address(&addr).unwrap(),
+        };
+        self.manager_addr = Some(manager.clone());
+        manager
     }
 
     fn get_key_path(&mut self) -> Option<Vec<u32>> {
