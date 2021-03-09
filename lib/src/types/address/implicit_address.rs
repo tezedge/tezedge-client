@@ -3,8 +3,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use trezor_api::protos::{TezosSignTx_TezosContractID, TezosSignTx_TezosContractID_TezosContractType};
 
 use crate::crypto::{Prefix, WithPrefix, WithoutPrefix};
-use crate::{Forge, FromBase58Check, ToBase58Check};
-use super::FromPrefixedBase58CheckError;
+use crate::{Forge, FromBase58Check, ToBase58Check, FromPrefixedBase58CheckError};
 
 type ImplicitAddressInner = [u8; 20];
 

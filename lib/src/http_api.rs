@@ -1,15 +1,17 @@
 use serde::Deserialize;
 use serde_json::Value as SerdeValue;
 
-use crate::{BlockHash, NewOperationGroup, NewOperationWithKind, Address, ToBase58Check};
+use crate::{Address, BlockHash, ImplicitAddress, NewOperationGroup, NewOperationWithKind, OriginatedAddress, ToBase58Check};
 use crate::api::{
     GetVersionInfo, GetVersionInfoResult, VersionInfo, NodeVersion, NetworkVersion, CommitInfo,
     GetConstants, GetConstantsResult,
     GetProtocolInfo, GetProtocolInfoResult, ProtocolInfo,
     GetHeadBlockHash, GetHeadBlockHashResult,
     GetChainID, GetChainIDResult,
+    GetContractStorage, GetContractStorageResult,
     GetCounterForKey, GetCounterForKeyResult,
     GetManagerKey, GetManagerKeyResult,
+    GetManagerAddress, GetManagerAddressResult,
     GetPendingOperations, GetPendingOperationsResult, PendingOperation,
     GetPendingOperationStatus, GetPendingOperationStatusResult, PendingOperationStatus,
     ForgeOperations, ForgeOperationsResult,
@@ -67,6 +69,14 @@ impl HttpApi {
             "{}/chains/main/blocks/head/context/contracts/{}/counter",
             self.base_url,
             key.to_base58check(),
+        )
+    }
+
+    fn get_contract_storage_url(&self, addr: &OriginatedAddress) -> String {
+        format!(
+            "{}/chains/main/blocks/head/context/contracts/{}/storage",
+            self.base_url,
+            addr.to_base58check(),
         )
     }
 
@@ -195,6 +205,20 @@ impl GetChainID for HttpApi {
     }
 }
 
+impl GetContractStorage for HttpApi {
+    fn get_contract_storage(
+        &self,
+        addr: &OriginatedAddress,
+    ) -> GetContractStorageResult
+    {
+        Ok(self.client.get(&self.get_contract_storage_url(addr))
+           .call()
+           .or(Err(()))?
+           .into_json()
+           .or(Err(()))?)
+    }
+}
+
 impl GetCounterForKey for HttpApi {
     fn get_counter_for_key(&self, key: &Address) -> GetCounterForKeyResult {
         Ok(self.client.get(&self.get_counter_for_key_url(key))
@@ -215,6 +239,19 @@ impl GetManagerKey for HttpApi {
            .unwrap()
            .into_json::<Option<String>>()
            .unwrap())
+    }
+}
+
+impl GetManagerAddress for HttpApi {
+    fn get_manager_address(&self, addr: &Address) -> GetManagerAddressResult {
+        Ok(match addr {
+            Address::Implicit(addr) => addr.clone(),
+            Address::Originated(addr) => {
+                let storage = self.get_contract_storage(addr)?;
+                let manager_str = storage["string"].as_str().ok_or(())?;
+                ImplicitAddress::from_base58check(manager_str).or(Err(()))?
+            }
+        })
     }
 }
 
@@ -261,13 +298,13 @@ impl ForgeOperations for HttpApi {
     ) -> ForgeOperationsResult
     {
         Ok(self.client.post(&self.forge_operations_url(&operation_group.branch))
-           .send_json(ureq::json!({
+           .send_json(dbg!(ureq::json!({
                "branch": &operation_group.branch,
                "contents": operation_group.to_operations_vec()
                    .into_iter()
                    .map(|op| NewOperationWithKind::from(op))
                    .collect::<Vec<_>>(),
-           }))
+           })))
            .unwrap()
            .into_json()
            .unwrap())

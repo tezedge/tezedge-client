@@ -43,6 +43,16 @@ impl NewOperationGroup {
         self
     }
 
+    pub fn with_operation<T>(mut self, op: T) -> Self
+        where T: Into<NewOperation>,
+    {
+        match op.into() {
+            NewOperation::Reveal(op) => self.with_reveal(op),
+            NewOperation::Transaction(op) => self.with_transaction(op),
+            NewOperation::Delegation(op) => self.with_delegation(op),
+        }
+    }
+
     pub fn to_operations_vec(&self) -> Vec<NewOperation> {
         let reveal = self.reveal.clone().map(|x| x.into());
         let transaction = self.transaction.clone().map(|x| x.into());

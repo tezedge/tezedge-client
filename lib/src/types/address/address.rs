@@ -2,11 +2,9 @@ use std::convert::TryInto;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use trezor_api::protos::{TezosSignTx_TezosContractID, TezosSignTx_TezosContractID_TezosContractType};
 
-use crate::{Forge, FromBase58Check, ToBase58Check, ImplicitAddress, OriginatedAddress};
+use crate::{Forge, FromBase58Check, ToBase58Check, FromPrefixedBase58CheckError, ImplicitAddress, OriginatedAddress};
 use crate::crypto::{Prefix, WithPrefix, WithoutPrefix};
-use super::FromPrefixedBase58CheckError;
 
-#[allow(non_camel_case_types)]
 #[derive(PartialEq, Debug, Clone)]
 pub enum Address {
     Implicit(ImplicitAddress),

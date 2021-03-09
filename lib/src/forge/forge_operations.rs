@@ -38,19 +38,28 @@ impl Forge for ImplicitAddress {
     }
 }
 
+impl Forge for OriginatedAddress {
+    /// Forge originated(KT1) address.
+    ///
+    /// Doesn't add originated tag's prefix (1).
+    fn forge(&self) -> Forged {
+        Forged([self.as_ref().to_vec(), vec![0]].concat())
+    }
+}
+
 impl Forge for Address {
     /// Forge implicit(tz1, tz2, tz3) or originated(KT1) address.
     ///
     /// Some fields that don't allow KT1 address, `ImplicitAddress::forge()`
-    /// should be used instead as this adds extra prefix `0` to output
-    /// and the result will be invalid.
+    /// should be used instead as this adds extra tag prefix `0` to
+    /// the output and the result will be invalid.
     fn forge(&self) -> Forged {
         Forged(match self {
             Address::Implicit(addr) => {
                 [vec![0], addr.forge().take()].concat()
             }
-            Address::Originated(key) => {
-                [vec![1], key.as_ref().to_vec(), vec![0]].concat()
+            Address::Originated(addr) => {
+                [vec![1], addr.forge().take()].concat()
             }
         })
     }

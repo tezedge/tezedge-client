@@ -2,10 +2,12 @@ use std::thread;
 use std::time::Duration;
 use structopt::StructOpt;
 use console::{style, Term};
+use dialoguer::theme::ColorfulTheme;
 
 use lib::{
-    BlockHash, Address, PublicKey, PrivateKey,
-    NewRevealOperationBuilder, NewTransactionOperationBuilder, NewOperationGroup,
+    BlockHash, PublicKey, PrivateKey, Address,
+    ImplicitAddress, OriginatedAddressWithManager, ImplicitOrOriginatedWithManager,
+    NewTransactionOperationBuilder, NewRevealOperationBuilder, NewOperationGroup,
 };
 use lib::utils::parse_float_amount;
 use lib::signer::{SignOperation, LocalSigner, OperationSignatureInfo};
@@ -94,20 +96,9 @@ impl Transfer {
     }
 
     fn get_from_addr(&mut self) -> Address {
-        if self.use_trezor {
-            let raw_key_path = &self.from;
+        if self.use_trezor && self.from.starts_with("m/") {
+            let key_path = self.get_key_path().unwrap();
 
-            if !raw_key_path.starts_with("m/") {
-                exit_with_error(format!(
-                    "when using Trezor, {} needs to be key derivation path like: \"{}\", but got: \"{}\"",
-                    style("--from").bold(),
-                    style("m/44'/1729'/0'").green(),
-                    style(raw_key_path).red(),
-                ));
-            }
-
-            let key_path = parse_derivation_path(raw_key_path);
-            self.key_path = Some(key_path.clone());
             crate::trezor::get_address(self.trezor(), key_path).into()
         } else {
             match Address::from_base58check(&self.from) {
@@ -121,6 +112,44 @@ impl Transfer {
                 }
             }
         }
+    }
+
+    fn get_manager_addr(&mut self) -> ImplicitAddress {
+        let addr = self.get_from_addr();
+        self.api().get_manager_address(&addr).unwrap()
+    }
+
+    fn get_key_path(&mut self) -> Option<Vec<u32>> {
+        if !self.use_trezor {
+            return None;
+        }
+
+        if let Some(key_path) = self.key_path.clone() {
+            return Some(key_path);
+        }
+
+        let raw_key_path = if self.from.starts_with("m/") {
+            self.from.clone()
+        } else {
+            // TODO: add cli argument to specify key_path there.
+            eprintln!(
+                "{} in order to transfer using trezor, you need to manually enter the {}, from which the {} was derived.\n\n      For more about key derivation path see: {}\n",
+                style("help:").yellow(),
+                style("path").green(),
+                style("--from").bold(),
+                style("https://learnmeabitcoin.com/technical/derivation-paths").cyan(),
+            );
+            dialoguer::Input::with_theme(&ColorfulTheme::default())
+                .with_prompt("please enter a key derivation path")
+                .with_initial_text("m/44'/1729'/0'")
+                .interact_text()
+                .unwrap()
+        };
+
+        let key_path = parse_derivation_path(&raw_key_path);
+        self.key_path = Some(key_path.clone());
+
+        Some(key_path)
     }
 
     fn get_to_addr(&self) -> Address {
@@ -168,9 +197,10 @@ impl Transfer {
         self.api().get_head_block_hash().unwrap()
     }
 
-    fn get_counter(&mut self, addr: &Address) -> u64 {
+    fn get_counter(&mut self) -> u64 {
         let counter = self.counter.unwrap_or_else(|| {
-            self.api().get_counter_for_key(&addr).unwrap()
+            let addr = self.get_manager_addr();
+            self.api().get_counter_for_key(&addr.into()).unwrap()
         }) + 1;
         self.counter = Some(counter);
         counter
@@ -193,7 +223,6 @@ impl Transfer {
 
         let protocol_info = self.get_protocol_info();
         let head_block_hash = self.get_head_block_hash();
-        let manager_key = self.get_manager_key(&from);
 
         spinner.finish();
         eprintln!(
@@ -209,27 +238,37 @@ impl Transfer {
         );
 
         let tx_op = NewTransactionOperationBuilder::new()
-            .source(from.clone().as_implicit().unwrap())
+            .source::<ImplicitOrOriginatedWithManager>(match from.clone() {
+                Address::Implicit(source) => source.into(),
+                Address::Originated(addr) => {
+                    let manager = match self.api().get_manager_address(&addr.clone().into()) {
+                        Ok(x) => x.into(),
+                        // TODO: more instructive error
+                        Err(_) => exit_with_error("transfering funds from contract originated after Babylon protocol change, isn't supported.")
+                    };
+                    addr.with_manager(manager).into()
+                }
+            })
             .destination(to.clone())
             .amount(amount)
             .fee(fee)
-            .counter(self.get_counter(&from))
+            .counter(self.get_counter())
             .gas_limit(50000)
             .storage_limit(50000)
             .build()
             .unwrap();
         operation_group = operation_group.with_transaction(tx_op);
 
-        if from.is_implicit() && manager_key.is_none() {
+        if from.is_implicit() && self.get_manager_key(&from).is_none() {
             let mut reveal_op = NewRevealOperationBuilder::new()
                 .source(from.clone().as_implicit().unwrap())
                 .fee(fee)
-                .counter(self.get_counter(&from))
+                .counter(self.get_counter())
                 .gas_limit(50000)
                 .storage_limit(50000);
 
             if self.use_trezor {
-                let key_path = self.key_path.clone().unwrap();
+                let key_path = self.get_key_path().unwrap();
                 reveal_op = reveal_op.public_key(
                     PublicKey::from_base58check(
                         &trezor_execute(
@@ -280,7 +319,7 @@ impl Transfer {
                 "forging and signing operation using Trezor",
             );
             let mut tx: TezosSignTx = operation_group.clone().into();
-            tx.set_address_n(self.key_path.clone().unwrap());
+            tx.set_address_n(self.get_key_path().unwrap());
             let result = OperationSignatureInfo::from(
                 trezor_execute(self.trezor().sign_tx(tx))
             );
@@ -344,7 +383,7 @@ impl Transfer {
             .with_text("applying and injecting the operation")
             .start();
 
-        self.api().preapply_operations(&operation_group, &signature).unwrap();
+        // self.api().preapply_operations(&operation_group, &signature).unwrap();
 
         self.api().inject_operations(&operation_with_signature).unwrap();
 

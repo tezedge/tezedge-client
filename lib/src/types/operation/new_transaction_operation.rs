@@ -1,17 +1,24 @@
 use serde::{Serialize, Deserialize};
 use trezor_api::protos::{TezosSignTx_TezosContractID, TezosSignTx_TezosTransactionOp};
 
-use crate::{Forge, Address, ImplicitAddress, NewTransactionParameters};
+use crate::{
+    Forge, NewTransactionParameters, Address, ImplicitAddress, OriginatedAddress,
+    ImplicitOrOriginatedWithManager, OriginatedAddressWithManager,
+};
 
 #[derive(Debug, Clone)]
 pub struct NewTransactionOperationBuilder {
-    source: Option<ImplicitAddress>,
+    source: Option<ImplicitOrOriginatedWithManager>,
     destination: Option<Address>,
     amount: Option<u64>,
     fee: Option<u64>,
     counter: Option<u64>,
     gas_limit: Option<u64>,
     storage_limit: Option<u64>,
+    /// Optional transaction parameters.
+    ///
+    /// Used to transfer/delegate from old (pre-Babylon) KT1 accounts.
+    parameters: Option<NewTransactionParameters>
 }
 
 impl NewTransactionOperationBuilder {
@@ -19,8 +26,10 @@ impl NewTransactionOperationBuilder {
         Default::default()
     }
 
-    pub fn source(mut self, source: ImplicitAddress) -> Self {
-        self.source = Some(source);
+    pub fn source<A>(mut self, source: A) -> Self
+        where A: Into<ImplicitOrOriginatedWithManager>,
+    {
+        self.source = Some(source.into());
         self
     }
 
@@ -55,15 +64,44 @@ impl NewTransactionOperationBuilder {
     }
 
     pub fn build(self) -> Result<NewTransactionOperation, ()> {
-        // TODO: proper error handling
-        Ok(NewTransactionOperation {
-            source: self.source.unwrap(),
-            destination: self.destination.unwrap(),
-            amount: self.amount.unwrap(),
-            fee: self.fee.unwrap(),
-            counter: self.counter.unwrap(),
-            gas_limit: self.gas_limit.unwrap(),
-            storage_limit: self.storage_limit.unwrap(),
+        let (source, destination, amount, fee, counter, gas_limit, storage_limit) = (
+            self.source.ok_or(())?,
+            self.destination.ok_or(())?,
+            self.amount.ok_or(())?,
+            self.fee.ok_or(())?,
+            self.counter.ok_or(())?,
+            self.gas_limit.ok_or(())?,
+            self.storage_limit.ok_or(())?,
+        );
+        use ImplicitOrOriginatedWithManager::*;
+        Ok(match source {
+            Implicit(source) => {
+                NewTransactionOperation {
+                    source,
+                    destination,
+                    amount,
+                    fee,
+                    counter,
+                    gas_limit,
+                    storage_limit,
+                    parameters: self.parameters,
+                }
+            }
+            OriginatedWithManager(OriginatedAddressWithManager { address, manager }) => {
+                NewTransactionOperation {
+                    fee,
+                    counter,
+                    gas_limit,
+                    storage_limit,
+                    source: manager,
+                    destination: address.into(),
+                    amount: 0,
+                    parameters: Some(NewTransactionParameters::Transfer {
+                        to: destination,
+                        amount: amount,
+                    }),
+                }
+            }
         })
     }
 }
@@ -78,6 +116,7 @@ impl Default for NewTransactionOperationBuilder {
             counter: None,
             gas_limit: None,
             storage_limit: None,
+            parameters: None,
         }
     }
 }
@@ -96,6 +135,8 @@ pub struct NewTransactionOperation {
     pub gas_limit: u64,
     #[serde(with = "crate::utils::serde_str")]
     pub storage_limit: u64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parameters: Option<NewTransactionParameters>,
 }
 
 impl Into<TezosSignTx_TezosTransactionOp> for NewTransactionOperation {
@@ -109,6 +150,13 @@ impl Into<TezosSignTx_TezosTransactionOp> for NewTransactionOperation {
         new_tx.set_amount(self.amount);
         new_tx.set_gas_limit(self.gas_limit);
         new_tx.set_storage_limit(self.storage_limit);
+
+        match self.parameters {
+            Some(parameters) => {
+                new_tx.set_parameters_manager(parameters.into());
+            }
+            None => {}
+        };
 
         new_tx
     }

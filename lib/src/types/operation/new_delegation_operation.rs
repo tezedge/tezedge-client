@@ -1,11 +1,12 @@
 use serde::{Serialize, Deserialize};
 use trezor_api::protos::TezosSignTx_TezosDelegationOp;
 
-use crate::{Forge, Address, ImplicitAddress};
+use crate::{Address, Forge, ImplicitAddress, ImplicitOrOriginatedWithManager, OriginatedAddressWithManager};
+use super::{NewOperation, NewTransactionOperation, NewTransactionParameters};
 
 #[derive(Debug, Clone)]
 pub struct NewDelegationOperationBuilder {
-    source: Option<ImplicitAddress>,
+    source: Option<ImplicitOrOriginatedWithManager>,
     /// Optional.
     ///
     /// If set to `None`, account will stop delegating to anyone.
@@ -21,11 +22,14 @@ impl NewDelegationOperationBuilder {
         Default::default()
     }
 
-    pub fn source(mut self, source: ImplicitAddress) -> Self {
-        self.source = Some(source);
+    pub fn source<A>(mut self, source: A) -> Self
+        where A: Into<ImplicitOrOriginatedWithManager>,
+    {
+        self.source = Some(source.into());
         self
     }
 
+    /// If not set, currently active delegation will be canceled.
     pub fn delegate_to(mut self, to: ImplicitAddress) -> Self {
         self.delegate_to = Some(to);
         self
@@ -51,15 +55,46 @@ impl NewDelegationOperationBuilder {
         self
     }
 
-    pub fn build(self) -> Result<NewDelegationOperation, ()> {
-        // TODO: proper error handling
-        Ok(NewDelegationOperation {
-            source: self.source.unwrap(),
-            delegate_to: self.delegate_to,
-            fee: self.fee.unwrap(),
-            counter: self.counter.unwrap(),
-            gas_limit: self.gas_limit.unwrap(),
-            storage_limit: self.storage_limit.unwrap(),
+    pub fn build(self) -> Result<NewOperation, ()> {
+        let (source, delegate_to, fee, counter, gas_limit, storage_limit) = (
+            self.source.ok_or(())?,
+            self.delegate_to,
+            self.fee.ok_or(())?,
+            self.counter.ok_or(())?,
+            self.gas_limit.ok_or(())?,
+            self.storage_limit.ok_or(())?,
+        );
+        use ImplicitOrOriginatedWithManager::*;
+        Ok(match source {
+            Implicit(source) => {
+                NewOperation::Delegation(NewDelegationOperation {
+                    source,
+                    delegate_to,
+                    fee,
+                    counter,
+                    gas_limit,
+                    storage_limit,
+                })
+            }
+            OriginatedWithManager(OriginatedAddressWithManager {
+                address,
+                manager,
+            }) => {
+                let parameters = match delegate_to {
+                    Some(delegate) => NewTransactionParameters::SetDelegate(delegate),
+                    None => NewTransactionParameters::CancelDelegate,
+                };
+                NewOperation::Transaction(NewTransactionOperation {
+                    fee,
+                    counter,
+                    gas_limit,
+                    storage_limit,
+                    source: manager,
+                    destination: address.into(),
+                    amount: 0,
+                    parameters: Some(parameters),
+                })
+            }
         })
     }
 }
