@@ -12,7 +12,7 @@ use crate::api::{
     GetCounterForKey, GetCounterForKeyResult,
     GetManagerKey, GetManagerKeyResult,
     GetManagerAddress, GetManagerAddressResult,
-    GetPendingOperations, GetPendingOperationsResult, PendingOperation,
+    GetPendingOperations, GetPendingOperationsResult, PendingOperations, PendingOperation,
     GetPendingOperationStatus, GetPendingOperationStatusResult, PendingOperationStatus,
     ForgeOperations, ForgeOperationsResult,
     PreapplyOperations, PreapplyOperationsResult,
@@ -257,11 +257,24 @@ impl GetManagerAddress for HttpApi {
 
 impl GetPendingOperations for HttpApi {
     fn get_pending_operations(&self) -> GetPendingOperationsResult {
-        Ok(self.client.get(&self.get_pending_operations_url())
+        let mut resp = self.client.get(&self.get_pending_operations_url())
            .call()
            .unwrap()
-           .into_json()
-           .unwrap())
+           .into_json::<serde_json::Value>()
+           .unwrap();
+
+        let mut ops = PendingOperations::default();
+        ops.applied = serde_json::from_value(resp.get_mut("applied").unwrap().take()).unwrap();
+        ops.refused = resp["refused"].as_array().unwrap().iter()
+            .map(|raw| {
+                let mut op = PendingOperation::default();
+                op.hash = raw[0].as_str().unwrap().to_string();
+                op.branch = raw[1]["branch"].as_str().unwrap().to_string();
+                op
+            })
+            .collect();
+
+        Ok(ops)
     }
 }
 
