@@ -63,8 +63,8 @@ pub struct Delegate {
 }
 
 // TODO: replace with query to persistent encrypted store for keys
-fn get_keys_by_addr(addr: &String) -> Result<(PublicKey, PrivateKey), ()> {
-    if addr != "tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU" {
+fn get_keys_by_addr(addr: &ImplicitAddress) -> Result<(PublicKey, PrivateKey), ()> {
+    if addr != &ImplicitAddress::from_base58check("tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU").unwrap() {
         return Err(());
     }
     let pub_key = "edpktywJsAeturPxoFkDEerF6bi7N41ZnQyMrmNLQ3GZx2w6nn8eCZ";
@@ -259,7 +259,7 @@ impl Delegate {
                 );
             } else {
                 reveal_op = reveal_op.public_key(
-                    get_keys_by_addr(&self.from).unwrap().0,
+                    get_keys_by_addr(&self.get_manager_addr()).unwrap().0,
                 );
             }
             operation_group.with_reveal(reveal_op.build().unwrap())
@@ -280,7 +280,7 @@ impl Delegate {
             let forged_operation = self.api().forge_operations(&operation_group).unwrap();
 
             let local_signer = {
-                let (pub_key, priv_key) = match get_keys_by_addr(&self.from) {
+                let (pub_key, priv_key) = match get_keys_by_addr(&self.get_manager_addr()) {
                     Ok(keys) => keys,
                     Err(_) => {
                         exit_with_error(format!(
@@ -364,7 +364,7 @@ impl Delegate {
             .with_text("applying and injecting the operation")
             .start();
 
-        // self.api().preapply_operations(&operation_group, &signature).unwrap();
+        self.api().preapply_operations(&operation_group, &signature).unwrap();
 
         self.api().inject_operations(&operation_with_signature).unwrap();
 
