@@ -1,8 +1,8 @@
 use serde::{Serialize, Deserialize};
-use trezor_api::protos::{TezosSignTx_TezosContractID, TezosSignTx_TezosTransactionOp};
+use trezor_api::protos::TezosSignTx_TezosTransactionOp;
 
 use crate::{
-    Forge, NewTransactionParameters, Address, ImplicitAddress, OriginatedAddress,
+    Forge, NewTransactionParameters, Address, ImplicitAddress,
     ImplicitOrOriginatedWithManager, OriginatedAddressWithManager,
 };
 

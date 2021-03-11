@@ -43,7 +43,7 @@ impl NewOperationGroup {
         self
     }
 
-    pub fn with_operation<T>(mut self, op: T) -> Self
+    pub fn with_operation<T>(self, op: T) -> Self
         where T: Into<NewOperation>,
     {
         match op.into() {

@@ -27,7 +27,6 @@ macro_rules! num_forge_nat {
     ($type:ident) => {
         impl ForgeNat for $type {
             fn forge_nat(&self) -> Forged {
-
                 let mut num = *self;
                 let mut res = vec![(num & 0x7F) as u8];
                 num >>= 7;

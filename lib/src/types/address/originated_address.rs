@@ -2,7 +2,7 @@ use std::convert::TryInto;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use trezor_api::protos::{TezosSignTx_TezosContractID, TezosSignTx_TezosContractID_TezosContractType};
 
-use crate::{Forge, FromBase58Check, ToBase58Check, Address, ImplicitAddress, FromPrefixedBase58CheckError};
+use crate::{Forge, FromBase58Check, ToBase58Check, ImplicitAddress, FromPrefixedBase58CheckError};
 use crate::crypto::{Prefix, WithPrefix, WithoutPrefix};
 
 type OriginatedAddressInner = [u8; 20];

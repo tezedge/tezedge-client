@@ -1,5 +1,3 @@
-use serde::Deserialize;
-
 use crate::{ImplicitAddress, OriginatedAddressWithManager};
 
 /// Either `ImplicitAddress` or `OriginatedAddress` contianing

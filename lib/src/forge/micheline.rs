@@ -1,7 +1,5 @@
-use std::borrow::Cow;
-
 pub use super::prim_type::PrimType;
-use super::{Forge, ForgeNat, Forged};
+use super::{Forge, Forged};
 
 //TODO: make sure logic is correct. Sample: https://github.com/baking-bad/netezos/blob/de88439f10bbdfc2c7942c00849756c4be864a81/Netezos/Forging/Local/LocalForge.Forgers.cs#L131
 fn forge_micheline_uint(mut num: u64) -> Forged {

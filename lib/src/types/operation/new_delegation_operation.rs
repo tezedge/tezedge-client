@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 use trezor_api::protos::TezosSignTx_TezosDelegationOp;
 
-use crate::{Address, Forge, ImplicitAddress, ImplicitOrOriginatedWithManager, OriginatedAddressWithManager};
+use crate::{Forge, ImplicitAddress, ImplicitOrOriginatedWithManager, OriginatedAddressWithManager};
 use super::{NewOperation, NewTransactionOperation, NewTransactionParameters};
 
 #[derive(Debug, Clone)]
