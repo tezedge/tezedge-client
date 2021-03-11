@@ -321,13 +321,14 @@ impl Transfer {
 
             local_signer.sign_operation(forged_operation.clone()).unwrap()
         } else {
+            let key_path = self.get_key_path().unwrap();
             eprintln!(
                 "{} -   {}",
                 style("[2/4]").bold().dim(),
                 "forging and signing operation using Trezor",
             );
             let mut tx: TezosSignTx = operation_group.clone().into();
-            tx.set_address_n(self.get_key_path().unwrap());
+            tx.set_address_n(key_path);
             let result = OperationSignatureInfo::from(
                 trezor_execute(self.trezor().sign_tx(tx))
             );
