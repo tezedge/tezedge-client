@@ -1,9 +1,12 @@
 use std::ops::Deref;
 
-mod micheline;
+mod prim_type;
+pub mod micheline;
 mod forge_primitives;
+mod forge_transaction_parameters;
 mod forge_operations;
 
+#[derive(PartialEq, Debug, Clone)]
 pub struct Forged(Vec<u8>);
 
 impl Forged {
@@ -32,6 +35,22 @@ impl IntoIterator for Forged {
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a Forged {
+    type Item = &'a u8;
+    type IntoIter = std::slice::Iter<'a, u8>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.iter()
+    }
+}
+
+impl Forge for Forged {
+    /// Simply clones already forged value.
+    fn forge(&self) -> Forged {
+        self.clone()
     }
 }
 

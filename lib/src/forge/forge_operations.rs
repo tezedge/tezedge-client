@@ -105,6 +105,14 @@ impl Forge for NewRevealOperation {
 
 impl Forge for NewTransactionOperation {
     fn forge(&self) -> Forged {
+        let forged_parameters = match &self.parameters {
+            Some(params) => [
+                true.forge().take(),
+                params.forge().take(),
+            ].concat(),
+            None => false.forge().take(),
+        };
+
         Forged([
             OperationTag::Transaction.forge_nat().take(),
             self.source.forge().take(),
@@ -114,10 +122,7 @@ impl Forge for NewTransactionOperation {
             self.storage_limit.forge_nat().take(),
             self.amount.forge_nat().take(),
             self.destination.forge().take(),
-            // TODO: replace with forging parameters. At the moment
-            // no additional parameters are used, when they will be,
-            // this needs to be changed as well.
-            false.forge().take(),
+            forged_parameters,
         ].concat())
     }
 }
