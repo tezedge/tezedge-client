@@ -1,5 +1,6 @@
 use serde::Serialize;
 
+use crate::utils::estimate_operation_fee;
 use super::{NewRevealOperation, NewTransactionOperation, NewDelegationOperation};
 
 #[derive(Serialize, Debug, Clone)]
@@ -18,8 +19,30 @@ impl NewOperation {
             Self::Delegation(_) => "delegation",
         }
     }
-    // TODO: estimate fees and if estimate fee is bigger than max
-    // allow fee, then show error to user.
+
+    pub fn estimate_bytes(&self) -> u64 {
+        match self {
+            Self::Reveal(op) => op.estimate_bytes(),
+            Self::Transaction(op) => op.estimate_bytes(),
+            Self::Delegation(op) => op.estimate_bytes(),
+        }
+    }
+
+    pub fn estimate_fee(
+        &self,
+        base_fee: u64,
+        ntez_per_byte: u64,
+        ntez_per_gas: u64,
+        estimated_gas: u64,
+    ) -> u64 {
+        estimate_operation_fee(
+            base_fee,
+            ntez_per_byte,
+            ntez_per_gas,
+            estimated_gas,
+            self.estimate_bytes(),
+        )
+    }
 }
 
 impl From<NewRevealOperation> for NewOperation {

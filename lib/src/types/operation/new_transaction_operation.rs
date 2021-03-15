@@ -5,6 +5,7 @@ use crate::{
     Forge, NewTransactionParameters, Address, ImplicitAddress,
     ImplicitOrOriginatedWithManager, OriginatedAddressWithManager,
 };
+use crate::utils::estimate_operation_fee;
 
 #[derive(Debug, Clone)]
 pub struct NewTransactionOperationBuilder {
@@ -24,6 +25,10 @@ pub struct NewTransactionOperationBuilder {
 impl NewTransactionOperationBuilder {
     pub fn new() -> Self {
         Default::default()
+    }
+
+    pub fn get_fee(&self) -> Option<u64> {
+        self.fee.clone()
     }
 
     pub fn source<A>(mut self, source: A) -> Self
@@ -137,6 +142,28 @@ pub struct NewTransactionOperation {
     pub storage_limit: u64,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parameters: Option<NewTransactionParameters>,
+}
+
+impl NewTransactionOperation {
+    pub fn estimate_bytes(&self) -> u64 {
+        self.forge().take().len() as u64
+    }
+
+    pub fn estimate_fee(
+        &self,
+        base_fee: u64,
+        ntez_per_byte: u64,
+        ntez_per_gas: u64,
+        estimated_gas: u64,
+    ) -> u64 {
+        estimate_operation_fee(
+            base_fee,
+            ntez_per_byte,
+            ntez_per_gas,
+            estimated_gas,
+            self.estimate_bytes(),
+        )
+    }
 }
 
 impl Into<TezosSignTx_TezosTransactionOp> for NewTransactionOperation {

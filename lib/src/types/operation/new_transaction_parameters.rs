@@ -1,11 +1,9 @@
 use serde::{Deserialize, Serialize, Serializer};
-use serde::ser::SerializeMap;
 use serde_json::json;
 use sodiumoxide::hex;
 
 use crate::{Forge, Address, ImplicitAddress};
 use crate::trezor_api::protos::{
-    TezosSignTx_TezosContractID,
     TezosSignTx_TezosTransactionOp_TezosParametersManager,
     TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer,
 };

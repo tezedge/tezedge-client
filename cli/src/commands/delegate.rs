@@ -16,7 +16,11 @@ use lib::http_api::HttpApi;
 use lib::api::*;
 
 use crate::spinner::SpinnerBuilder;
-use crate::common::{exit_with_error, parse_derivation_path};
+use crate::common::{
+    exit_with_error, parse_derivation_path,
+    yes_no_custom_amount_input, YesNoCustomAmount,
+    estimate_gas_consumption, estimate_operation_fees,
+};
 use crate::emojies;
 use crate::trezor::trezor_execute;
 
@@ -44,8 +48,14 @@ pub struct Delegate {
     #[structopt(short, long)]
     pub to: String,
 
+    amount: String,
+
+    /// Specify fee for the delegation.
+    ///
+    /// If not specified, fee will be estimated and you will be prompted
+    /// whether or not you accept estimate or would like to enter custom one.
     #[structopt(long)]
-    pub fee: String,
+    pub fee: Option<String>,
 
     // NOT cli arguments
 
@@ -168,16 +178,18 @@ impl Delegate {
         }
     }
 
-    fn get_fee(&self) -> u64 {
-        match parse_float_amount(&self.fee) {
-            Ok(amount) => amount,
+    fn get_fee(&self) -> Option<u64> {
+        self.fee.as_ref().and_then(|fee| {
+            match parse_float_amount(fee) {
+                Ok(amount) => Some(amount),
             Err(_) => {
                 exit_with_error(format!(
                     "invalid fee: {}",
-                    style(&self.fee).bold()
+                        style(fee).bold(),
                 ));
             }
         }
+        })
     }
 
     fn get_protocol_info(&mut self) -> ProtocolInfo {
@@ -204,7 +216,7 @@ impl Delegate {
     fn build_operation_group(&mut self) -> NewOperationGroup {
         let from = self.get_from_addr();
         let to = self.get_to_addr();
-        let fee = self.get_fee();
+        let manual_fee = self.get_fee();
 
         let spinner = SpinnerBuilder::new()
             .with_prefix(style("[1/4]").bold().dim())
@@ -227,7 +239,7 @@ impl Delegate {
             protocol_info.next_protocol_hash,
         );
 
-        let delegation_op = NewDelegationOperationBuilder::new()
+        let mut delegation_op = NewDelegationOperationBuilder::new()
             .source::<ImplicitOrOriginatedWithManager>(match from.clone() {
                 Address::Implicit(source) => source.into(),
                 Address::Originated(addr) => {
@@ -240,21 +252,18 @@ impl Delegate {
                 }
             })
             .delegate_to(to.clone())
-            .fee(fee)
+            .fee(manual_fee.unwrap_or(0))
             .counter(self.get_counter())
-            .gas_limit(50000)
-            .storage_limit(50000)
-            .build()
-            .unwrap();
-        operation_group = operation_group.with_operation(delegation_op);
+            .gas_limit(10300)
+            .storage_limit(257);
 
-        if from.is_implicit() && self.get_manager_key(&from).is_none() {
+        let mut reveal_op = if from.is_implicit() && self.get_manager_key(&from).is_none() {
             let mut reveal_op = NewRevealOperationBuilder::new()
                 .source(from.clone().as_implicit().unwrap())
-                .fee(fee)
+                .fee(0)
                 .counter(self.get_counter())
-                .gas_limit(50000)
-                .storage_limit(50000);
+                .gas_limit(10300)
+                .storage_limit(257);
 
             if self.use_trezor {
                 let key_path = self.get_key_path().unwrap();
@@ -270,10 +279,122 @@ impl Delegate {
                     get_keys_by_addr(&self.get_manager_addr()).unwrap().0,
                 );
             }
-            operation_group.with_reveal(reveal_op.build().unwrap())
+            Some(reveal_op)
         } else {
-            operation_group
+            None
+        };
+
+        // estimate gas consumption and fees
+        operation_group = operation_group.with_operation(delegation_op.clone().build().unwrap());
+        if let Some(reveal_op) = &reveal_op {
+            operation_group = operation_group.with_reveal(reveal_op.clone().build().unwrap());
         }
+
+        let gas_consumption = estimate_gas_consumption(
+            &operation_group,
+            self.api(),
+        ).unwrap();
+
+        let fees = estimate_operation_fees(
+            &operation_group,
+            &gas_consumption,
+        );
+
+        let gas_and_fee = if from.is_implicit() {
+            (gas_consumption.delegation, fees.delegation)
+        } else {
+            (gas_consumption.transaction, fees.transaction)
+        };
+
+        match gas_and_fee {
+            // both should always be `Some`, otherwise
+            // `estimate_gas_consumption` would fail.
+            (Some(estimated_gas), Some(estimated_fee)) => {
+                eprintln!();
+
+                if let Some(fee) = manual_fee.filter(|fee| *fee < estimated_fee) {
+                    eprintln!(
+                        "{} Entered fee({} µꜩ ) is lower than the estimated minimum fee ({} µꜩ )!\n",
+                        style("[WARN]").yellow(),
+                        style(fee).red(),
+                        style(estimated_fee).green(),
+                    );
+                }
+                delegation_op = delegation_op.gas_limit(estimated_gas);
+
+                let input = yes_no_custom_amount_input(
+                    format!(
+                        "Would you like to use estimated fee({} µꜩ ),\n  or continue with specified fee({} µꜩ )",
+                        style(estimated_fee).green(),
+                        style(manual_fee.unwrap_or(0)).yellow(),
+                    ),
+                    manual_fee.map(|_| YesNoCustomAmount::No)
+                        .unwrap_or(YesNoCustomAmount::Yes),
+                );
+
+                delegation_op = match input {
+                    YesNoCustomAmount::Custom(custom_fee) => {
+                        delegation_op.fee(custom_fee)
+                    }
+                    YesNoCustomAmount::Yes => delegation_op.fee(estimated_fee),
+                    YesNoCustomAmount::No => delegation_op,
+                };
+            }
+            _ => {}
+        };
+
+        match (reveal_op, gas_consumption.reveal, fees.reveal) {
+            (Some(mut reveal_op), Some(estimated_gas), Some(estimated_fee)) => {
+                reveal_op = reveal_op.gas_limit(estimated_gas);
+
+                eprintln!(
+                    "\n{} Account from which you are sending from, hasn't yet been {}!",
+                    style("[WARN]").yellow(),
+                    style("revealed").bold(),
+                );
+                eprintln!(
+                    "\n       Additional fee (estimated {} µꜩ ) is required to reveal the account.",
+                    style(estimated_fee).green(),
+                );
+
+                // whether or not entered fee is greater or equal to the total estimated fee.
+                let is_fee_larger = delegation_op
+                    .get_fee()
+                    .filter(|fee| *fee >= fees.total())
+                    .is_some();
+
+
+                if is_fee_larger {
+                    eprintln!(
+                        "\n       {} current fee({} µꜩ ) should be sufficient.",
+                        style("HOWEVER").bold(),
+                        delegation_op.get_fee().unwrap(),
+                    );
+                }
+
+                let input = yes_no_custom_amount_input(
+                    format!(
+                        "Would you like to add an estimated fee({} µꜩ ) resulting in total: {} µꜩ ",
+                        style(estimated_fee).bold(),
+                        style(delegation_op.get_fee().unwrap_or(0) + estimated_fee).green(),
+                    ),
+                    manual_fee.map(|_| YesNoCustomAmount::No)
+                        .unwrap_or(YesNoCustomAmount::Yes),
+                );
+
+                reveal_op = match input {
+                    YesNoCustomAmount::Custom(custom_fee) => {
+                        reveal_op.fee(custom_fee)
+                    }
+                    YesNoCustomAmount::Yes => reveal_op.fee(estimated_fee),
+                    YesNoCustomAmount::No => reveal_op,
+                };
+                operation_group = operation_group.with_reveal(reveal_op.build().unwrap());
+            },
+            _ => {}
+        }
+
+        operation_group.with_operation(delegation_op.build().unwrap())
     }
 
     fn sign_operation(

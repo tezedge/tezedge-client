@@ -7,6 +7,9 @@ pub use get_pending_operation_status::*;
 pub mod forge_operations;
 pub use forge_operations::*;
 
+pub mod run_operation;
+pub use run_operation::*;
+
 pub mod preapply_operations;
 pub use preapply_operations::*;
 
