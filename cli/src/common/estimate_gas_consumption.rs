@@ -1,4 +1,4 @@
-use lib::{serde_json, NewOperation, NewOperationGroup};
+use lib::{NewOperation, NewOperationGroup};
 use lib::api::RunOperation;
 use lib::http_api::HttpApi;
 

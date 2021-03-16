@@ -23,6 +23,7 @@ use crate::common::{
 };
 use crate::emojies;
 use crate::trezor::trezor_execute;
+use crate::commands::CommandError;
 
 /// Create a transaction
 ///
