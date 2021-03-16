@@ -63,8 +63,8 @@ pub fn estimate_operation_fees(
     };
 
     OperationFees {
-        reveal: reveal_fee,
-        transaction: transaction_fee,
-        delegation: delegation_fee,
+        reveal: reveal_fee.map(|x| x + 50),
+        transaction: transaction_fee.map(|x| x + 100),
+        delegation: delegation_fee.map(|x| x + 100),
     }
 }
