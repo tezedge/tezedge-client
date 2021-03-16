@@ -23,6 +23,7 @@ use crate::common::{
 };
 use crate::emojies;
 use crate::trezor::trezor_execute;
+use crate::commands::CommandError;
 
 /// Delegate balance to baker
 #[derive(StructOpt)]
@@ -159,7 +160,7 @@ impl Delegate {
                 .unwrap()
         };
 
-        let key_path = parse_derivation_path(&raw_key_path);
+        let key_path = parse_derivation_path(&raw_key_path).unwrap();
         self.key_path = Some(key_path.clone());
 
         Some(key_path)
@@ -481,7 +482,7 @@ impl Delegate {
         );
     }
 
-    pub fn execute(mut self) {
+    pub fn execute(mut self) -> Result<(), CommandError> {
         let operation_group = self.build_operation_group();
         let OperationSignatureInfo {
             operation_hash,
@@ -518,5 +519,7 @@ impl Delegate {
         if !console::user_attended() {
             println!("{}", &operation_hash);
         }
+
+        Ok(())
     }
 }

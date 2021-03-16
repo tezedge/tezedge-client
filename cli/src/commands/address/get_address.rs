@@ -3,6 +3,7 @@ use structopt::StructOpt;
 use lib::ToBase58Check;
 
 use crate::common::parse_derivation_path;
+use crate::commands::CommandError;
 
 /// Get address
 ///
@@ -22,13 +23,14 @@ pub struct GetAddress {
 }
 
 impl GetAddress {
-    pub fn execute(self) {
-        let path = parse_derivation_path(&self.path);
+    pub fn execute(self) -> Result<(), CommandError> {
+        let path = parse_derivation_path(&self.path)?;
         let address = crate::trezor::get_address(
             &mut crate::trezor::find_device_and_connect(),
             path,
         ).to_base58check();
 
         println!("{}", address);
+        Ok(())
     }
 }

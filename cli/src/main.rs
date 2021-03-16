@@ -1,9 +1,12 @@
 use structopt::StructOpt;
+use console::style;
 
 mod emojies;
 mod spinner;
-mod common;
 mod trezor;
+
+mod common;
+use common::exit_with_error;
 
 mod commands;
 use commands::Command;
@@ -12,9 +15,14 @@ use commands::Command;
 fn main() {
     let command = Command::from_args();
 
-    match command {
+    let result = match command {
         Command::Address(c) => c.execute(),
         Command::Transfer(c) => c.execute(),
         Command::Delegate(c) => c.execute(),
+    };
+
+    match result {
+        Ok(_) => {}
+        Err(err) => exit_with_error(err),
     }
 }
