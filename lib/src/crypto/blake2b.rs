@@ -1,11 +1,10 @@
 // Copyright (c) SimpleStaking and Tezedge Contributors
 // SPDX-License-Identifier: MIT
 
-use failure::Fail;
 use sodiumoxide::crypto::generichash::State;
 
-#[derive(Debug, Copy, Clone, Fail)]
-#[fail(display = "Output digest length must be between 16 and 64 bytes.")]
+#[derive(thiserror::Error, PartialEq, Debug, Clone, Copy)]
+#[error("Output digest length must be between 16 and 64 bytes.")]
 pub struct Blake2bLengthError;
 
 /// Generate digest of length 256 bits (32bytes) from arbitrary binary data

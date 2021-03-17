@@ -2,20 +2,19 @@
 // SPDX-License-Identifier: MIT
 
 use base58::{FromBase58, ToBase58};
-use failure::Fail;
 use sodiumoxide::crypto::hash::sha256;
 
 /// Possible errors for base58checked
-#[derive(Debug, PartialEq, Fail)]
+#[derive(thiserror::Error, Debug, PartialEq)]
 pub enum FromBase58CheckError {
     /// Base58 error.
-    #[fail(display = "invalid base58")]
+    #[error("invalid base58")]
     InvalidBase58,
     /// The input had invalid checksum.
-    #[fail(display = "invalid checksum")]
+    #[error("invalid checksum")]
     InvalidChecksum,
     /// The input is missing checksum.
-    #[fail(display = "missing checksum")]
+    #[error("missing checksum")]
     MissingChecksum,
 }
 

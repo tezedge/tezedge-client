@@ -10,7 +10,6 @@ use crate::api::{
     GetChainID, GetChainIDResult,
     GetContractStorage, GetContractStorageResult,
     GetCounterForKey, GetCounterForKeyResult,
-    GetManagerKey, GetManagerKeyResult,
     GetManagerAddress, GetManagerAddressResult,
     GetPendingOperations, GetPendingOperationsResult, PendingOperations, PendingOperation,
     GetPendingOperationStatus, GetPendingOperationStatusResult, PendingOperationStatus,
@@ -19,6 +18,9 @@ use crate::api::{
     PreapplyOperations, PreapplyOperationsResult,
     InjectOperations, InjectOperationsResult,
 };
+
+mod get_manager_public_key;
+pub use get_manager_public_key::*;
 
 pub struct HttpApi {
     base_url: String,
@@ -76,15 +78,6 @@ impl HttpApi {
     fn get_contract_storage_url(&self, addr: &OriginatedAddress) -> String {
         format!(
             "{}/chains/main/blocks/head/context/contracts/{}/storage",
-            self.base_url,
-            addr.to_base58check(),
-        )
-    }
-
-    /// Get manager key
-    fn get_manager_key_url(&self, addr: &Address) -> String {
-        format!(
-            "{}/chains/main/blocks/head/context/contracts/{}/manager_key",
             self.base_url,
             addr.to_base58check(),
         )
@@ -235,17 +228,6 @@ impl GetCounterForKey for HttpApi {
            .into_json::<String>()
            .unwrap()
            .parse()
-           .unwrap())
-    }
-}
-
-// TODO: receiving NULL, probably because node isn't synced
-impl GetManagerKey for HttpApi {
-    fn get_manager_key(&self, addr: &Address) -> GetManagerKeyResult {
-        Ok(self.client.get(&self.get_manager_key_url(addr))
-           .call()
-           .unwrap()
-           .into_json::<Option<String>>()
            .unwrap())
     }
 }

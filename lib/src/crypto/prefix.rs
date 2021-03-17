@@ -1,5 +1,3 @@
-use failure::Fail;
-
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy)]
 pub enum Prefix {
@@ -69,8 +67,8 @@ impl AsRef<[u8]> for Prefix {
     }
 }
 
-#[derive(Debug, PartialEq, Fail)]
-#[fail(display = "not matching prefix")]
+#[derive(thiserror::Error, Debug, PartialEq)]
+#[error("not matching prefix")]
 pub struct NotMatchingPrefixError;
 
 pub trait WithPrefix {

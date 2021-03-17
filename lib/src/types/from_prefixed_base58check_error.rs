@@ -1,25 +1,23 @@
-use failure::Fail;
-
 use crate::crypto::FromBase58CheckError;
 use crate::crypto::NotMatchingPrefixError;
 
 /// Possible errors for base58checked
-#[derive(Debug, PartialEq, Fail)]
+#[derive(thiserror::Error, PartialEq, Debug)]
 pub enum FromPrefixedBase58CheckError {
     /// Base58 error.
-    #[fail(display = "invalid base58")]
+    #[error("invalid base58")]
     InvalidBase58,
     /// The input had invalid checksum.
-    #[fail(display = "invalid checksum")]
+    #[error("invalid checksum")]
     InvalidChecksum,
     /// The input is missing checksum.
-    #[fail(display = "missing checksum")]
+    #[error("missing checksum")]
     MissingChecksum,
     /// Provided prefix doesn't match one in base58 string
-    #[fail(display = "not matching prefix")]
+    #[error("not matching prefix")]
     NotMatchingPrefix,
     /// Invalid size
-    #[fail(display = "invalid size")]
+    #[error("invalid size")]
     InvalidSize,
 }
 

@@ -225,8 +225,8 @@ impl Transfer {
         counter
     }
 
-    fn get_manager_key(&mut self, addr: &Address) -> Option<String> {
-        self.api().get_manager_key(&addr).unwrap()
+    fn get_manager_public_key(&mut self, addr: &Address) -> Option<PublicKey> {
+        self.api().get_manager_public_key(&addr).unwrap()
     }
 
     fn build_operation_group(&mut self) -> NewOperationGroup {
@@ -275,7 +275,7 @@ impl Transfer {
             .gas_limit(10300)
             .storage_limit(257);
 
-        let mut reveal_op = if from.is_implicit() && self.get_manager_key(&from).is_none() {
+        let mut reveal_op = if from.is_implicit() && self.get_manager_public_key(&from).is_none() {
             let mut reveal_op = NewRevealOperationBuilder::new()
                 .source(from.clone().as_implicit().unwrap())
                 .fee(0)
