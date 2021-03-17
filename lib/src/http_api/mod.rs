@@ -19,6 +19,9 @@ use crate::api::{
     InjectOperations, InjectOperationsResult,
 };
 
+mod get_head_block_hash;
+pub use get_head_block_hash::*;
+
 mod get_manager_public_key;
 pub use get_manager_public_key::*;
 
@@ -49,13 +52,6 @@ impl HttpApi {
     fn get_protocol_info_url(&self) -> String {
         format!(
             "{}/chains/main/blocks/head/protocols",
-            self.base_url,
-        )
-    }
-
-    fn get_head_block_hash_url(&self) -> String {
-        format!(
-            "{}/chains/main/blocks/head/hash",
             self.base_url,
         )
     }
@@ -183,16 +179,6 @@ impl GetProtocolInfo for HttpApi {
             .into_json::<ProtocolInfoJson>()
             .unwrap()
             .into())
-    }
-}
-
-impl GetHeadBlockHash for HttpApi {
-    fn get_head_block_hash(&self) -> GetHeadBlockHashResult {
-        Ok(self.client.get(&self.get_head_block_hash_url())
-            .call()
-            .unwrap()
-            .into_json()
-            .unwrap())
     }
 }
 
