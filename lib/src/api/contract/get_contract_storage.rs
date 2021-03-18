@@ -14,7 +14,7 @@ pub enum GetContractStorageErrorKind {
 #[derive(thiserror::Error, Debug)]
 pub struct GetContractStorageError {
     pub address: OriginatedAddress,
-    pub error: GetContractStorageErrorKind,
+    pub kind: GetContractStorageErrorKind,
 }
 
 impl Display for GetContractStorageError {
@@ -22,7 +22,7 @@ impl Display for GetContractStorageError {
         write!(f,
             "getting storage for contract with an address \"{}\" failed! Reason: {}",
             self.address.to_base58check(),
-            self.error,
+            self.kind,
         )
     }
 }

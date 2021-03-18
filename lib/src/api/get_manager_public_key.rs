@@ -15,7 +15,7 @@ pub enum GetManagerPublicKeyErrorKind {
 #[derive(thiserror::Error, Debug)]
 pub struct GetManagerPublicKeyError {
     pub address: Address,
-    pub error: GetManagerPublicKeyErrorKind,
+    pub kind: GetManagerPublicKeyErrorKind,
 }
 
 impl Display for GetManagerPublicKeyError {
@@ -23,7 +23,7 @@ impl Display for GetManagerPublicKeyError {
         write!(f,
             "getting manager's public key for address \"{}\" failed! Reason: {}",
             self.address.to_base58check(),
-            self.error,
+            self.kind,
         )
     }
 }

@@ -14,7 +14,7 @@ pub enum GetContractCounterErrorKind {
 #[derive(thiserror::Error, Debug)]
 pub struct GetContractCounterError {
     pub address: Address,
-    pub error: GetContractCounterErrorKind,
+    pub kind: GetContractCounterErrorKind,
 }
 
 impl Display for GetContractCounterError {
@@ -22,7 +22,7 @@ impl Display for GetContractCounterError {
         write!(f,
             "getting counter for address \"{}\" failed! Reason: {}",
             self.address.to_base58check(),
-            self.error,
+            self.kind,
         )
     }
 }

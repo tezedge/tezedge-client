@@ -28,7 +28,7 @@ impl From<GetContractStorageErrorKind> for GetContractManagerAddressErrorKind {
 #[derive(thiserror::Error, Debug)]
 pub struct GetContractManagerAddressError {
     pub address: OriginatedAddress,
-    pub error: GetContractManagerAddressErrorKind,
+    pub kind: GetContractManagerAddressErrorKind,
 }
 
 impl Display for GetContractManagerAddressError {
@@ -36,7 +36,7 @@ impl Display for GetContractManagerAddressError {
         write!(f,
             "getting manager's address for contract \"{}\" failed! Reason: {}",
             self.address.to_base58check(),
-            self.error,
+            self.kind,
         )
     }
 }
@@ -45,7 +45,7 @@ impl From<GetContractStorageError> for GetContractManagerAddressError {
     fn from(error: GetContractStorageError) -> Self {
         Self {
             address: error.address.into(),
-            error: error.error.into(),
+            kind: error.kind.into(),
         }
     }
 }
@@ -63,12 +63,12 @@ pub trait GetContractManagerAddress {
 
 
 #[inline]
-fn build_error<E>(address: &OriginatedAddress, error: E) -> GetContractManagerAddressError
+fn build_error<E>(address: &OriginatedAddress, kind: E) -> GetContractManagerAddressError
     where E: Into<GetContractManagerAddressErrorKind>,
 {
     GetContractManagerAddressError {
         address: address.clone(),
-        error: error.into(),
+        kind: kind.into(),
     }
 }
 

@@ -42,12 +42,12 @@ impl From<std::io::Error> for GetContractCounterErrorKind {
 }
 
 #[inline]
-fn build_error<E>(address: &Address, error: E) -> GetContractCounterError
+fn build_error<E>(address: &Address, kind: E) -> GetContractCounterError
     where E: Into<GetContractCounterErrorKind>,
 {
     GetContractCounterError {
         address: address.clone(),
-        error: error.into(),
+        kind: kind.into(),
     }
 }
 

@@ -43,12 +43,12 @@ impl From<std::io::Error> for GetContractStorageErrorKind {
 }
 
 #[inline]
-fn build_error<E>(address: &OriginatedAddress, error: E) -> GetContractStorageError
+fn build_error<E>(address: &OriginatedAddress, kind: E) -> GetContractStorageError
     where E: Into<GetContractStorageErrorKind>,
 {
     GetContractStorageError {
         address: address.clone(),
-        error: error.into(),
+        kind: kind.into(),
     }
 }
 

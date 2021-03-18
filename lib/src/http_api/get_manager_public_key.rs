@@ -43,12 +43,12 @@ impl From<std::io::Error> for GetManagerPublicKeyErrorKind {
 }
 
 #[inline]
-fn build_error<E>(address: &Address, error: E) -> GetManagerPublicKeyError
+fn build_error<E>(address: &Address, kind: E) -> GetManagerPublicKeyError
     where E: Into<GetManagerPublicKeyErrorKind>,
 {
     GetManagerPublicKeyError {
         address: address.clone(),
-        error: error.into(),
+        kind: kind.into(),
     }
 }
 
