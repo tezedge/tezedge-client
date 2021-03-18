@@ -8,7 +8,7 @@ use crate::api::{
     GetHeadBlockHash, GetHeadBlockHashResult,
     GetChainID, GetChainIDResult,
     GetContractStorage, GetContractStorageResult,
-    GetManagerAddress, GetManagerAddressResult,
+    GetContractManagerAddress, GetContractManagerAddressResult,
     GetPendingOperations, GetPendingOperationsResult, PendingOperations, PendingOperation,
     GetPendingOperationStatus, GetPendingOperationStatusResult, PendingOperationStatus,
     ForgeOperations, ForgeOperationsResult,
@@ -169,8 +169,8 @@ impl GetContractStorage for HttpApi {
     }
 }
 
-impl GetManagerAddress for HttpApi {
-    fn get_manager_address(&self, addr: &Address) -> GetManagerAddressResult {
+impl GetContractManagerAddress for HttpApi {
+    fn get_contract_manager_address(&self, addr: &Address) -> GetContractManagerAddressResult {
         Ok(match addr {
             Address::Implicit(addr) => addr.clone(),
             Address::Originated(addr) => {

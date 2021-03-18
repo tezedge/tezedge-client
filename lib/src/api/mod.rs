@@ -26,10 +26,6 @@ pub use get_chain_id::*;
 mod get_manager_public_key;
 pub use get_manager_public_key::*;
 
-// TODO: move inside contract/ and rename
-mod get_manager_address;
-pub use get_manager_address::*;
-
 #[derive(thiserror::Error, Debug)]
 #[error(transparent)]
 pub struct TransportError(pub Box<dyn std::error::Error>);
