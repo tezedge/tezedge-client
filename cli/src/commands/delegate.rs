@@ -204,7 +204,7 @@ impl Delegate {
     fn get_counter(&mut self) -> u64 {
         let counter = self.counter.unwrap_or_else(|| {
             let addr = self.get_manager_addr();
-            self.api().get_counter_for_key(&addr.into()).unwrap()
+            self.api().get_contract_counter(&addr.into()).unwrap()
         }) + 1;
         self.counter = Some(counter);
         counter

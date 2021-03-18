@@ -22,10 +22,6 @@ pub use get_head_block_hash::*;
 mod get_chain_id;
 pub use get_chain_id::*;
 
-// TODO: move inside contract/ and rename to get_contract_counter
-mod get_counter_for_key;
-pub use get_counter_for_key::*;
-
 // TODO: move inside contract/ and rename
 mod get_manager_public_key;
 pub use get_manager_public_key::*;

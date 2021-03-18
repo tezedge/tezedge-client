@@ -9,7 +9,7 @@ use crate::api::{
     GetHeadBlockHash, GetHeadBlockHashResult,
     GetChainID, GetChainIDResult,
     GetContractStorage, GetContractStorageResult,
-    GetCounterForKey, GetCounterForKeyResult,
+    GetContractCounter, GetContractCounterResult,
     GetManagerAddress, GetManagerAddressResult,
     GetPendingOperations, GetPendingOperationsResult, PendingOperations, PendingOperation,
     GetPendingOperationStatus, GetPendingOperationStatusResult, PendingOperationStatus,
@@ -63,11 +63,11 @@ impl HttpApi {
         )
     }
 
-    fn get_counter_for_key_url(&self, key: &Address) -> String {
+    fn get_contract_counter_url(&self, address: &Address) -> String {
         format!(
             "{}/chains/main/blocks/head/context/contracts/{}/counter",
             self.base_url,
-            key.to_base58check(),
+            address.to_base58check(),
         )
     }
 
@@ -206,9 +206,9 @@ impl GetContractStorage for HttpApi {
     }
 }
 
-impl GetCounterForKey for HttpApi {
-    fn get_counter_for_key(&self, key: &Address) -> GetCounterForKeyResult {
-        Ok(self.client.get(&self.get_counter_for_key_url(key))
+impl GetContractCounter for HttpApi {
+    fn get_contract_counter(&self, address: &Address) -> GetContractCounterResult {
+        Ok(self.client.get(&self.get_contract_counter_url(address))
            .call()
            .unwrap()
            .into_json::<String>()
