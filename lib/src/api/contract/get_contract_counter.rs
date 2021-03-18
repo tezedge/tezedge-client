@@ -1,6 +1,33 @@
-use crate::Address;
+use std::fmt::{self, Display};
 
-pub type GetContractCounterResult = Result<u64, ()>;
+use crate::{Address, ToBase58Check};
+use crate::api::TransportError;
+
+#[derive(thiserror::Error, Debug)]
+#[error(transparent)]
+pub enum GetContractCounterErrorKind {
+    Transport(#[from] TransportError),
+    #[error("Unknown! {0}")]
+    Unknown(String),
+}
+
+#[derive(thiserror::Error, Debug)]
+pub struct GetContractCounterError {
+    pub address: Address,
+    pub error: GetContractCounterErrorKind,
+}
+
+impl Display for GetContractCounterError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f,
+            "getting counter for address \"{}\" failed! Reason: {}",
+            self.address.to_base58check(),
+            self.error,
+        )
+    }
+}
+
+pub type GetContractCounterResult = Result<u64, GetContractCounterError>;
 
 pub trait GetContractCounter {
     /// Get counter for a contract.

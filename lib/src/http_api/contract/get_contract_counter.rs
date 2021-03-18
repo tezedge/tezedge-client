@@ -1,20 +1,19 @@
 use crate::{Address, PublicKey, ToBase58Check, FromPrefixedBase58CheckError};
 use crate::api::{
-    GetManagerPublicKey, GetManagerPublicKeyResult,
-    TransportError, GetManagerPublicKeyError, GetManagerPublicKeyErrorKind,
+    GetContractCounter, GetContractCounterResult,
+    TransportError, GetContractCounterError, GetContractCounterErrorKind,
 };
 use crate::http_api::HttpApi;
 
-/// Get manager key
-fn get_manager_key_url(base_url: &str, addr: &Address) -> String {
+fn get_contract_counter_url(base_url: &str, addr: &Address) -> String {
     format!(
-        "{}/chains/main/blocks/head/context/contracts/{}/manager_key",
+        "{}/chains/main/blocks/head/context/contracts/{}/counter",
         base_url,
         addr.to_base58check(),
     )
 }
 
-impl From<ureq::Error> for GetManagerPublicKeyErrorKind {
+impl From<ureq::Error> for GetContractCounterErrorKind {
     fn from(error: ureq::Error) -> Self {
         match error {
             ureq::Error::Transport(error) => {
@@ -36,32 +35,29 @@ impl From<ureq::Error> for GetManagerPublicKeyErrorKind {
     }
 }
 
-impl From<std::io::Error> for GetManagerPublicKeyErrorKind {
+impl From<std::io::Error> for GetContractCounterErrorKind {
     fn from(error: std::io::Error) -> Self {
         Self::Transport(TransportError(Box::new(error)))
     }
 }
 
 #[inline]
-fn build_error<E>(address: &Address, error: E) -> GetManagerPublicKeyError
-    where E: Into<GetManagerPublicKeyErrorKind>,
+fn build_error<E>(address: &Address, error: E) -> GetContractCounterError
+    where E: Into<GetContractCounterErrorKind>,
 {
-    GetManagerPublicKeyError {
+    GetContractCounterError {
         address: address.clone(),
         error: error.into(),
     }
 }
 
 // TODO: receiving NULL, probably because node isn't synced
-impl GetManagerPublicKey for HttpApi {
-    fn get_manager_public_key(&self, addr: &Address) -> GetManagerPublicKeyResult {
-        Ok(self.client.get(&get_manager_key_url(&self.base_url, addr))
+impl GetContractCounter for HttpApi {
+    fn get_contract_counter(&self, addr: &Address) -> GetContractCounterResult {
+        Ok(self.client.get(&get_contract_counter_url(&self.base_url, addr))
            .call()
            .map_err(|err| build_error(addr, err))?
-           .into_json::<Option<String>>()
-           .map_err(|err| build_error(addr, err))?
-           .map(|key| PublicKey::from_base58check(&key))
-           .transpose()
+           .into_json()
            .map_err(|err| build_error(addr, err))?)
     }
 }

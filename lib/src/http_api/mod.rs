@@ -9,7 +9,6 @@ use crate::api::{
     GetHeadBlockHash, GetHeadBlockHashResult,
     GetChainID, GetChainIDResult,
     GetContractStorage, GetContractStorageResult,
-    GetContractCounter, GetContractCounterResult,
     GetManagerAddress, GetManagerAddressResult,
     GetPendingOperations, GetPendingOperationsResult, PendingOperations, PendingOperation,
     GetPendingOperationStatus, GetPendingOperationStatusResult, PendingOperationStatus,
@@ -18,6 +17,9 @@ use crate::api::{
     PreapplyOperations, PreapplyOperationsResult,
     InjectOperations, InjectOperationsResult,
 };
+
+mod contract;
+pub use contract::*;
 
 mod get_head_block_hash;
 pub use get_head_block_hash::*;
@@ -60,14 +62,6 @@ impl HttpApi {
         format!(
             "{}/chains/main/chain_id",
             self.base_url,
-        )
-    }
-
-    fn get_contract_counter_url(&self, address: &Address) -> String {
-        format!(
-            "{}/chains/main/blocks/head/context/contracts/{}/counter",
-            self.base_url,
-            address.to_base58check(),
         )
     }
 
@@ -203,18 +197,6 @@ impl GetContractStorage for HttpApi {
            .or(Err(()))?
            .into_json()
            .or(Err(()))?)
-    }
-}
-
-impl GetContractCounter for HttpApi {
-    fn get_contract_counter(&self, address: &Address) -> GetContractCounterResult {
-        Ok(self.client.get(&self.get_contract_counter_url(address))
-           .call()
-           .unwrap()
-           .into_json::<String>()
-           .unwrap()
-           .parse()
-           .unwrap())
     }
 }
 

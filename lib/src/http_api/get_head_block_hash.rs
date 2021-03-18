@@ -2,7 +2,7 @@ use crate::api::{
     GetHeadBlockHash, GetHeadBlockHashResult,
     TransportError, GetHeadBlockHashError,
 };
-use super::HttpApi;
+use crate::http_api::HttpApi;
 
 fn get_head_block_hash_url(base_url: &str) -> String {
     format!("{}/chains/main/blocks/head/hash", base_url)
