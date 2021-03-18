@@ -127,7 +127,7 @@ impl Delegate {
         let addr = self.get_from_addr();
         let manager = match self.manager_addr.clone() {
             Some(mgr) => { return mgr },
-            None => self.api().get_manager_address(&addr).unwrap(),
+            None => self.api().get_contract_manager_address(&addr).unwrap(),
         };
         self.manager_addr = Some(manager.clone());
         manager
@@ -244,7 +244,7 @@ impl Delegate {
             .source::<ImplicitOrOriginatedWithManager>(match from.clone() {
                 Address::Implicit(source) => source.into(),
                 Address::Originated(addr) => {
-                    let manager = match self.api().get_manager_address(&addr.clone().into()) {
+                    let manager = match self.api().get_contract_manager_address(&addr.clone().into()) {
                         Ok(x) => x.into(),
                         // TODO: more instructive error
                         Err(_) => exit_with_error("delegating funds from contract originated after Babylon protocol change, isn't supported.")
