@@ -7,7 +7,6 @@ use crate::api::{
     GetConstants, GetConstantsResult,
     GetHeadBlockHash, GetHeadBlockHashResult,
     GetChainID, GetChainIDResult,
-    GetContractStorage, GetContractStorageResult,
     GetContractManagerAddress, GetContractManagerAddressResult,
     GetPendingOperations, GetPendingOperationsResult, PendingOperations, PendingOperation,
     GetPendingOperationStatus, GetPendingOperationStatusResult, PendingOperationStatus,
@@ -57,14 +56,6 @@ impl HttpApi {
         format!(
             "{}/chains/main/chain_id",
             self.base_url,
-        )
-    }
-
-    fn get_contract_storage_url(&self, addr: &OriginatedAddress) -> String {
-        format!(
-            "{}/chains/main/blocks/head/context/contracts/{}/storage",
-            self.base_url,
-            addr.to_base58check(),
         )
     }
 
@@ -152,20 +143,6 @@ impl GetChainID for HttpApi {
             .unwrap()
             .into_json()
             .unwrap())
-    }
-}
-
-impl GetContractStorage for HttpApi {
-    fn get_contract_storage(
-        &self,
-        addr: &OriginatedAddress,
-    ) -> GetContractStorageResult
-    {
-        Ok(self.client.get(&self.get_contract_storage_url(addr))
-           .call()
-           .or(Err(()))?
-           .into_json()
-           .or(Err(()))?)
     }
 }
 
