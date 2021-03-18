@@ -5,7 +5,6 @@ use crate::{Address, BlockHash, ImplicitAddress, NewOperationGroup, NewOperation
 use crate::api::{
     GetVersionInfo, GetVersionInfoResult, VersionInfo, NodeVersion, NetworkVersion, CommitInfo,
     GetConstants, GetConstantsResult,
-    GetProtocolInfo, GetProtocolInfoResult, ProtocolInfo,
     GetHeadBlockHash, GetHeadBlockHashResult,
     GetChainID, GetChainIDResult,
     GetContractStorage, GetContractStorageResult,
@@ -20,6 +19,9 @@ use crate::api::{
 
 mod contract;
 pub use contract::*;
+
+mod get_protocol_info;
+pub use get_protocol_info::*;
 
 mod get_head_block_hash;
 pub use get_head_block_hash::*;
@@ -47,13 +49,6 @@ impl HttpApi {
     fn get_constants_url(&self) -> String {
         format!(
             "{}/chains/main/blocks/head/context/constants",
-            self.base_url,
-        )
-    }
-
-    fn get_protocol_info_url(&self) -> String {
-        format!(
-            "{}/chains/main/blocks/head/protocols",
             self.base_url,
         )
     }
@@ -147,32 +142,6 @@ impl GetConstants for HttpApi {
             .unwrap()
             .into_json()
             .unwrap())
-    }
-}
-
-#[derive(Deserialize)]
-struct ProtocolInfoJson {
-    protocol: String,
-    next_protocol: String,
-}
-
-impl Into<ProtocolInfo> for ProtocolInfoJson {
-    fn into(self) -> ProtocolInfo {
-        let mut info = ProtocolInfo::default();
-        info.protocol_hash = self.protocol;
-        info.next_protocol_hash = self.next_protocol;
-        info
-    }
-}
-
-impl GetProtocolInfo for HttpApi {
-    fn get_protocol_info(&self) -> GetProtocolInfoResult {
-        Ok(self.client.get(&self.get_protocol_info_url())
-            .call()
-            .unwrap()
-            .into_json::<ProtocolInfoJson>()
-            .unwrap()
-            .into())
     }
 }
 
