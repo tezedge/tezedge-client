@@ -38,7 +38,7 @@ pub fn estimate_gas_consumption(
     api: &mut HttpApi,
 ) -> Result<OperationGroupGasConsumption, ()>
 {
-    let run_operation_result = api.run_operation(op)?;
+    let run_operation_result = api.run_operation(op).unwrap();
     let op_results = run_operation_result["contents"]
         .as_array()
         .ok_or(())?;

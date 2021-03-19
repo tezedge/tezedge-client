@@ -7,7 +7,6 @@ use crate::api::{
     GetConstants, GetConstantsResult,
     GetChainID, GetChainIDResult,
     ForgeOperations, ForgeOperationsResult,
-    RunOperation, RunOperationResult,
     PreapplyOperations, PreapplyOperationsResult,
     InjectOperations, InjectOperationsResult,
 };
@@ -65,13 +64,6 @@ impl HttpApi {
             "{}/chains/main/blocks/{}/helpers/forge/operations",
             self.base_url,
             branch.to_base58check(),
-        )
-    }
-
-    fn run_operation_url(&self) -> String {
-        format!(
-            "{}/chains/main/blocks/head/helpers/scripts/run_operation",
-            self.base_url,
         )
     }
 
@@ -151,33 +143,6 @@ impl ForgeOperations for HttpApi {
                    .into_iter()
                    .map(|op| NewOperationWithKind::from(op))
                    .collect::<Vec<_>>(),
-           }))
-           .unwrap()
-           .into_json()
-           .unwrap())
-    }
-}
-
-impl RunOperation for HttpApi {
-    fn run_operation(
-        &self,
-        operation_group: &NewOperationGroup,
-    ) -> RunOperationResult
-    {
-        Ok(self.client.post(&self.run_operation_url())
-           .send_json(ureq::json!({
-                "chain_id": self.get_chain_id()?,
-                "operation": {
-                    "branch": &operation_group.branch,
-                    // this is necessary to be valid signature but doesn't
-                    // need to match the actual operation signature.
-                    "signature": "edsigthZLBZKMBUCwHpMCXHkGtBSzwh7wdUxqs7C1LRMk64xpcVU8tyBDnuFuf9CLkdL3urGem1zkHXFV9JbBBabi6k8QnhW4RG",
-                    "contents": operation_group.to_operations_vec()
-                        .into_iter()
-                        .map(|op| NewOperationWithKind::from(op))
-                        .collect::<Vec<_>>(),
-                },
-
            }))
            .unwrap()
            .into_json()
