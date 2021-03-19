@@ -6,8 +6,6 @@ use crate::api::{
     GetVersionInfo, GetVersionInfoResult, VersionInfo, NodeVersion, NetworkVersion, CommitInfo,
     GetConstants, GetConstantsResult,
     GetChainID, GetChainIDResult,
-    GetPendingOperations, PendingOperation,
-    GetPendingOperationStatus, GetPendingOperationStatusResult, PendingOperationStatus,
     ForgeOperations, ForgeOperationsResult,
     RunOperation, RunOperationResult,
     PreapplyOperations, PreapplyOperationsResult,
@@ -137,32 +135,6 @@ impl GetChainID for HttpApi {
             .unwrap()
             .into_json()
             .unwrap())
-    }
-}
-
-impl GetPendingOperationStatus for HttpApi {
-    fn get_pending_operation_status(
-        &self,
-        operation_hash: &str
-    ) -> GetPendingOperationStatusResult
-    {
-        let pending_operations = self.get_pending_operations().unwrap();
-
-        let contained_by = |ops: &[PendingOperation]| {
-            ops.iter()
-                .find(|op| op.hash == operation_hash)
-                .is_some()
-        };
-
-        let status = if contained_by(&pending_operations.applied) {
-            PendingOperationStatus::Applied
-        } else if contained_by(&pending_operations.refused) {
-            PendingOperationStatus::Refused
-        } else {
-            PendingOperationStatus::Finished
-        };
-
-        Ok(status)
     }
 }
 
