@@ -5,7 +5,6 @@ use crate::{BlockHash, NewOperationGroup, NewOperationWithKind, ToBase58Check};
 use crate::api::{
     GetVersionInfo, GetVersionInfoResult, VersionInfo, NodeVersion, NetworkVersion, CommitInfo,
     GetConstants, GetConstantsResult,
-    GetChainID, GetChainIDResult,
     ForgeOperations, ForgeOperationsResult,
     PreapplyOperations, PreapplyOperationsResult,
     InjectOperations, InjectOperationsResult,
@@ -16,6 +15,9 @@ pub use contract::*;
 
 mod operation;
 pub use operation::*;
+
+mod get_chain_id;
+pub use get_chain_id::*;
 
 mod get_protocol_info;
 pub use get_protocol_info::*;
@@ -46,13 +48,6 @@ impl HttpApi {
     fn get_constants_url(&self) -> String {
         format!(
             "{}/chains/main/blocks/head/context/constants",
-            self.base_url,
-        )
-    }
-
-    fn get_chain_id_url(&self) -> String {
-        format!(
-            "{}/chains/main/chain_id",
             self.base_url,
         )
     }
@@ -113,16 +108,6 @@ impl GetVersionInfo for HttpApi {
 impl GetConstants for HttpApi {
     fn get_constants(&self) -> GetConstantsResult {
         Ok(self.client.get(&self.get_constants_url())
-            .call()
-            .unwrap()
-            .into_json()
-            .unwrap())
-    }
-}
-
-impl GetChainID for HttpApi {
-    fn get_chain_id(&self) -> GetChainIDResult {
-        Ok(self.client.get(&self.get_chain_id_url())
             .call()
             .unwrap()
             .into_json()

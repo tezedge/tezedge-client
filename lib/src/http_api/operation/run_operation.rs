@@ -45,8 +45,7 @@ impl RunOperation for HttpApi {
     {
         Ok(self.client.post(&run_operation_url(&self.base_url))
            .send_json(ureq::json!({
-                // TODO: remove unwrap after implementing get_chain_id.
-                "chain_id": self.get_chain_id().unwrap(),
+                "chain_id": self.get_chain_id()?,
                 "operation": {
                     "branch": &operation_group.branch,
                     // this is necessary to be valid signature for this call

@@ -1,11 +1,12 @@
 use std::fmt::{self, Display};
 
 use crate::NewOperationGroup;
-use crate::api::TransportError;
+use crate::api::{TransportError, GetChainIDError};
 
 #[derive(thiserror::Error, Debug)]
 pub enum RunOperationError {
     Transport(#[from] TransportError),
+    GetChainID(#[from] GetChainIDError),
     Unknown(String),
 }
 
@@ -14,6 +15,7 @@ impl Display for RunOperationError {
         write!(f, "operation simulation failed! Reason: ")?;
         match self {
             Self::Transport(err) => err.fmt(f),
+            Self::GetChainID(err) => write!(f, "\n{}", err),
             Self::Unknown(err) => write!(f, "Unknown! {}", err),
         }
     }
