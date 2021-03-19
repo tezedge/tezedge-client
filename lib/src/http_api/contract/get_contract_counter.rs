@@ -1,4 +1,4 @@
-use crate::{Address, PublicKey, ToBase58Check, FromPrefixedBase58CheckError};
+use crate::{Address, ToBase58Check};
 use crate::api::{
     GetContractCounter, GetContractCounterResult,
     TransportError, GetContractCounterError, GetContractCounterErrorKind,

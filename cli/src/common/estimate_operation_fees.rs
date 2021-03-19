@@ -1,4 +1,4 @@
-use lib::{NewOperation, NewOperationGroup};
+use lib::NewOperationGroup;
 
 use super::OperationGroupGasConsumption;
 

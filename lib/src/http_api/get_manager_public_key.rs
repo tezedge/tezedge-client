@@ -1,4 +1,4 @@
-use crate::{Address, PublicKey, ToBase58Check, FromPrefixedBase58CheckError};
+use crate::{Address, PublicKey, ToBase58Check};
 use crate::api::{
     GetManagerPublicKey, GetManagerPublicKeyResult,
     TransportError, GetManagerPublicKeyError, GetManagerPublicKeyErrorKind,

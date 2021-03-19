@@ -5,8 +5,8 @@ use console::{style, Term};
 use dialoguer::theme::ColorfulTheme;
 
 use lib::{
-    BlockHash, PublicKey, PrivateKey, Address,
-    ImplicitAddress, OriginatedAddressWithManager, ImplicitOrOriginatedWithManager,
+    BlockHash, PublicKey, PrivateKey,
+    Address, ImplicitAddress, ImplicitOrOriginatedWithManager,
     NewDelegationOperationBuilder, NewRevealOperationBuilder, NewOperationGroup,
 };
 use lib::utils::parse_float_amount;
@@ -48,8 +48,6 @@ pub struct Delegate {
 
     #[structopt(short, long)]
     pub to: String,
-
-    amount: String,
 
     /// Specify fee for the delegation.
     ///
@@ -258,7 +256,7 @@ impl Delegate {
             .gas_limit(10300)
             .storage_limit(257);
 
-        let mut reveal_op = if from.is_implicit() && self.get_manager_public_key(&from).is_none() {
+        let reveal_op = if from.is_implicit() && self.get_manager_public_key(&from).is_none() {
             let mut reveal_op = NewRevealOperationBuilder::new()
                 .source(from.clone().as_implicit().unwrap())
                 .fee(0)

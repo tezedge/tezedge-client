@@ -12,7 +12,7 @@ pub enum GetHeadBlockHashError {
 
 impl Display for GetHeadBlockHashError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "getting head block hash failed! Reason: ");
+        write!(f, "getting head block hash failed! Reason: ")?;
         match self {
             Self::Transport(err) => err.fmt(f),
             Self::Base58Decode(err) => err.fmt(f),

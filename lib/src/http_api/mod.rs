@@ -1,11 +1,10 @@
 use serde::Deserialize;
 use serde_json::Value as SerdeValue;
 
-use crate::{Address, BlockHash, ImplicitAddress, NewOperationGroup, NewOperationWithKind, OriginatedAddress, ToBase58Check};
+use crate::{BlockHash, NewOperationGroup, NewOperationWithKind, ToBase58Check};
 use crate::api::{
     GetVersionInfo, GetVersionInfoResult, VersionInfo, NodeVersion, NetworkVersion, CommitInfo,
     GetConstants, GetConstantsResult,
-    GetHeadBlockHash, GetHeadBlockHashResult,
     GetChainID, GetChainIDResult,
     GetPendingOperations, GetPendingOperationsResult, PendingOperations, PendingOperation,
     GetPendingOperationStatus, GetPendingOperationStatusResult, PendingOperationStatus,

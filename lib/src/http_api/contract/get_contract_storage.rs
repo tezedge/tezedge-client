@@ -1,4 +1,4 @@
-use crate::{OriginatedAddress, PublicKey, ToBase58Check, FromPrefixedBase58CheckError};
+use crate::{OriginatedAddress, ToBase58Check};
 use crate::api::{
     GetContractStorage, GetContractStorageResult,
     TransportError, GetContractStorageError, GetContractStorageErrorKind,

@@ -1,5 +1,4 @@
 use std::fmt;
-use std::num::ParseIntError;
 
 #[derive(thiserror::Error, PartialEq, Debug)]
 pub struct ParseDerivationPathError {
@@ -66,7 +65,7 @@ pub fn parse_derivation_path(path: &str) -> Result<Vec<u32>, ParseDerivationPath
             } else {
                 num
         })
-                .map_err(|err| {
+                .map_err(|_| {
                     ParseDerivationPathError::new(
                         ParseDerivationPathErrorKind::BadNumber,
                         path.to_string(),

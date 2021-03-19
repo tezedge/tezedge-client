@@ -1,4 +1,4 @@
-use lib::{NewOperation, NewOperationGroup};
+use lib::NewOperationGroup;
 use lib::api::RunOperation;
 use lib::http_api::HttpApi;
 

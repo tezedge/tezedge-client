@@ -11,7 +11,7 @@ pub enum GetProtocolInfoError {
 
 impl Display for GetProtocolInfoError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "getting information about protocol failed! Reason: ");
+        write!(f, "getting information about protocol failed! Reason: ")?;
         match self {
             Self::Transport(err) => err.fmt(f),
             Self::Unknown(err) => write!(f, "Unknown! {}", err)
