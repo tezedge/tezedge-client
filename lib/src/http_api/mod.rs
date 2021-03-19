@@ -6,7 +6,7 @@ use crate::api::{
     GetVersionInfo, GetVersionInfoResult, VersionInfo, NodeVersion, NetworkVersion, CommitInfo,
     GetConstants, GetConstantsResult,
     GetChainID, GetChainIDResult,
-    GetPendingOperations, GetPendingOperationsResult, PendingOperations, PendingOperation,
+    GetPendingOperations, PendingOperation,
     GetPendingOperationStatus, GetPendingOperationStatusResult, PendingOperationStatus,
     ForgeOperations, ForgeOperationsResult,
     RunOperation, RunOperationResult,
@@ -16,6 +16,9 @@ use crate::api::{
 
 mod contract;
 pub use contract::*;
+
+mod operation;
+pub use operation::*;
 
 mod get_protocol_info;
 pub use get_protocol_info::*;
@@ -53,13 +56,6 @@ impl HttpApi {
     fn get_chain_id_url(&self) -> String {
         format!(
             "{}/chains/main/chain_id",
-            self.base_url,
-        )
-    }
-
-    fn get_pending_operations_url(&self) -> String {
-        format!(
-            "{}/chains/main/mempool/pending_operations",
             self.base_url,
         )
     }
@@ -144,36 +140,13 @@ impl GetChainID for HttpApi {
     }
 }
 
-impl GetPendingOperations for HttpApi {
-    fn get_pending_operations(&self) -> GetPendingOperationsResult {
-        let mut resp = self.client.get(&self.get_pending_operations_url())
-           .call()
-           .unwrap()
-           .into_json::<serde_json::Value>()
-           .unwrap();
-
-        let mut ops = PendingOperations::default();
-        ops.applied = serde_json::from_value(resp.get_mut("applied").unwrap().take()).unwrap();
-        ops.refused = resp["refused"].as_array().unwrap().iter()
-            .map(|raw| {
-                let mut op = PendingOperation::default();
-                op.hash = raw[0].as_str().unwrap().to_string();
-                op.branch = raw[1]["branch"].as_str().unwrap().to_string();
-                op
-            })
-            .collect();
-
-        Ok(ops)
-    }
-}
-
 impl GetPendingOperationStatus for HttpApi {
     fn get_pending_operation_status(
         &self,
         operation_hash: &str
     ) -> GetPendingOperationStatusResult
     {
-        let pending_operations = self.get_pending_operations()?;
+        let pending_operations = self.get_pending_operations().unwrap();
 
         let contained_by = |ops: &[PendingOperation]| {
             ops.iter()
