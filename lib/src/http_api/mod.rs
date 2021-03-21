@@ -1,12 +1,10 @@
 use serde::Deserialize;
-use serde_json::Value as SerdeValue;
 
 use crate::{BlockHash, NewOperationGroup, NewOperationWithKind, ToBase58Check};
 use crate::api::{
     GetVersionInfo, GetVersionInfoResult, VersionInfo, NodeVersion, NetworkVersion, CommitInfo,
     GetConstants, GetConstantsResult,
     ForgeOperations, ForgeOperationsResult,
-    InjectOperations, InjectOperationsResult,
 };
 
 mod contract;
@@ -58,13 +56,6 @@ impl HttpApi {
             "{}/chains/main/blocks/{}/helpers/forge/operations",
             self.base_url,
             branch.to_base58check(),
-        )
-    }
-
-    fn inject_operations_url(&self) -> String {
-        format!(
-            "{}/injection/operation",
-            self.base_url,
         )
     }
 }
@@ -121,23 +112,6 @@ impl ForgeOperations for HttpApi {
                    .map(|op| NewOperationWithKind::from(op))
                    .collect::<Vec<_>>(),
            }))
-           .unwrap()
-           .into_json()
-           .unwrap())
-    }
-}
-
-impl InjectOperations for HttpApi {
-    fn inject_operations(
-        &self,
-        operation_with_signature: &str,
-    ) -> InjectOperationsResult
-    {
-        let operation_with_signature_json =
-            SerdeValue::String(operation_with_signature.to_owned());
-
-        Ok(self.client.post(&self.inject_operations_url())
-           .send_json(operation_with_signature_json)
            .unwrap()
            .into_json()
            .unwrap())
