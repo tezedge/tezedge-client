@@ -6,7 +6,6 @@ use crate::api::{
     GetVersionInfo, GetVersionInfoResult, VersionInfo, NodeVersion, NetworkVersion, CommitInfo,
     GetConstants, GetConstantsResult,
     ForgeOperations, ForgeOperationsResult,
-    PreapplyOperations, PreapplyOperationsResult,
     InjectOperations, InjectOperationsResult,
 };
 
@@ -59,13 +58,6 @@ impl HttpApi {
             "{}/chains/main/blocks/{}/helpers/forge/operations",
             self.base_url,
             branch.to_base58check(),
-        )
-    }
-
-    fn preapply_operations_url(&self) -> String {
-        format!(
-            "{}/chains/main/blocks/head/helpers/preapply/operations",
-            self.base_url,
         )
     }
 
@@ -129,29 +121,6 @@ impl ForgeOperations for HttpApi {
                    .map(|op| NewOperationWithKind::from(op))
                    .collect::<Vec<_>>(),
            }))
-           .unwrap()
-           .into_json()
-           .unwrap())
-    }
-}
-
-impl PreapplyOperations for HttpApi {
-    fn preapply_operations(
-        &self,
-        operation_group: &NewOperationGroup,
-        signature: &str,
-    ) -> PreapplyOperationsResult
-    {
-        Ok(self.client.post(&self.preapply_operations_url())
-           .send_json(ureq::json!([{
-               "protocol": &operation_group.next_protocol_hash,
-               "branch": &operation_group.branch,
-               "signature": signature,
-               "contents": operation_group.to_operations_vec()
-                   .into_iter()
-                   .map(|op| NewOperationWithKind::from(op))
-                   .collect::<Vec<_>>(),
-           }]))
            .unwrap()
            .into_json()
            .unwrap())
