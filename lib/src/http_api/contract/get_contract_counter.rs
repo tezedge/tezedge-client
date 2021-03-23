@@ -1,3 +1,5 @@
+use serde::Deserialize;
+
 use crate::{Address, ToBase58Check};
 use crate::api::{
     GetContractCounter, GetContractCounterResult,
@@ -41,6 +43,19 @@ impl From<std::io::Error> for GetContractCounterErrorKind {
     }
 }
 
+#[derive(Deserialize)]
+#[serde(transparent)]
+struct ContractCounter {
+    #[serde(with = "crate::utils::serde_str")]
+    current: u64,
+}
+
+impl Into<u64> for ContractCounter {
+    fn into(self) -> u64 {
+        self.current
+    }
+}
+
 #[inline]
 fn build_error<E>(address: &Address, kind: E) -> GetContractCounterError
     where E: Into<GetContractCounterErrorKind>,
@@ -57,8 +72,9 @@ impl GetContractCounter for HttpApi {
         Ok(self.client.get(&get_contract_counter_url(&self.base_url, addr))
            .call()
            .map_err(|err| build_error(addr, err))?
-           .into_json()
-           .map_err(|err| build_error(addr, err))?)
+           .into_json::<ContractCounter>()
+           .map_err(|err| build_error(addr, err))?
+           .into())
     }
 }
 
