@@ -3,6 +3,8 @@ use std::time::Duration;
 use std::sync::mpsc;
 use console::{Term, style};
 
+use crate::emojies;
+
 pub fn wait_for_action_spinner() -> SpinnerBuilder {
     SpinnerBuilder::new()
         .with_spinner_chars(vec![
@@ -14,9 +16,25 @@ pub fn wait_for_action_spinner() -> SpinnerBuilder {
         .with_interval_ms(300)
 }
 
-enum SpinnerMsg {}
+enum SpinnerMsg {
+    /// Finish spinner with a success message.
+    FinishSuccess(String),
 
-type SpinnerSender = mpsc::Sender<SpinnerMsg>;
+    /// Finish spinner with a failure message.
+    FinishFailure(String),
+}
+
+impl SpinnerMsg {
+    /// If the message is final.
+    fn is_final(&self) -> bool {
+        match self {
+            Self::FinishSuccess(_) => true,
+            Self::FinishFailure(_) => true,
+        }
+    }
+}
+
+type SpinnerSender = mpsc::SyncSender<SpinnerMsg>;
 type SpinnerReceiver = mpsc::Receiver<SpinnerMsg>;
 type SpinnerChannel = (SpinnerSender, SpinnerReceiver);
 
@@ -69,7 +87,7 @@ impl SpinnerBuilder {
     }
 
     pub fn start(self) -> Spinner {
-        let (tx, rx): SpinnerChannel = mpsc::channel();
+        let (tx, rx): SpinnerChannel = mpsc::sync_channel(0);
         let spinner_chars = self.spinner_chars;
         let interval = self.interval;
         let prefix = self.prefix;
@@ -80,6 +98,38 @@ impl SpinnerBuilder {
             for sp_char in spinner_chars.iter().cycle() {
                 loop {
                     match rx.try_recv() {
+                        Ok(spinner_msg) => {
+                            let t = Term::stderr();
+
+                            if has_printed && spinner_msg.is_final() {
+                                let _ = t.clear_last_lines(1);
+                            }
+
+                            match &spinner_msg {
+                                SpinnerMsg::FinishSuccess(text) => {
+                                    let _ = t.write_line(&format!(
+                                        "{} {} {}",
+                                        style(&prefix).bold().green(),
+                                        emojies::TICK,
+                                        text,
+                                    ));
+                                }
+                                SpinnerMsg::FinishFailure(text) => {
+                                    let _ = t.write_line(&format!(
+                                        "{} {} {}",
+                                        style(&prefix).bold().red(),
+                                        emojies::X,
+                                        text,
+                                    ));
+                                }
+                            }
+
+                            if spinner_msg.is_final() {
+                                return;
+                            } else {
+                                break;
+                            }
+                        }
                         Err(mpsc::TryRecvError::Disconnected) => {
                             if has_printed {
                                 let _ = Term::stderr().clear_last_lines(1);
@@ -119,6 +169,25 @@ pub struct Spinner {
 }
 
 impl Spinner {
+    pub fn finish_succeed<S>(self, message: S)
+        where S: ToString,
+    {
+        self.tx.as_ref().map(|tx| {
+            let _ = tx.send(SpinnerMsg::FinishSuccess(message.to_string()));
+        });
+        self.finish();
+    }
+
+    pub fn finish_fail<S>(self, message: S)
+        where S: ToString,
+    {
+        self.tx.as_ref().map(|tx| {
+            let _ = tx.send(SpinnerMsg::FinishFailure(message.to_string()));
+        });
+        self.finish();
+    }
+
+    /// Calls drop on the spinner which will delete spinner from the terminal.
     pub fn finish(self) {
     }
 }

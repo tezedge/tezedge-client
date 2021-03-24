@@ -9,119 +9,46 @@ use crate::utils::estimate_operation_fee;
 
 #[derive(Debug, Clone)]
 pub struct NewTransactionOperationBuilder {
-    source: Option<ImplicitOrOriginatedWithManager>,
-    destination: Option<Address>,
-    amount: Option<u64>,
-    fee: Option<u64>,
-    counter: Option<u64>,
-    gas_limit: Option<u64>,
-    storage_limit: Option<u64>,
-    /// Optional transaction parameters.
-    ///
-    /// Used to transfer/delegate from old (pre-Babylon) KT1 accounts.
-    parameters: Option<NewTransactionParameters>
+    pub source: ImplicitOrOriginatedWithManager,
+    pub destination: Address,
+    pub amount: u64,
+    pub fee: u64,
+    pub counter: u64,
+    pub gas_limit: u64,
+    pub storage_limit: u64,
 }
 
 impl NewTransactionOperationBuilder {
-    pub fn new() -> Self {
-        Default::default()
-    }
-
-    pub fn get_fee(&self) -> Option<u64> {
-        self.fee.clone()
-    }
-
-    pub fn source<A>(mut self, source: A) -> Self
-        where A: Into<ImplicitOrOriginatedWithManager>,
-    {
-        self.source = Some(source.into());
-        self
-    }
-
-    pub fn destination(mut self, destination: Address) -> Self {
-        self.destination = Some(destination);
-        self
-    }
-
-    pub fn amount(mut self, amount: u64) -> Self {
-        self.amount = Some(amount);
-        self
-    }
-
-    pub fn fee(mut self, fee: u64) -> Self {
-        self.fee = Some(fee);
-        self
-    }
-
-    pub fn counter(mut self, counter: u64) -> Self {
-        self.counter = Some(counter);
-        self
-    }
-
-    pub fn gas_limit(mut self, gas_limit: u64) -> Self {
-        self.gas_limit = Some(gas_limit);
-        self
-    }
-
-    pub fn storage_limit(mut self, storage_limit: u64) -> Self {
-        self.storage_limit = Some(storage_limit);
-        self
-    }
-
-    pub fn build(self) -> Result<NewTransactionOperation, ()> {
-        let (source, destination, amount, fee, counter, gas_limit, storage_limit) = (
-            self.source.ok_or(())?,
-            self.destination.ok_or(())?,
-            self.amount.ok_or(())?,
-            self.fee.ok_or(())?,
-            self.counter.ok_or(())?,
-            self.gas_limit.ok_or(())?,
-            self.storage_limit.ok_or(())?,
-        );
+    pub fn build(self) -> NewTransactionOperation {
         use ImplicitOrOriginatedWithManager::*;
-        Ok(match source {
+        match self.source {
             Implicit(source) => {
                 NewTransactionOperation {
                     source,
-                    destination,
-                    amount,
-                    fee,
-                    counter,
-                    gas_limit,
-                    storage_limit,
-                    parameters: self.parameters,
+                    destination: self.destination,
+                    amount: self.amount,
+                    fee: self.fee,
+                    counter: self.counter,
+                    gas_limit: self.gas_limit,
+                    storage_limit: self.storage_limit,
+                    parameters: None,
                 }
             }
             OriginatedWithManager(OriginatedAddressWithManager { address, manager }) => {
                 NewTransactionOperation {
-                    fee,
-                    counter,
-                    gas_limit,
-                    storage_limit,
                     source: manager,
                     destination: address.into(),
                     amount: 0,
+                    fee: self.fee,
+                    counter: self.counter,
+                    gas_limit: self.gas_limit,
+                    storage_limit: self.storage_limit,
                     parameters: Some(NewTransactionParameters::Transfer {
-                        to: destination,
-                        amount: amount,
+                        to: self.destination,
+                        amount: self.amount,
                     }),
                 }
             }
-        })
-    }
-}
-
-impl Default for NewTransactionOperationBuilder {
-    fn default() -> Self {
-        Self {
-            source: None,
-            destination: None,
-            amount: None,
-            fee: None,
-            counter: None,
-            gas_limit: None,
-            storage_limit: None,
-            parameters: None,
         }
     }
 }

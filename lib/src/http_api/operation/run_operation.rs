@@ -1,7 +1,7 @@
 use crate::{NewOperationGroup, NewOperationWithKind};
 use crate::api::{
     GetChainID, RunOperation, RunOperationResult,
-    TransportError, RunOperationError,
+    TransportError, RunOperationError, RunOperationJson,
 };
 use crate::http_api::HttpApi;
 
@@ -58,6 +58,7 @@ impl RunOperation for HttpApi {
                 },
 
            }))?
-           .into_json()?)
+           .into_json::<RunOperationJson>()?
+           .into())
     }
 }

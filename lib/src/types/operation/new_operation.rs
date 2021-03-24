@@ -20,6 +20,22 @@ impl NewOperation {
         }
     }
 
+    pub fn get_fee(&self) -> u64 {
+        match self {
+            Self::Reveal(op) => op.fee,
+            Self::Transaction(op) => op.fee,
+            Self::Delegation(op) => op.fee,
+        }
+    }
+
+    pub fn set_fee(&mut self, fee: u64) {
+        match self {
+            Self::Reveal(op) => op.fee = fee,
+            Self::Transaction(op) => op.fee = fee,
+            Self::Delegation(op) => op.fee = fee,
+        }
+    }
+
     pub fn estimate_bytes(&self) -> u64 {
         match self {
             Self::Reveal(op) => op.estimate_bytes(),

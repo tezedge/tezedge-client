@@ -1,5 +1,4 @@
 use structopt::StructOpt;
-use console::style;
 
 mod emojies;
 mod spinner;
