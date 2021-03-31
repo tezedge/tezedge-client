@@ -1,5 +1,5 @@
-use sodiumoxide::{crypto, hex};
-use crypto::sign::ed25519;
+use sodiumoxide::hex;
+use sodiumoxide::crypto::sign::ed25519;
 
 pub use ed25519::Signature;
 

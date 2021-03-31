@@ -1,5 +1,5 @@
-use sodiumoxide::{hex, crypto};
-use crypto::sign::ed25519;
+use sodiumoxide::hex;
+use sodiumoxide::crypto::sign::ed25519;
 
 use crate::{PublicKey, PrivateKey, CombinedKey, ToBase58Check};
 use crate::crypto::{blake2b, Prefix, WithPrefix};

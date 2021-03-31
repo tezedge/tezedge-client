@@ -1,5 +1,5 @@
 [package]
-name = "lib"
+name = "types"
 version = "0.1.0"
 authors = ["Zura Benashvili <zura.benashvili@gmail.com>"]
 edition = "2018"
@@ -7,13 +7,8 @@ edition = "2018"
 [dependencies]
 crypto = { path = "../crypto" }
 utils = { path = "../utils" }
-types = { path = "../types" }
-rpc_api = { path = "../rpc_api" }
 trezor_api = { path = "../trezor_api" }
+thiserror = "1.0.24"
 serde = { version = "1.0.123", features = ["derive"] }
 serde_json = "1.0.62"
-ureq = { version = "2.0.1", features = ["json"] }
 sodiumoxide = "0.2.6"
-base58 = "0.1.0"
-rust_decimal = "1.10.3"
-thiserror = "1.0.24"

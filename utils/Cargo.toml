@@ -1,0 +1,16 @@
+[package]
+name = "utils"
+version = "0.1.0"
+authors = ["Zura Benashvili <zura.benashvili@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+# crypto = { path = "../crypto" }
+# types = { path = "../types" }
+serde = { version = "1.0.123", features = ["derive"] }
+rust_decimal = "1.10.3"
+# serde_json = "1.0.62"
+# sodiumoxide = "0.2.6"
+# base58 = "0.1.0"
+
+# thiserror = "1.0.24"
