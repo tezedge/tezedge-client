@@ -1,0 +1,12 @@
+[package]
+name = "ledger_api"
+version = "0.1.0"
+authors = ["Zura Benashvili <zura.benashvili@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+types = { path = "../types" }
+hidapi = { version = "1.2.5", default-features = false, features = ["linux-static-hidraw"] }
+ledger-transport = { git = "https://github.com/simplestaking/ledger-rs.git", tag = "v0.1.1" }
+ledger-transport-hid = { git = "https://github.com/simplestaking/ledger-rs.git", tag = "v0.1.1" }
+thiserror = "1.0.24"

@@ -5,5 +5,6 @@ pub use types::*;
 pub use rpc_api::*;
 pub use utils;
 pub use trezor_api;
+pub use ledger_api;
 
 pub mod signer;

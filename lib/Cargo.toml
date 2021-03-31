@@ -10,6 +10,7 @@ utils = { path = "../utils" }
 types = { path = "../types" }
 rpc_api = { path = "../rpc_api" }
 trezor_api = { path = "../trezor_api" }
+ledger_api = { path = "../ledger_api" }
 serde = { version = "1.0.123", features = ["derive"] }
 serde_json = "1.0.62"
 ureq = { version = "2.0.1", features = ["json"] }
