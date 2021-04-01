@@ -52,8 +52,9 @@ impl GetAddress {
                 path,
             ).to_base58check()
         } else if self.ledger {
-            let ledger = lib::ledger_api::Ledger::connect()?;
-            ledger.get_address(path, false)?.to_base58check()
+            lib::ledger_api::Ledger::connect()?
+                .get_address(path, false)?
+                .to_base58check()
         } else {
             Err(NoSourceSpecifiedError)?
         };
