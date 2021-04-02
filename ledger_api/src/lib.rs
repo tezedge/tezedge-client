@@ -1,16 +1,22 @@
 use std::convert::TryInto;
 use std::time::Duration;
 
-use ledger_apdu::{APDUCommand, APDUAnswer, APDUErrorCodes, map_apdu_error_description};
+use ledger_apdu::{APDUCommand, APDUAnswer, APDUErrorCodes};
 use ledger::{TransportNativeHID, LedgerHIDError};
 
 use types::{PUBLIC_KEY_LEN, PublicKey, ImplicitAddress};
+
+mod ledger_error;
+pub use ledger_error::{LedgerError, RunAppError, RunAppErrorKind};
 
 mod retry_request;
 pub use retry_request::RetryRequest;
 
 mod reconnect_request;
 pub use reconnect_request::ReconnectRequest;
+
+mod unlock_request;
+pub use unlock_request::UnlockRequest;
 
 mod run_app_request;
 pub use run_app_request::RunAppRequest;
@@ -23,36 +29,6 @@ pub use ledger_response::LedgerResponse;
 
 const TEZOS_APP_NAME: &'static str = "Tezos Wallet";
 const TEZOS_CLA: u8 = 0x80;
-
-#[derive(thiserror::Error, Debug)]
-#[error(transparent)]
-pub enum LedgerError {
-    Transport(#[from] LedgerHIDError),
-    #[error("{}", map_apdu_error_description(*.0))]
-    APDU(u16),
-    RunApp(#[from] RunAppError),
-    #[error("invalid data length received from ledger")]
-    InvalidDataLength,
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum RunAppErrorKind {
-    #[error("{0}")]
-    Transport(#[from] LedgerHIDError),
-    #[error("app name is too large! Length must be <= 255")]
-    NameTooLarge,
-    #[error("{}", map_apdu_error_description(*.0))]
-    APDU(u16),
-    #[error("failed to reconnect after opening an app. {0}")]
-    Reconnect(LedgerHIDError),
-}
-
-#[derive(thiserror::Error, Debug)]
-#[error("running app with name \"{name}\" on ledger failed! Reason: {kind}")]
-pub struct RunAppError {
-    name: String,
-    kind: RunAppErrorKind,
-}
 
 pub struct Ledger {
     transport: TransportNativeHID,
@@ -95,29 +71,6 @@ impl Ledger {
         return Ok(());
     }
 
-    fn should_reconnect(&self, ledger_err: &LedgerError) -> bool {
-        let transport_err = match &ledger_err {
-            LedgerError::Transport(err) => err,
-            _ => { return false; }
-        };
-
-        match &transport_err {
-            LedgerHIDError::Hid(hid_err) => {
-                match &hid_err {
-                    hidapi::HidError::HidApiError { message } => {
-                        if message == "No such device" {
-                            return true;
-                        }
-                    }
-                    _ => {}
-                }
-            }
-            _ => {}
-        }
-
-        false
-    }
-
     pub(crate) fn raw_call(
         &mut self,
         command: &APDUCommand,
@@ -134,8 +87,9 @@ impl Ledger {
         let answer = match self.raw_call(&command) {
             Ok(x) => x,
             Err(ledger_err) => {
-                if self.should_reconnect(&ledger_err) {
-                    return ReconnectRequest::new(self, LedgerRequestData { command, handler }).into();
+                let req_data = LedgerRequestData { command, handler };
+                if ledger_err.needs_reconnect() {
+                    return ReconnectRequest::new(self, req_data).into();
                 } else {
                     return ledger_err.into();
                 }
@@ -143,16 +97,25 @@ impl Ledger {
         };
 
         if answer.retcode != APDUErrorCodes::NoError as u16 {
+            let req_data = LedgerRequestData { command, handler };
+
             if answer.retcode == APDUErrorCodes::ClaNotSupported as u16 {
-                if command.cla == TEZOS_CLA {
+                if req_data.command.cla == TEZOS_CLA {
                     return RunAppRequest::new(
                         self,
-                        LedgerRequestData { command, handler },
+                        req_data,
                         TEZOS_APP_NAME,
                     ).into();
                 }
             }
-            return LedgerError::APDU(answer.retcode).into();
+
+            let ledger_err = LedgerError::APDU(answer.retcode);
+
+            if ledger_err.needs_unlock() {
+                return UnlockRequest::new(self, req_data).into();
+            }
+
+            return ledger_err.into();
         }
 
         handler(answer.data).into()

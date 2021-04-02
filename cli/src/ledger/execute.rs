@@ -30,6 +30,15 @@ pub fn ledger_execute<'a, T>(mut response: LedgerResponse<'a, T>) -> T
                     .start();
                 response = req.ack();
             }
+            LedgerResponse::UnlockRequest(req) => {
+                let _spinner = spinner.clone()
+                    .with_text(format!(
+                        "please {} your Ledger device.",
+                        style("unlock").bold(),
+                    ))
+                    .start();
+                response = req.ack();
+            }
             LedgerResponse::ReconnectRequest(req) => {
                 let _spinner = SpinnerBuilder::new()
                     .with_text(format!(
