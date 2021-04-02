@@ -1,10 +1,10 @@
 use sodiumoxide::hex;
 use sodiumoxide::crypto::sign::ed25519;
 
-use crate::{PublicKey, PrivateKey, CombinedKey, ToBase58Check};
-use crate::crypto::{blake2b, Prefix, WithPrefix};
+use types::{PublicKey, PrivateKey, CombinedKey};
+use crypto::{blake2b, Prefix, WithPrefix, ToBase58Check};
 
-use super::{SignOperation, SignOperationResult, OperationSignatureInfo};
+use crate::{SignOperation, SignOperationResult, OperationSignatureInfo};
 
 pub struct LocalSigner {
     pub_key: PublicKey,
@@ -48,7 +48,6 @@ impl LocalSigner {
         )
             .with_prefix(Prefix::operation)
             .to_base58check();
-
 
         OperationSignatureInfo {
             signature,

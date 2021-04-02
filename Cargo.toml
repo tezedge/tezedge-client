@@ -3,6 +3,7 @@ members = [
     "cli",
     "lib",
     "crypto",
+    "signer",
     "types",
     "utils",
     "rpc_api",

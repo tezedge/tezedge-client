@@ -1,8 +1,4 @@
 use sodiumoxide::hex;
-use sodiumoxide::crypto::sign::ed25519;
-
-pub use ed25519::Signature;
-
 use trezor_api::protos::TezosSignedTx;
 
 #[derive(Debug, Clone)]

@@ -8,6 +8,7 @@ edition = "2018"
 crypto = { path = "../crypto" }
 utils = { path = "../utils" }
 types = { path = "../types" }
+signer = { path = "../signer" }
 rpc_api = { path = "../rpc_api" }
 trezor_api = { path = "../trezor_api" }
 ledger_api = { path = "../ledger_api" }
