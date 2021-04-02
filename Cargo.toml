@@ -2,5 +2,10 @@
 members = [
     "cli",
     "lib",
+    "crypto",
+    "types",
+    "utils",
+    "rpc_api",
     "trezor_api",
+    "ledger_api",
 ]
