@@ -3,6 +3,7 @@ use structopt::StructOpt;
 mod emojies;
 mod spinner;
 mod trezor;
+mod ledger;
 
 mod common;
 use common::exit_with_error;

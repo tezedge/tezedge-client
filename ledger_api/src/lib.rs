@@ -1,4 +1,3 @@
-use std::thread;
 use std::convert::TryInto;
 use std::time::Duration;
 
@@ -6,6 +5,21 @@ use ledger_apdu::{APDUCommand, APDUAnswer, APDUErrorCodes, map_apdu_error_descri
 use ledger::{TransportNativeHID, LedgerHIDError};
 
 use types::{PUBLIC_KEY_LEN, PublicKey, ImplicitAddress};
+
+mod retry_request;
+pub use retry_request::RetryRequest;
+
+mod reconnect_request;
+pub use reconnect_request::ReconnectRequest;
+
+mod run_app_request;
+pub use run_app_request::RunAppRequest;
+
+mod ledger_request;
+use ledger_request::{LedgerRequest, LedgerRequestData, ResultHandler};
+
+mod ledger_response;
+pub use ledger_response::LedgerResponse;
 
 const TEZOS_APP_NAME: &'static str = "Tezos Wallet";
 const TEZOS_CLA: u8 = 0x80;
@@ -62,7 +76,7 @@ impl Ledger {
 
     /// Tries to reconnect to Ledger device every 200 millis for a
     /// number of `attempts`.
-    fn reconnect(&mut self, attempts: usize) -> Result<(), LedgerHIDError> {
+    pub(crate) fn reconnect(&mut self, attempts: usize) -> Result<(), LedgerHIDError> {
         for i in 1..=attempts {
             std::thread::sleep(Duration::from_millis(200));
             match TransportNativeHID::new() {
@@ -81,7 +95,75 @@ impl Ledger {
         return Ok(());
     }
 
-    fn run_app(&mut self, name: &str) -> Result<APDUAnswer, RunAppError> {
+    fn should_reconnect(&self, ledger_err: &LedgerError) -> bool {
+        let transport_err = match &ledger_err {
+            LedgerError::Transport(err) => err,
+            _ => { return false; }
+        };
+
+        match &transport_err {
+            LedgerHIDError::Hid(hid_err) => {
+                match &hid_err {
+                    hidapi::HidError::HidApiError { message } => {
+                        if message == "No such device" {
+                            return true;
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            _ => {}
+        }
+
+        false
+    }
+
+    pub(crate) fn raw_call(
+        &mut self,
+        command: &APDUCommand,
+    ) -> Result<APDUAnswer, LedgerError> {
+        Ok(self.transport.exchange(command)?)
+    }
+
+    pub(crate) fn call<'a, T: 'static>(
+        &'a mut self,
+        command: APDUCommand,
+        handler: Box<ResultHandler<T>>,
+    ) -> LedgerResponse<'a, T>
+    {
+        let answer = match self.raw_call(&command) {
+            Ok(x) => x,
+            Err(ledger_err) => {
+                if self.should_reconnect(&ledger_err) {
+                    return ReconnectRequest::new(self, LedgerRequestData { command, handler }).into();
+                } else {
+                    return ledger_err.into();
+                }
+            }
+        };
+
+        if answer.retcode != APDUErrorCodes::NoError as u16 {
+            if answer.retcode == APDUErrorCodes::ClaNotSupported as u16 {
+                if command.cla == TEZOS_CLA {
+                    return RunAppRequest::new(
+                        self,
+                        LedgerRequestData { command, handler },
+                        TEZOS_APP_NAME,
+                    ).into();
+                }
+            }
+            return LedgerError::APDU(answer.retcode).into();
+        }
+
+        handler(answer.data).into()
+    }
+
+    /// Run an application on a Ledger device.
+    ///
+    /// ## Warning
+    ///
+    /// Might disconnect and reconnect Ledger from PC.
+    pub fn run_app(&mut self, name: &str) -> Result<APDUAnswer, RunAppError> {
         let name_bytes = name.as_bytes().to_vec();
 
         if name_bytes.len() > u8::MAX as usize {
@@ -107,13 +189,6 @@ impl Ledger {
             })?;
 
         if result.retcode == APDUErrorCodes::NoError as u16 {
-            // for some reason hidapi endpoint shuts down after opening
-            // an app, so we need to reconnect to it.
-            self.reconnect(10).map_err(|err| RunAppError {
-                name: name.to_string(),
-                kind: RunAppErrorKind::Reconnect(err),
-            })?;
-
             Ok(result)
         } else {
             Err(RunAppError {
@@ -123,22 +198,41 @@ impl Ledger {
         }
     }
 
-    fn call(&mut self, command: &APDUCommand) -> Result<Vec<u8>, LedgerError> {
-        let answer = self.transport.exchange(command)?;
 
-        if answer.retcode != APDUErrorCodes::NoError as u16 {
-            if answer.retcode == APDUErrorCodes::ClaNotSupported as u16 {
-                if command.cla == TEZOS_CLA {
-                    self.run_app(TEZOS_APP_NAME)?;
+    fn public_key_request<'a>(
+        &'a mut self,
+        path: Vec<u32>,
+        prompt: bool,
+    ) -> LedgerRequest<'a, PublicKey>
+    {
+        let path_bytes = Self::encode_path(&path);
+        let command = APDUCommand {
+            cla: TEZOS_CLA,
+            ins: if prompt { 0x03 } else { 0x02 },
+            p1: 0x00,
+            p2: 0x00,
+            data: [vec![path.len() as u8], path_bytes].concat(),
+        };
 
-                    // repeat the command now that tezos app is running.
-                    return self.call(command);
+        LedgerRequest::new(self, command)
+            .map(|bytes| {
+                let len = bytes[0] as usize;
+
+                // len also counts in first byte, which specifies "curve".
+                if len > bytes.len() + 1 || len - 1 != PUBLIC_KEY_LEN {
+                    return Err(LedgerError::InvalidDataLength);
                 }
-            }
-            return Err(LedgerError::APDU(answer.retcode));
-        }
 
-        Ok(answer.data)
+                // TODO: implement for other curves.
+                Ok(PublicKey::edpk(
+                    // remove 2 byte prefix from the actual key.
+                    // - first byte is for length of following public key.
+                    // - second byte is curve type, right now we ignore it
+                    //   as we only support edpk.
+                    bytes[2..(PUBLIC_KEY_LEN + 2)].try_into()
+                        .map_err(|_| LedgerError::InvalidDataLength)?
+                ))
+            })
     }
 
     /// Get Tezos address from Ledger for a given `path`(key derivation path).
@@ -156,49 +250,27 @@ impl Ledger {
     /// he/she wants to share public key for a given address to us.
     /// This functionality can be used to get address first without prompting,
     /// then verifying it by asking the user if address is same as shown in Ledger.
-    pub fn get_address(
-        &mut self,
+    pub fn get_address<'a>(
+        &'a mut self,
         path: Vec<u32>,
         prompt: bool,
-    ) -> Result<ImplicitAddress, LedgerError>
+    ) -> LedgerResponse<'a, ImplicitAddress>
     {
-        Ok(self.get_public_key(path, prompt)?.hash())
+        self.public_key_request(path, prompt)
+            .map(|pub_key| Ok(pub_key.hash()))
+            .send()
     }
 
     /// Get Tezos public key from Ledger for a given `path`(key derivation path).
     ///
     /// If `prompt` = `true`, user will be prompted on Ledger device, whether
     /// he/she wants to share public key for a given address to us.
-    pub fn get_public_key(
-        &mut self,
+    pub fn get_public_key<'a>(
+        &'a mut self,
         path: Vec<u32>,
         prompt: bool,
-    ) -> Result<PublicKey, LedgerError> {
-        let path_bytes = Self::encode_path(&path);
-
-        let bytes = self.call(&APDUCommand {
-            cla: TEZOS_CLA,
-            ins: if prompt { 0x03 } else { 0x02 },
-            p1: 0x00,
-            p2: 0x00,
-            data: [vec![path.len() as u8], path_bytes].concat(),
-        })?;
-
-        let len = bytes[0] as usize;
-
-        // len also counts in first byte, which specifies "curve".
-        if len > bytes.len() + 1 || len - 1 != PUBLIC_KEY_LEN {
-            return Err(LedgerError::InvalidDataLength);
-        }
-
-        // TODO: implement for other curves.
-        Ok(PublicKey::edpk(
-            // remove 2 byte prefix from the actual key.
-            // - first byte is for length of following public key.
-            // - second byte is curve type, right now we ignore it
-            //   as we only support edpk.
-            bytes[2..(PUBLIC_KEY_LEN + 2)].try_into()
-                .map_err(|_| LedgerError::InvalidDataLength)?
-        ))
+    ) -> LedgerResponse<'a, PublicKey>
+    {
+        self.public_key_request(path, prompt).send()
     }
 }

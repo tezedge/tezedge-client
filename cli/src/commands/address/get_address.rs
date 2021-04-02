@@ -52,8 +52,11 @@ impl GetAddress {
                 path,
             ).to_base58check()
         } else if self.ledger {
-            lib::ledger_api::Ledger::connect()?
-                .get_address(path, false)?
+            let mut ledger = crate::ledger::find_device_and_connect();
+
+            crate::ledger::ledger_execute(
+                ledger.get_address(path, false)
+            )
                 .to_base58check()
         } else {
             Err(NoSourceSpecifiedError)?
