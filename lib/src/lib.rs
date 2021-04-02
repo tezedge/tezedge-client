@@ -1,3 +1,7 @@
+//! Simply unifies and reexports all **tezedge-client** crates.
+//!
+//! Doesn't reexport cli parts/crates.
+
 pub use crypto;
 pub use crypto::{ToBase58Check, FromBase58Check};
 
