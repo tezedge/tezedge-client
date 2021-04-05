@@ -118,7 +118,7 @@ impl Ledger {
             return ledger_err.into();
         }
 
-        handler(answer.data).into()
+        handler(self, answer.data).into()
     }
 
     /// Run an application on a Ledger device.
@@ -178,7 +178,7 @@ impl Ledger {
         };
 
         LedgerRequest::new(self, command)
-            .map(|bytes| {
+            .map(|_, bytes| {
                 let len = bytes[0] as usize;
 
                 // len also counts in first byte, which specifies "curve".
@@ -220,7 +220,7 @@ impl Ledger {
     ) -> LedgerResponse<'a, ImplicitAddress>
     {
         self.public_key_request(path, prompt)
-            .map(|pub_key| Ok(pub_key.hash()))
+            .map(|_, pub_key| Ok(pub_key.hash()))
             .send()
     }
 
