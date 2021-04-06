@@ -17,6 +17,22 @@ impl<'a, T> LedgerResponse<'a, T> {
     pub fn is_err(&self) -> bool {
         matches!(self, Self::Err(_))
     }
+
+    pub fn ack_all(self) -> Result<T, LedgerError>
+        where T: 'static
+    {
+        let mut resp = self;
+        loop {
+            resp = match resp {
+                Self::Ok(val) => { return Ok(val); }
+                Self::Err(err) => { return Err(err); }
+                Self::RetryRequest(req) => req.ack(),
+                Self::ReconnectRequest(req) => req.ack(),
+                Self::UnlockRequest(req) => req.ack(),
+                Self::RunAppRequest(req) => req.ack(),
+            }
+        }
+    }
 }
 
 impl<'a, T> From<Result<T, LedgerResponse<'a, T>>> for LedgerResponse<'a, T> {

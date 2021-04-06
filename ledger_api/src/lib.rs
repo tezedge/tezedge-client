@@ -4,7 +4,9 @@ use std::time::Duration;
 use ledger_apdu::{APDUCommand, APDUAnswer, APDUErrorCodes};
 use ledger::{TransportNativeHID, LedgerHIDError};
 
-use types::{PUBLIC_KEY_LEN, PublicKey, ImplicitAddress};
+use types::{PUBLIC_KEY_LEN, Forged, PublicKey, ImplicitAddress};
+use crypto::{hex, blake2b, ToBase58Check, WithPrefix, Prefix};
+use signer::OperationSignatureInfo;
 
 mod ledger_error;
 pub use ledger_error::{LedgerError, RunAppError, RunAppErrorKind};
@@ -198,6 +200,96 @@ impl Ledger {
             })
     }
 
+    fn sign_tx_request<'a>(
+        &'a mut self,
+        path: Vec<u32>,
+        // TODO: replace with ForgedOperation or Forged<NewOperationGroup>.
+        forged_operation: Forged,
+    ) -> LedgerRequest<'a, OperationSignatureInfo>
+    {
+        let path_bytes = Self::encode_path(&path);
+        let initial_command = APDUCommand {
+            cla: TEZOS_CLA,
+            ins: 0x04,
+            p1: 0x00,
+            p2: 0x00,
+            data: [vec![path.len() as u8], path_bytes].concat(),
+        };
+
+        let operation_bytes = forged_operation.as_ref().to_vec();
+
+        LedgerRequest::new(self, initial_command)
+            .map(move |ledger, _| {
+                let mut op = forged_operation.as_ref().to_vec();
+                op.insert(0, 0x03);
+
+                let chunks = (0..)
+                    .step_by(230)
+                    .take_while(|i| *i < op.len())
+                    .map(|start_i| {
+                        let end_i = (start_i + 230).min(op.len());
+                        &op[start_i..end_i]
+                    })
+                    .enumerate()
+                    .collect::<Vec<_>>();
+
+
+                // TODO: change error type. This can only happen if
+                // forged_operation is an empty array.
+                let mut result = Err(LedgerError::InvalidDataLength);
+
+                for (index, chunk) in chunks.iter() {
+                    let code = if *index == chunks.len() - 1 {
+                        0x81
+                    } else {
+                        0x01
+                    };
+
+                    let resp = ledger.call(APDUCommand {
+                        cla: TEZOS_CLA,
+                        ins: 0x04,
+                        p1: code,
+                        p2: 0x00,
+                        data: chunk.to_vec(),
+                    }, Box::new(|_, x| Ok(x)));
+
+                    result = resp.ack_all();
+                }
+
+                result
+            })
+            .map(move |_, bytes| {
+                if bytes.len() < 64 {
+                    return Err(LedgerError::InvalidDataLength);
+                }
+
+                let signature_bytes = &bytes[0..64];
+
+                let signature = signature_bytes
+                    .with_prefix(Prefix::edsig)
+                    .to_base58check();
+
+                let operation_with_signature_bytes = [
+                    operation_bytes.to_vec(),
+                    signature_bytes.to_vec(),
+                ].concat();
+
+                let operation_with_signature = hex::encode(&operation_with_signature_bytes);
+
+                let operation_hash = blake2b::digest_256(
+                    &operation_with_signature_bytes,
+                )
+                    .with_prefix(Prefix::operation)
+                    .to_base58check();
+
+                Ok(OperationSignatureInfo {
+                    signature,
+                    operation_with_signature,
+                    operation_hash,
+                })
+            })
+    }
+
     /// Get Tezos address from Ledger for a given `path`(key derivation path).
     ///
     /// In reality we get public key from Ledger and then hash it.
@@ -235,5 +327,15 @@ impl Ledger {
     ) -> LedgerResponse<'a, PublicKey>
     {
         self.public_key_request(path, prompt).send()
+    }
+
+    pub fn sign_tx<'a>(
+        &'a mut self,
+        path: Vec<u32>,
+        // TODO: replace with ForgedOperation or Forged<NewOperationGroup>.
+        forged_operation: Forged,
+    ) -> LedgerResponse<'a, OperationSignatureInfo>
+    {
+        self.sign_tx_request(path, forged_operation).send()
     }
 }
