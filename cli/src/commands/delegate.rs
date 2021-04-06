@@ -17,6 +17,9 @@ pub struct Delegate {
     #[structopt(long = "trezor")]
     pub use_trezor: bool,
 
+    #[structopt(long = "ledger")]
+    pub use_ledger: bool,
+
     /// Address to delegate tezos from.
     ///
     /// Can either be public key hash: tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU
@@ -41,6 +44,7 @@ impl RawOperationCommand for Delegate {
         RawOptions {
             api_type: "http".to_string(),
             use_trezor: self.use_trezor,
+            use_ledger: self.use_ledger,
         }
     }
 

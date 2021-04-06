@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 mod prim_type;
 pub mod micheline;
 mod forge_primitives;
@@ -18,14 +16,6 @@ impl Forged {
 impl AsRef<[u8]> for Forged {
     fn as_ref(&self) -> &[u8] {
         self.0.as_ref()
-    }
-}
-
-impl Deref for Forged {
-    type Target = Vec<u8>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
     }
 }
 

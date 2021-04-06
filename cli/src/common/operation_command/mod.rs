@@ -11,11 +11,13 @@ use lib::{
 
 use lib::signer::{LocalSigner, OperationSignatureInfo};
 use lib::trezor_api::{Trezor, TezosSignTx};
+use lib::ledger_api::Ledger;
 use lib::api::*;
 
 use crate::emojies;
 use crate::spinner::SpinnerBuilder;
 use crate::trezor::trezor_execute;
+use crate::ledger::ledger_execute;
 use crate::common::{
     exit_with_error,
     yes_no_custom_amount_input, YesNoCustomAmount,
@@ -68,6 +70,11 @@ pub struct TrezorState {
     key_path: Vec<u32>,
 }
 
+pub struct LedgerState {
+    ledger: Ledger,
+    key_path: Vec<u32>,
+}
+
 #[derive(PartialEq, Debug, Clone, Copy)]
 enum OperationType {
     Transaction { amount: u64 },
@@ -84,6 +91,8 @@ pub struct OperationCommand {
     pub state: OperationCommandState,
     /// If `Some`, Trezor will be used to execute an operation.
     pub trezor_state: Option<TrezorState>,
+    /// If `Some`, Ledger will be used to execute an operation.
+    pub ledger_state: Option<LedgerState>,
 }
 
 impl OperationCommand {
@@ -133,6 +142,10 @@ impl OperationCommand {
                     trezor_state.trezor.get_public_key(trezor_state.key_path.clone())
                 ),
             )?
+        } else if let Some(ledger_state) = self.ledger_state.as_mut() {
+            ledger_execute(
+                ledger_state.ledger.get_public_key(ledger_state.key_path.clone(), false)
+            )
         } else {
             match get_keys_by_addr(&self.get_manager_address()?) {
                 Ok(keys) => keys.0,
@@ -385,6 +398,31 @@ impl OperationCommand {
                 style("[2/4]").bold().green(),
                 emojies::TICK,
                 "operation forged and signed",
+            );
+
+            Ok(sig_info)
+        } else if let Some(ledger_state) = self.ledger_state.as_mut() {
+            eprintln!(
+                "{} -   {}\n",
+                style("[2/4]").bold().dim(),
+                "signing operation using Ledger. Please confirm an operation on your ledger.",
+            );
+
+            eprintln!("please confirm an operation on Ledger once you see the dialog on the device.\n");
+
+            let sig_info = ledger_execute(
+                ledger_state.ledger.sign_tx(
+                    ledger_state.key_path.clone(),
+                    operation_group.forge(),
+                )
+            );
+
+            Term::stderr().clear_last_lines(4)?;
+            eprintln!(
+                "{} {} {}",
+                style("[2/4]").bold().green(),
+                emojies::TICK,
+                "operation signed",
             );
 
             Ok(sig_info)
