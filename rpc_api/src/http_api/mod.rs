@@ -7,6 +7,9 @@ pub use operation::*;
 mod get_chain_id;
 pub use get_chain_id::*;
 
+mod get_version_info;
+pub use get_version_info::*;
+
 mod get_protocol_info;
 pub use get_protocol_info::*;
 
