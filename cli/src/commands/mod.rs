@@ -12,3 +12,14 @@ pub enum Command {
     Transfer(transfer::Transfer),
     Delegate(delegate::Delegate),
 }
+
+impl Command {
+    /// Get node endpoint.
+    pub fn get_endpoint(&self) -> Option<&str> {
+        match self {
+            Self::Address(_) => None,
+            Self::Transfer(cmd) => Some(cmd.endpoint.as_str()),
+            Self::Delegate(cmd) => Some(cmd.endpoint.as_str()),
+        }
+    }
+}
