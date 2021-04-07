@@ -307,7 +307,7 @@ impl OperationCommand {
 
                 let input = yes_no_custom_amount_input(
                     format!(
-                        "Would you like to use estimated fee({} µꜩ ),\n  or continue with specified fee({} µꜩ )",
+                        "Would you like to use estimated fee({} µꜩ ),\n  or continue with specified fee({} µꜩ )\n",
                         style(estimated_fee).green(),
                         style(manual_fee.unwrap_or(0)).yellow(),
                     ),
