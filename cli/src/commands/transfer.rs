@@ -523,7 +523,7 @@ impl Transfer {
         eprintln!(
             "\n  {}View operation at: {}/{}",
             emojies::FINGER_POINTER_RIGHT,
-            style("https://delphinet.tezblock.io/transaction").cyan(),
+            style("https://edo2net.tzkt.io").cyan(),
             style(&operation_hash).cyan(),
         );
 
