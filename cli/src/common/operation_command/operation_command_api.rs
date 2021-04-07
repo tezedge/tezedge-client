@@ -3,6 +3,7 @@ use lib::api::*;
 pub trait OperationCommandApi:
     GetChainID
     + GetHeadBlockHash
+    + GetVersionInfo
     + GetProtocolInfo
     + GetContractCounter
     + GetContractManagerAddress
@@ -17,6 +18,7 @@ pub trait OperationCommandApi:
 impl<T> OperationCommandApi for T where T:
     GetChainID
     + GetHeadBlockHash
+    + GetVersionInfo
     + GetProtocolInfo
     + GetContractCounter
     + GetContractManagerAddress

@@ -40,6 +40,21 @@ impl NetworkVersion {
         MAINNET_CHAINS.iter()
             .any(|chain| self.chain_name.starts_with(chain))
     }
+
+    /// Explorer url for a given network.
+    pub fn explorer_url(&self) -> Option<String> {
+        if self.is_mainnet() {
+            Some("https://tzstats.com".to_owned())
+        } else if self.chain_name.starts_with("TEZOS_DELPHI") {
+            Some("https://delphi.tzstats.com".to_owned())
+        } else if self.chain_name.starts_with("TEZOS_EDO") {
+            Some("https://edo.tzstats.com".to_owned())
+        } else if self.chain_name.starts_with("TEZOS_FLORENCE") {
+            Some("https://florence.tzstats.com".to_owned())
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
@@ -59,6 +74,11 @@ pub struct VersionInfo {
 impl VersionInfo {
     pub fn is_mainnet(&self) -> bool {
         self.network_version.is_mainnet()
+    }
+
+    /// Explorer url for a given network.
+    pub fn explorer_url(&self) -> Option<String> {
+        self.network_version.explorer_url()
     }
 }
 

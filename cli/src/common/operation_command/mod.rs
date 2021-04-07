@@ -52,6 +52,7 @@ pub struct OperationOptions {
 }
 
 pub struct OperationCommandState {
+    pub version: Option<VersionInfo>,
     pub counter: Option<u64>,
     pub manager_address: Option<ImplicitAddress>,
 }
@@ -59,6 +60,7 @@ pub struct OperationCommandState {
 impl Default for OperationCommandState {
     fn default() -> Self {
         Self {
+            version: None,
             counter: None,
             manager_address: None,
         }
@@ -96,6 +98,17 @@ pub struct OperationCommand {
 }
 
 impl OperationCommand {
+    fn get_version(&mut self) -> GetVersionInfoResult {
+        let version = self.state.version.as_ref()
+            .map(|version| Ok(version.clone()))
+            .unwrap_or_else(|| {
+                self.api.get_version_info()
+            })?;
+
+        self.state.version.replace(version.clone());
+        Ok(version)
+    }
+
     fn get_counter(&mut self) -> Result<u64, GetContractCounterError> {
         let counter = self.state.counter
             .map(|value| Ok(value))
@@ -228,6 +241,7 @@ impl OperationCommand {
             .with_text("fetching necessary data from the node")
             .start();
 
+        self.get_version()?;
         let protocol_info = self.api.get_protocol_info()?;
         let head_block_hash = self.api.get_head_block_hash()?;
 
@@ -506,12 +520,24 @@ impl OperationCommand {
 
         self.confirm_operation(&operation_hash)?;
 
-        eprintln!(
-            "\n  {}View operation at: {}/{}",
-            emojies::FINGER_POINTER_RIGHT,
-            style("https://delphinet.tezblock.io/transaction").cyan(),
-            style(&operation_hash).cyan(),
-        );
+        let version = self.get_version()?;
+        if let Some(explorer_url) = version.explorer_url() {
+            eprintln!(
+                "\n  {}View operation at: {}/{}",
+                emojies::FINGER_POINTER_RIGHT,
+                style(explorer_url).cyan(),
+                style(&operation_hash).cyan(),
+            );
+        } else {
+            eprintln!(
+                "\n{} couldn't find explorer url for current network({}).",
+                style("[WARN]").yellow(),
+                style(&version.network_version.chain_name).bold(),
+            );
+
+            eprintln!("\nOperation hash: {}", style(&operation_hash).green());
+        }
+        
 
         if !console::user_attended() {
             println!("{}", &operation_hash);
