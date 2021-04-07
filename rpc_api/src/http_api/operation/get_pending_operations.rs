@@ -42,7 +42,7 @@ impl From<std::io::Error> for GetPendingOperationsError {
 #[derive(Serialize, Deserialize, Clone)]
 struct PendingOperationsJson {
     applied: Vec<PendingOperation>,
-    refused: Vec<(String,)>,
+    refused: Vec<(String, serde_json::Value)>,
 }
 
 impl From<PendingOperationsJson> for PendingOperations {
@@ -50,7 +50,7 @@ impl From<PendingOperationsJson> for PendingOperations {
         Self {
             applied: op.applied,
             refused: op.refused.into_iter()
-                .map(|(hash,)| PendingOperation { hash })
+                .map(|(hash, _)| PendingOperation { hash })
                 .collect(),
         }
     }
