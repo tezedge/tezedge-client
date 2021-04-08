@@ -25,7 +25,6 @@ impl Display for GetVersionInfoError {
 pub struct NodeVersion {
     major: usize,
     minor: usize,
-    additional_info: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
