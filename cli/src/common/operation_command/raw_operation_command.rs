@@ -106,6 +106,7 @@ pub enum ParseOperationCommandError {
 
 pub struct RawOptions {
     pub api_type: String,
+    pub no_prompt: bool,
     pub use_trezor: bool,
     pub use_ledger: bool,
 }
@@ -187,7 +188,9 @@ pub trait RawOperationCommand {
         };
 
         Ok(OperationCommand {
-            options: OperationOptions {},
+            options: OperationOptions {
+                no_prompt: self.get_raw_options().no_prompt,
+            },
             from,
             to,
             fee,

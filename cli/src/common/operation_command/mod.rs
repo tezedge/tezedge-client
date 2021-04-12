@@ -39,6 +39,7 @@ fn exit_with_error_no_wallet_type_selected() -> ! {
 }
 
 pub struct OperationOptions {
+    pub no_prompt: bool,
 }
 
 pub struct OperationCommandState {
@@ -306,15 +307,20 @@ impl OperationCommand {
                     );
                 }
 
-                let input = yes_no_custom_amount_input(
-                    format!(
-                        "Would you like to use estimated fee({} µꜩ ),\n  or continue with specified fee({} µꜩ )\n",
-                        style(estimated_fee).green(),
-                        style(manual_fee.unwrap_or(0)).yellow(),
-                    ),
-                    manual_fee.map(|_| YesNoCustomAmount::No)
-                        .unwrap_or(YesNoCustomAmount::Yes),
-                );
+                let default_input = manual_fee.map(|_| YesNoCustomAmount::No)
+                        .unwrap_or(YesNoCustomAmount::Yes);
+                let input = if self.options.no_prompt {
+                    default_input
+                } else {
+                    yes_no_custom_amount_input(
+                        format!(
+                            "Would you like to use estimated fee({} µꜩ ),\n  or continue with specified fee({} µꜩ )\n",
+                            style(estimated_fee).green(),
+                            style(manual_fee.unwrap_or(0)).yellow(),
+                        ),
+                        default_input,
+                    )
+                };
 
                 let fee = match input {
                     YesNoCustomAmount::Custom(custom_fee) => custom_fee,
@@ -366,15 +372,21 @@ impl OperationCommand {
                     );
                 }
 
-                let input = yes_no_custom_amount_input(
-                    format!(
-                        "Would you like to add an estimated fee({} µꜩ ) resulting in total: {} µꜩ ",
-                        style(estimated_fee).bold(),
-                        style(estimated_fee + op_fee).green(),
-                    ),
-                    manual_fee.map(|_| YesNoCustomAmount::No)
-                        .unwrap_or(YesNoCustomAmount::Yes),
-                );
+                let default_input = manual_fee.map(|_| YesNoCustomAmount::No)
+                    .unwrap_or(YesNoCustomAmount::Yes);
+
+                let input = if self.options.no_prompt {
+                    default_input
+                } else {
+                    yes_no_custom_amount_input(
+                        format!(
+                            "Would you like to add an estimated fee({} µꜩ ) resulting in total: {} µꜩ ",
+                            style(estimated_fee).bold(),
+                            style(estimated_fee + op_fee).green(),
+                        ),
+                        default_input,
+                    )
+                };
 
                 match input {
                     YesNoCustomAmount::Custom(custom_fee) => {

@@ -48,6 +48,10 @@ pub struct TransferLocal {
     #[structopt(short, long, parse(from_occurrences))]
     pub verbose: u8,
 
+    /// Disable interactivity and accept default answers to prompts.
+    #[structopt(short = "y", long = "no-prompt")]
+    pub no_prompt: bool,
+
     #[structopt(short = "E", long)]
     pub endpoint: String,
 
@@ -119,7 +123,9 @@ impl TransferLocal {
         let private_key = self.private_key()?;
 
         Ok(OperationCommand {
-            options: OperationOptions {},
+            options: OperationOptions {
+                no_prompt: self.no_prompt,
+            },
             api: Box::new(HttpApi::new(self.endpoint.clone())),
             from: public_key.hash().into(),
             to: Address::from_base58check(&self.to)

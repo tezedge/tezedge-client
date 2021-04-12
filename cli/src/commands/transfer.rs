@@ -15,6 +15,10 @@ pub struct Transfer {
     #[structopt(short, long, parse(from_occurrences))]
     pub verbose: u8,
 
+    /// Disable interactivity and accept default answers to prompts.
+    #[structopt(short = "y", long = "no-prompt")]
+    pub no_prompt: bool,
+
     #[structopt(short = "E", long)]
     pub endpoint: String,
 
@@ -50,6 +54,7 @@ impl RawOperationCommand for Transfer {
     fn get_raw_options(&self) -> RawOptions {
         RawOptions {
             api_type: "http".to_string(),
+            no_prompt: self.no_prompt,
             use_trezor: self.use_trezor,
             use_ledger: self.use_ledger,
         }
