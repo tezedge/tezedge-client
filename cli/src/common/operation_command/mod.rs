@@ -29,21 +29,12 @@ pub use raw_operation_command::*;
 mod operation_command_api;
 pub use operation_command_api::*;
 
-#[derive(thiserror::Error, Debug)]
-#[error("local wallet not found for a given address")]
-struct WalletNotFoundError;
-
-// TODO: replace with query to persistent encrypted store for keys
-fn get_keys_by_addr(addr: &ImplicitAddress) -> Result<(PublicKey, PrivateKey), WalletNotFoundError> {
-    if addr != &ImplicitAddress::from_base58check("tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU").unwrap() {
-        return Err(WalletNotFoundError);
-    }
-    let pub_key = "edpktywJsAeturPxoFkDEerF6bi7N41ZnQyMrmNLQ3GZx2w6nn8eCZ";
-    let priv_key = "edsk37Qf3bj5actYQj38hNnu5WtbYVw3Td7dxWQnV9XhrYeBYDuSty";
-
-    Ok((
-        PublicKey::from_base58check(pub_key).unwrap(),
-        PrivateKey::from_base58check(priv_key).unwrap(),
+/// Exit and print error that no wallet type(trezor, ledger, local) was selected.
+fn exit_with_error_no_wallet_type_selected() -> ! {
+    exit_with_error(format!(
+        "{}\n{}",
+        "trezor, ledger, or local wallet needs to be used to create this operation. Neither selected.",
+        "Technically this shouldn't be possible!",
     ))
 }
 
@@ -67,13 +58,27 @@ impl Default for OperationCommandState {
 }
 
 pub struct TrezorState {
-    trezor: Trezor,
-    key_path: Vec<u32>,
+    pub trezor: Trezor,
+    pub key_path: Vec<u32>,
 }
 
 pub struct LedgerState {
-    ledger: Ledger,
-    key_path: Vec<u32>,
+    pub ledger: Ledger,
+    pub key_path: Vec<u32>,
+}
+
+pub struct LocalWalletState {
+    pub public_key: PublicKey,
+    pub private_key: PrivateKey,
+}
+
+impl LocalWalletState {
+    pub fn signer(&self) -> LocalSigner {
+        LocalSigner::new(
+            self.public_key.clone(),
+            self.private_key.clone(),
+        )
+    }
 }
 
 #[derive(PartialEq, Debug, Clone, Copy)]
@@ -94,6 +99,8 @@ pub struct OperationCommand {
     pub trezor_state: Option<TrezorState>,
     /// If `Some`, Ledger will be used to execute an operation.
     pub ledger_state: Option<LedgerState>,
+    /// If `Some`, Local wallet will be used to execute an operation.
+    pub local_state: Option<LocalWalletState>,
 }
 
 impl OperationCommand {
@@ -158,17 +165,12 @@ impl OperationCommand {
             ledger_execute(
                 ledger_state.ledger.get_public_key(ledger_state.key_path.clone(), false)
             )
+        } else if let Some(local_state) = self.local_state.as_ref() {
+            local_state.public_key.clone()
         } else {
-            match get_keys_by_addr(&self.get_manager_address()?) {
-                Ok(keys) => keys.0,
-                Err(_) => {
-                    exit_with_error(format!(
-                        "no local wallet found with address: {}",
-                        style(&self.from.to_base58check()).bold(),
-                    ));
-                }
-            }
+            exit_with_error_no_wallet_type_selected()
         };
+
         Ok(Some(NewRevealOperation {
             source,
             public_key,
@@ -439,33 +441,21 @@ impl OperationCommand {
             );
 
             Ok(sig_info)
-        } else {
+        } else if let Some(state) = self.local_state.as_ref() {
             let spinner = SpinnerBuilder::new()
                 .with_prefix(style("[2/4]").bold().dim())
                 .with_text("forging the operation and signing")
                 .start();
             let forged_operation = operation_group.forge();
 
-            let local_signer = {
-                let (pub_key, priv_key) = match get_keys_by_addr(&self.get_manager_address()?) {
-                    Ok(keys) => keys,
-                    Err(err) => {
-                        spinner.finish_fail(format!(
-                            "no local wallet found with address: {}",
-                            style(&self.from.to_base58check()).bold()
-                        ));
-                        return Err(err.into());
-                    }
-                };
-                LocalSigner::new(pub_key, priv_key)
-            };
-
-            let sig_info = local_signer.sign_forged_operation_bytes(
+            let sig_info = state.signer().sign_forged_operation_bytes(
                 forged_operation.as_ref(),
             );
 
             spinner.finish_succeed("operation forged and signed");
             Ok(sig_info)
+        } else {
+            exit_with_error_no_wallet_type_selected()
         }
     }
 
@@ -536,7 +526,6 @@ impl OperationCommand {
 
             eprintln!("\nOperation hash: {}", style(&operation_hash).green());
         }
-        
 
         if !console::user_attended() {
             println!("{}", &operation_hash);

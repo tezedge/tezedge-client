@@ -45,6 +45,8 @@ fn main() {
         Command::Address(c) => c.execute(),
         Command::Transfer(c) => c.execute(),
         Command::Delegate(c) => c.execute(),
+        Command::TransferLocal(c) => c.execute(),
+        Command::DelegateLocal(c) => c.execute(),
     };
 
     match result {

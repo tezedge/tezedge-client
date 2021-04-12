@@ -2,7 +2,7 @@ use std::fmt::{self, Display};
 use console::style;
 use dialoguer::theme::ColorfulTheme;
 
-use lib::{Address};
+use lib::Address;
 use lib::http_api::HttpApi;
 use lib::utils::parse_float_amount;
 use crate::common::operation_command::{OperationCommand, OperationOptions, OperationCommandState};
@@ -45,10 +45,10 @@ impl Display for GetKeyPathError {
 
 #[derive(thiserror::Error, Debug)]
 pub struct ParseAddressError {
-    kind: AddressKind,
+    pub kind: AddressKind,
     /// Input address as string before parsing.
-    address: String,
-    error: lib::FromPrefixedBase58CheckError,
+    pub address: String,
+    pub error: lib::FromPrefixedBase58CheckError,
 }
 
 #[derive(PartialEq, Debug, Clone)]
@@ -82,7 +82,7 @@ impl Display for InvalidApiTypeError {
 }
 
 #[derive(thiserror::Error, Debug)]
-pub struct InvalidFeeError(String);
+pub struct InvalidFeeError(pub String);
 
 impl Display for InvalidFeeError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -195,6 +195,7 @@ pub trait RawOperationCommand {
             state,
             trezor_state,
             ledger_state,
+            local_state: None,
         })
     }
 }
