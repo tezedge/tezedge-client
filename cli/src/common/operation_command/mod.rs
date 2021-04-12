@@ -14,8 +14,7 @@ use lib::trezor_api::{Trezor, TezosSignTx};
 use lib::ledger_api::Ledger;
 use lib::api::*;
 
-use crate::emojies;
-use crate::spinner::SpinnerBuilder;
+use cli_spinner::SpinnerBuilder;
 use crate::trezor::trezor_execute;
 use crate::ledger::ledger_execute;
 use crate::common::{

@@ -1,7 +1,7 @@
 use console::style;
 
 use lib::ledger_api::LedgerResponse;
-use crate::spinner::{wait_for_action_spinner, SpinnerBuilder};
+use cli_spinner::{wait_for_action_spinner, SpinnerBuilder};
 use crate::common::exit_with_error;
 
 pub fn ledger_execute<'a, T>(mut response: LedgerResponse<'a, T>) -> T

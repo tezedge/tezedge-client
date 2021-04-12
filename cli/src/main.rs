@@ -5,8 +5,6 @@ use console::style;
 use lib::api::GetVersionInfo;
 use lib::http_api::HttpApi;
 
-mod emojies;
-mod spinner;
 mod trezor;
 mod ledger;
 

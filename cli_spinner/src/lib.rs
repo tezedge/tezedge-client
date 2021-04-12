@@ -3,8 +3,6 @@ use std::time::Duration;
 use std::sync::mpsc;
 use console::{Term, style};
 
-use crate::emojies;
-
 pub fn wait_for_action_spinner() -> SpinnerBuilder {
     SpinnerBuilder::new()
         .with_spinner_chars(vec![

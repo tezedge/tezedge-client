@@ -1,6 +1,8 @@
 [workspace]
 members = [
     "cli",
+    "cli_emojies",
+    "cli_spinner",
     "lib",
     "crypto",
     "signer",

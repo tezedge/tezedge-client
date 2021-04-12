@@ -1,6 +1,6 @@
 use lib::trezor_api::{Result, TrezorResponse};
 use lib::trezor_api::messages::TrezorMessage;
-use crate::spinner::wait_for_action_spinner;
+use cli_spinner::wait_for_action_spinner;
 use crate::common::exit_with_error;
 
 // TODO: at the moment if before calling "ack" or before response comes for "ack",
