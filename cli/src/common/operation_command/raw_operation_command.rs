@@ -102,6 +102,9 @@ pub enum ParseOperationCommandError {
     InvalidAddress(#[from] ParseAddressError),
 
     InvalidFee(#[from] InvalidFeeError),
+
+    #[error("interactivity is turned off, but `--key-path` wasn't passed in.")]
+    MissingKeyPath
 }
 
 pub struct RawOptions {
@@ -114,6 +117,7 @@ pub struct RawOptions {
 pub trait RawOperationCommand {
     fn get_raw_options(&self) -> RawOptions;
     fn get_api_endpoint(&self) -> String;
+    fn get_raw_key_path(&self) -> Option<&str>;
     fn get_raw_from(&self) -> &str;
     fn get_raw_to(&self) -> &str;
     fn get_raw_fee(&self) -> Option<&String>;
@@ -134,7 +138,12 @@ pub trait RawOperationCommand {
         let key_path = if options.use_trezor || options.use_ledger {
             let raw_key_path = if from_is_key_path {
                 self.get_raw_from().to_string()
+            } else if let Some(key_path) = self.get_raw_key_path() {
+                key_path.to_string()
             } else {
+                if self.get_raw_options().no_prompt {
+                    return Err(ParseOperationCommandError::MissingKeyPath);
+                }
                 ask_for_key_path()?
             };
 

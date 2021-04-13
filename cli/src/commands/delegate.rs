@@ -24,11 +24,17 @@ pub struct Delegate {
     #[structopt(long = "ledger")]
     pub use_ledger: bool,
 
+    /// Required only if `--from` argument is an originated
+    /// (starts with KT1) address.
+    #[structopt(long = "key-path")]
+    pub key_path: Option<String>,
+
     /// Address to delegate tezos from.
     ///
-    /// Can either be public key hash: tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU
+    /// When delegating from originated (KT1) address, this needs to be
+    /// that KT1 address.
     ///
-    /// Or if --trezor flag is set, key derivation path**, like: "m/44'/1729'/0'"
+    /// Otherwise use key derivation path, like: "m/44'/1729'/0'/0'"
     #[structopt(short, long)]
     pub from: String,
 
@@ -55,6 +61,10 @@ impl RawOperationCommand for Delegate {
 
     fn get_api_endpoint(&self) -> String {
         self.endpoint.clone()
+    }
+
+    fn get_raw_key_path(&self) -> Option<&str> {
+        self.key_path.as_ref().map(|s| s.as_str())
     }
 
     fn get_raw_from(&self) -> &str {
