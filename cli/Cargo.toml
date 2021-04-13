@@ -4,6 +4,10 @@ version = "0.1.0"
 authors = ["Zura Benashvili <zura.benashvili@gmail.com>"]
 edition = "2018"
 
+[[bin]]
+name = "test_all"
+path = "manual_tests/test_all.rs"
+
 [dependencies]
 lib = { path = "../lib" }
 emojies = { package = "cli_emojies", path = "../cli_emojies" }
