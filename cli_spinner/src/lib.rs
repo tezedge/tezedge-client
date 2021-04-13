@@ -1,4 +1,5 @@
 use std::thread;
+use std::error::Error;
 use std::time::Duration;
 use std::sync::mpsc;
 use console::{Term, style};
@@ -91,7 +92,7 @@ impl SpinnerBuilder {
         let prefix = self.prefix;
         let text = self.text;
 
-        let th = thread::spawn(move || {
+        let thread_handle = thread::spawn(move || {
             let mut has_printed = false;
             for sp_char in spinner_chars.iter().cycle() {
                 loop {
@@ -155,34 +156,72 @@ impl SpinnerBuilder {
         });
 
         Spinner {
-            tx: Some(tx),
-            thread_handle: Some(th),
+            inner: Some(SpinnerInner {
+                tx,
+                thread_handle,
+            }),
         }
     }
 }
 
+struct SpinnerInner {
+    tx: SpinnerSender,
+    thread_handle: thread::JoinHandle<()>,
+}
+
+impl SpinnerInner {
+    fn finish(self) {
+        drop(self.tx);
+        let _ = self.thread_handle.join();
+    }
+}
+
 pub struct Spinner {
-    tx: Option<SpinnerSender>,
-    thread_handle: Option<thread::JoinHandle<()>>,
+    inner: Option<SpinnerInner>,
 }
 
 impl Spinner {
-    pub fn finish_succeed<S>(self, message: S)
+    fn success<S>(&mut self, message: S)
         where S: ToString,
     {
-        self.tx.as_ref().map(|tx| {
-            let _ = tx.send(SpinnerMsg::FinishSuccess(message.to_string()));
-        });
-        self.finish();
+        if let Some(inner) = self.inner.take() {
+            let _ = inner.tx.send(SpinnerMsg::FinishSuccess(message.to_string()));
+            inner.finish();
+        }
     }
 
-    pub fn finish_fail<S>(self, message: S)
+    fn fail<S>(&mut self, message: S)
         where S: ToString,
     {
-        self.tx.as_ref().map(|tx| {
-            let _ = tx.send(SpinnerMsg::FinishFailure(message.to_string()));
-        });
-        self.finish();
+        if let Some(inner) = self.inner.take() {
+            let _ = inner.tx.send(SpinnerMsg::FinishFailure(message.to_string()));
+            inner.finish();
+        }
+    }
+
+    pub fn finish_succeed<S>(mut self, message: S)
+        where S: ToString,
+    {
+        self.success(message);
+    }
+
+    #[inline]
+    pub fn finish_fail<S>(mut self, message: S)
+        where S: ToString,
+    {
+        self.fail(message);
+    }
+
+    /// If `result` is an [Err], stop the spinner and print the error
+    /// as a failure message.
+    #[inline]
+    pub fn fail_if<T, E>(&mut self, result: Result<T, E>) -> Result<T, E>
+        where E: Error,
+    {
+        if let Err(err) = &result {
+            self.fail(err);
+        }
+        result
     }
 
     /// Calls drop on the spinner which will delete spinner from the terminal.
@@ -192,11 +231,8 @@ impl Spinner {
 
 impl Drop for Spinner {
     fn drop(&mut self) {
-        if let Some(tx) = self.tx.take() {
-            drop(tx);
-            if let Some(handle) = self.thread_handle.take() {
-                let _ = handle.join();
-            }
+        if let Some(inner) = self.inner.take() {
+            inner.finish();
         }
     }
 }
