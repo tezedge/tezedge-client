@@ -347,8 +347,5 @@ impl TestAll {
 }
 
 fn main() {
-    match TestAll::from_args().test() {
-        Ok(_) => {}
-        Err(_) => println!("\n\n{}", style("Tests failed!").on_red()),
-    }
+    let _ = TestAll::from_args().test();
 }
