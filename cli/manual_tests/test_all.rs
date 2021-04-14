@@ -2,9 +2,11 @@ use std::fmt::{self, Display};
 use std::process::{Command, Stdio};
 use std::error::Error;
 use structopt::StructOpt;
-use console::style;
+use console::{style, Term};
 
 use lib::{Address, PublicKey, ToBase58Check};
+use lib::api::GetManagerPublicKey;
+use lib::http_api::HttpApi;
 use cli_spinner::SpinnerBuilder;
 
 #[derive(thiserror::Error, Debug)]
@@ -59,6 +61,10 @@ pub struct TestAll {
 }
 
 impl TestAll {
+    fn api(&self) -> HttpApi {
+        HttpApi::new(&self.endpoint)
+    }
+
     fn cli_command(&self) -> Command {
         let target_dir = std::env::var("CARGO_TARGET_DIR")
             .unwrap_or_else(|_| String::from("target"));
@@ -267,20 +273,138 @@ impl TestAll {
         self.hw_transfer("--ledger", from, to, amount, fee)
     }
 
+    fn hw_find_unrevealed(
+        &self,
+        device: &str,
+        prefix: &str,
+        index: u32,
+    ) -> Result<(u32, String, Address), Box<dyn Error>>
+    {
+        let rpc = self.api();
+        let device_flag = format!("--{}", device);
+        let mut i = index;
+
+        loop {
+            if i != index {
+                let _ = Term::stderr().clear_last_lines(1);
+            }
+            let path = format!("{}/{}'", prefix, i);
+            eprintln!(
+                " -   searching for unrevealed {} account. Checking path: {}",
+                style(device).bold(),
+                style(&path).magenta(),
+            );
+
+            let address = self.get_address(&path, &device_flag)?;
+
+            if rpc.get_manager_public_key(&address)?.is_none() {
+                let _ = Term::stderr().clear_last_lines(1);
+                eprintln!(
+                    " {} {} unrevealed account ({}) found on path: {}",
+                    style(emojies::TICK),
+                    style(device).bold(),
+                    style(address.to_base58check()).bold(),
+                    style(&path).magenta(),
+                );
+                break Ok((i, path, address));
+            }
+
+            i += 1;
+        }
+    }
+
+    fn trezor_find_unrevealed(
+        &self,
+        prefix: &str,
+        index: u32,
+    ) -> Result<(u32, String, Address), Box<dyn Error>>
+    {
+        self.hw_find_unrevealed("trezor", prefix, index)
+    }
+
+    fn ledger_find_unrevealed(
+        &self,
+        prefix: &str,
+        index: u32,
+    ) -> Result<(u32, String, Address), Box<dyn Error>>
+    {
+        self.hw_find_unrevealed("ledger", prefix, index)
+    }
+
+    /// Test transfer + reveal from hardware wallet.
+    fn test_hw_transfer_reveal(
+        &self,
+        device: &str,
+        key_path: &str,
+        to: &Address,
+    ) -> Result<(), Box<dyn Error>>
+    {
+        let device_flag = "--".to_string() + device;
+        let mut spinner = SpinnerBuilder::new()
+            .with_text(format!(
+                "testing {} from {} account",
+                style("transfer + reveal").yellow(),
+                style(device).bold(),
+            ))
+            .start();
+
+        let op_hash = spinner.fail_if(
+            self.hw_transfer(&device_flag, key_path, to, "0.1", None),
+        )?;
+        spinner.finish_succeed(format!(
+            "{} from {} account successful. Operation hash: {}",
+            style("transfer + reveal").green(),
+            style(device).bold(),
+            style(op_hash).cyan(),
+        ));
+
+        Ok(())
+    }
+
+    /// Test transfer without reveal from hardware wallet.
+    fn test_hw_transfer(
+        &self,
+        device: &str,
+        key_path: &str,
+        to: &Address,
+    ) -> Result<(), Box<dyn Error>>
+    {
+        let device_flag = "--".to_string() + device;
+        let mut spinner = SpinnerBuilder::new()
+            .with_text(format!(
+                "testing {} from {} account",
+                style("transfer w/o reveal").yellow(),
+                style(device).bold(),
+            ))
+            .start();
+
+        let op_hash = spinner.fail_if(
+            self.hw_transfer(&device_flag, key_path, to, "0.1", None),
+        )?;
+        spinner.finish_succeed(format!(
+            "{} from {} account successful. Operation hash: {}",
+            style("transfer w/o reveal").green(),
+            style(device).bold(),
+            style(op_hash).cyan(),
+        ));
+
+        Ok(())
+    }
+
     pub fn test(self) -> Result<(), Box<dyn Error>> {
         let mut spinner = self.spinner_for_build().start();
-
         spinner.fail_if(self.build())?;
         spinner.finish_succeed("build successful!");
 
-        let key_path = "m/44'/1729'/0'/0'";
-
+        let key_path_prefix = "m/44'/1729'/0'".to_string();
         let public_key = PublicKey::from_base58check(&self.public_key)
             .map_err(|_| "invalid --public-key passed")?;
 
         let local_address: Address = public_key.hash().into();
-        let trezor_address = self.get_address_trezor(key_path)?;
-        let ledger_address = self.get_address_ledger(key_path)?;
+        let (i, trezor_key_path, trezor_address)
+            = self.trezor_find_unrevealed(&key_path_prefix, 0)?;
+        let (_, ledger_key_path, ledger_address)
+            = self.ledger_find_unrevealed(&key_path_prefix, i)?;
 
         // Transfer to trezor account.
         let mut spinner = SpinnerBuilder::new()
@@ -310,37 +434,17 @@ impl TestAll {
             self.transfer_local(&local_address, &ledger_address, "2", None),
         )?;
         spinner.finish_succeed(format!(
-            "funds transfered to ledger account: {}",
+            "funds transfered to ledger account. Operation hash: {}",
             style(op_hash).cyan(),
         ));
 
-        // Transfer from trezor account.
-        let mut spinner = SpinnerBuilder::new()
-            .with_text("testing transfer from trezor account")
-            .start();
+        // test transfer + reveal
+        self.test_hw_transfer_reveal("trezor", &trezor_key_path, &ledger_address)?;
+        self.test_hw_transfer_reveal("ledger", &ledger_key_path, &trezor_address)?;
 
-        let op_hash = spinner.fail_if(
-            self.trezor_transfer(key_path, &ledger_address, "0.1", None),
-        )?;
-        spinner.finish_succeed(format!(
-            "transfer from {} account successful. Operation hash: {}",
-            style("Trezor").bold(),
-            style(op_hash).cyan(),
-        ));
-
-        // Transfer from ledger account.
-        let mut spinner = SpinnerBuilder::new()
-            .with_text("testing transfer from ledger account")
-            .start();
-
-        let op_hash = spinner.fail_if(
-            self.ledger_transfer(key_path, &trezor_address, "0.1", None),
-        )?;
-        spinner.finish_succeed(format!(
-            "transfer from {} account successful. Operation hash: {}",
-            style("Ledger").bold(),
-            style(op_hash).cyan(),
-        ));
+        // test transfer with already revealed accounts
+        self.test_hw_transfer("trezor", &trezor_key_path, &ledger_address)?;
+        self.test_hw_transfer("ledger", &ledger_key_path, &trezor_address)?;
 
         Ok(())
     }
