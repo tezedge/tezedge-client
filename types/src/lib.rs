@@ -1,6 +1,9 @@
 mod from_prefixed_base58check_error;
 pub use from_prefixed_base58check_error::*;
 
+mod network;
+pub use network::*;
+
 mod block_hash;
 pub use block_hash::*;
 

@@ -1,0 +1,9 @@
+[package]
+name = "explorer_api"
+version = "0.1.0"
+authors = ["Zura Benashvili <zura.benashvili@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+types = { path = "../types" }
+thiserror = "1.0.24"

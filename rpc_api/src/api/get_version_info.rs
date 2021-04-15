@@ -2,8 +2,7 @@ use std::fmt::{self, Display};
 use serde::{Serialize, Deserialize};
 
 use crate::api::TransportError;
-
-const MAINNET_CHAINS: [&'static str; 2] = ["TEZOS_BETANET", "TEZOS_MAINNET"];
+use types::Network;
 
 #[derive(thiserror::Error, Debug)]
 pub enum GetVersionInfoError {
@@ -35,24 +34,15 @@ pub struct NetworkVersion {
 }
 
 impl NetworkVersion {
-    pub fn is_mainnet(&self) -> bool {
-        MAINNET_CHAINS.iter()
-            .any(|chain| self.chain_name.starts_with(chain))
+    pub fn get_network(&self) -> Network {
+        self.chain_name.parse().unwrap()
     }
 
-    /// Explorer url for a given network.
-    pub fn explorer_url(&self) -> Option<String> {
-        if self.is_mainnet() {
-            Some("https://tzstats.com".to_owned())
-        } else if self.chain_name.starts_with("TEZOS_DELPHI") {
-            Some("https://delphi.tzstats.com".to_owned())
-        } else if self.chain_name.starts_with("TEZOS_EDO") {
-            Some("https://edo.tzstats.com".to_owned())
-        } else if self.chain_name.starts_with("TEZOS_FLORENCE") {
-            Some("https://florence.tzstats.com".to_owned())
-        } else {
-            None
-        }
+    pub fn is_mainnet(&self) -> bool {
+        matches!(
+            self.get_network(),
+            Network::Main(_) | Network::Beta(_),
+        )
     }
 }
 
@@ -75,9 +65,8 @@ impl VersionInfo {
         self.network_version.is_mainnet()
     }
 
-    /// Explorer url for a given network.
-    pub fn explorer_url(&self) -> Option<String> {
-        self.network_version.explorer_url()
+    pub fn get_network(&self) -> Network {
+        self.network_version.get_network()
     }
 }
 

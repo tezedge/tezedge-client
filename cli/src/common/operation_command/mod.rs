@@ -6,10 +6,11 @@ use lib::{
     Forge, Address, ImplicitAddress, ImplicitOrOriginatedWithManager,
     NewOperationGroup, NewOperation, NewTransactionOperation, NewRevealOperation,
     NewTransactionOperationBuilder, NewDelegationOperationBuilder,
-    PrivateKey, PublicKey, ToBase58Check,
+    PrivateKey, PublicKey,
 };
 
 use lib::signer::{LocalSigner, OperationSignatureInfo};
+use lib::explorer_api::TzStats;
 use lib::trezor_api::{Trezor, TezosSignTx};
 use lib::ledger_api::Ledger;
 use lib::api::*;
@@ -522,22 +523,26 @@ impl OperationCommand {
         self.confirm_operation(&operation_hash)?;
 
         let version = self.get_version()?;
-        if let Some(explorer_url) = version.explorer_url() {
-            eprintln!(
-                "\n  {}View operation at: {}/{}",
-                emojies::FINGER_POINTER_RIGHT,
-                style(explorer_url).cyan(),
-                style(&operation_hash).cyan(),
-            );
-        } else {
-            eprintln!(
-                "\n{} couldn't find explorer url for current network({}).",
-                style("[WARN]").yellow(),
-                style(&version.network_version.chain_name).bold(),
-            );
+        let network = version.get_network();
 
-            eprintln!("\nOperation hash: {}", style(&operation_hash).green());
-        }
+        match TzStats::new(network) {
+            Ok(tzstats) => {
+                eprintln!(
+                    "\n  {}View operation at: {}/{}",
+                    emojies::FINGER_POINTER_RIGHT,
+                    style(tzstats.operation_link_prefix()).cyan(),
+                    style(&operation_hash).cyan(),
+                );
+            }
+            Err(err) => {
+                eprintln!(
+                    "\n{} {}",
+                    style("[WARN]").yellow(),
+                    err,
+                );
+                eprintln!("\nOperation hash: {}", style(&operation_hash).green());
+            }
+        };
 
         if !console::user_attended() {
             println!("{}", &operation_hash);

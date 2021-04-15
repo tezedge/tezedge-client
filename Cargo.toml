@@ -9,6 +9,7 @@ members = [
     "types",
     "utils",
     "rpc_api",
+    "explorer_api",
     "trezor_api",
     "ledger_api",
 ]

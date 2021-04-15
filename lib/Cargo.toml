@@ -10,6 +10,7 @@ utils = { path = "../utils" }
 types = { path = "../types" }
 signer = { path = "../signer" }
 rpc_api = { path = "../rpc_api" }
+explorer_api = { path = "../explorer_api" }
 trezor_api = { path = "../trezor_api" }
 ledger_api = { path = "../ledger_api" }
 serde = { version = "1.0.123", features = ["derive"] }
