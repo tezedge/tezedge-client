@@ -16,6 +16,9 @@ pub fn wait_for_action_spinner() -> SpinnerBuilder {
 }
 
 enum SpinnerMsg {
+    /// Update/Change text of the spinner.
+    UpdateText(String),
+
     /// Finish spinner with a success message.
     FinishSuccess(String),
 
@@ -27,6 +30,7 @@ impl SpinnerMsg {
     /// If the message is final.
     fn is_final(&self) -> bool {
         match self {
+            Self::UpdateText(_) => false,
             Self::FinishSuccess(_) => true,
             Self::FinishFailure(_) => true,
         }
@@ -90,7 +94,7 @@ impl SpinnerBuilder {
         let spinner_chars = self.spinner_chars;
         let interval = self.interval;
         let prefix = self.prefix;
-        let text = self.text;
+        let mut spinner_text = self.text;
 
         let thread_handle = thread::spawn(move || {
             let mut has_printed = false;
@@ -104,7 +108,12 @@ impl SpinnerBuilder {
                                 let _ = t.clear_last_lines(1);
                             }
 
-                            match &spinner_msg {
+                            let is_end = spinner_msg.is_final();
+
+                            match spinner_msg {
+                                SpinnerMsg::UpdateText(text) => {
+                                    spinner_text = text;
+                                }
                                 SpinnerMsg::FinishSuccess(text) => {
                                     let _ = t.write_line(&format!(
                                         "{} {} {}",
@@ -123,11 +132,7 @@ impl SpinnerBuilder {
                                 }
                             }
 
-                            if spinner_msg.is_final() {
-                                return;
-                            } else {
-                                break;
-                            }
+                            if is_end { return; } else { break; }
                         }
                         Err(mpsc::TryRecvError::Disconnected) => {
                             if has_printed {
@@ -148,7 +153,7 @@ impl SpinnerBuilder {
                     "{} {}   {}",
                     prefix,
                     sp_char,
-                    text,
+                    spinner_text,
                 ));
                 has_printed = true;
                 thread::sleep(interval);
@@ -181,6 +186,15 @@ pub struct Spinner {
 }
 
 impl Spinner {
+    /// Update/Change text of the spinner.
+    pub fn update_text<S>(&mut self, text: S)
+        where S: ToString,
+    {
+        if let Some(inner) = self.inner.as_ref() {
+            let _ = inner.tx.send(SpinnerMsg::UpdateText(text.to_string()));
+        }
+    }
+
     fn success<S>(&mut self, message: S)
         where S: ToString,
     {
