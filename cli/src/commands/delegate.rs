@@ -1,8 +1,11 @@
 use structopt::StructOpt;
+use console::style;
+
+use lib::ImplicitAddress;
 
 use crate::commands::CommandError;
-
-use crate::common::operation_command::{RawOperationCommand, RawOptions};
+use crate::common::exit_with_error;
+use crate::common::operation_command::*;
 
 /// Delegate balance to baker
 #[derive(StructOpt)]
@@ -38,8 +41,15 @@ pub struct Delegate {
     #[structopt(short, long)]
     pub from: String,
 
+    /// Address to delegate funds to.
+    ///
+    /// Use --cancel argument instead, to cancel active delegation.
     #[structopt(short, long)]
-    pub to: String,
+    pub to: Option<String>,
+
+    /// Cancel active delegation.
+    #[structopt(long)]
+    pub cancel: bool,
 
     /// Specify fee for the delegation.
     ///
@@ -71,10 +81,6 @@ impl RawOperationCommand for Delegate {
         &self.from
     }
 
-    fn get_raw_to(&self) -> &str {
-        &self.to
-    }
-
     fn get_raw_fee(&self) -> Option<&String> {
         self.fee.as_ref()
     }
@@ -82,6 +88,48 @@ impl RawOperationCommand for Delegate {
 
 impl Delegate {
     pub fn execute(self) -> Result<(), CommandError> {
-        Ok(self.parse()?.delegate()?)
+        if self.cancel && self.to.is_some() {
+            exit_with_error(format!(
+                "{} and {} can't be provided at the same time.\n\n{}\n{}",
+                style("--cancel").bold(),
+                style("--to").bold(),
+                format!(
+                    " - If you wish to {} an active delegation, please remove {} argument.",
+                    style("cancel").bold(),
+                    style("--to").bold(),
+                ),
+                format!(
+                    " - If you wish to {} an active delegation, please remove {} argument.",
+                    style("set").bold(),
+                    style("--cancel").bold(),
+                ),
+            ));
+        }
+
+        if self.to.is_none() && !self.cancel {
+            exit_with_error(format!(
+                "Neither {} nor {} argument was supplied.\n\n{}",
+                style("--to").bold(),
+                style("--cancel").bold(),
+                format!(
+                    "Please specify either:\n{}\n{}",
+                    format!(" - {} <address>, to delegate to the <address>.", style("--to").bold()),
+                    format!(" - {}, to cancel active delegation.", style("--cancel").bold()),
+                ),
+            ));
+        }
+
+        let to = self.to.as_ref()
+            .map(|to| {
+                ImplicitAddress::from_base58check(to)
+                    .map_err(|err| ParseAddressError {
+                        kind: AddressKind::Destination,
+                        error: err,
+                        address: to.clone(),
+                    })
+            })
+            .transpose()?;
+
+        Ok(self.parse()?.delegate(to)?)
     }
 }

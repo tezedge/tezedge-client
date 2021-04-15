@@ -4,9 +4,10 @@ use console::style;
 
 use lib::utils::parse_float_amount;
 use lib::http_api::HttpApi;
-use lib::{Address, PrivateKey, PublicKey};
+use lib::{ImplicitAddress, PrivateKey, PublicKey};
 
 use crate::commands::CommandError;
+use crate::common::exit_with_error;
 use crate::common::operation_command::*;
 
 #[derive(thiserror::Error, Debug)]
@@ -61,8 +62,15 @@ pub struct DelegateLocal {
     #[structopt(short, long)]
     pub from: String,
 
+    /// Address to delegate funds to.
+    ///
+    /// Use --cancel argument instead, to cancel active delegation.
     #[structopt(short, long)]
-    pub to: String,
+    pub to: Option<String>,
+
+    /// Cancel active delegation.
+    #[structopt(long)]
+    pub cancel: bool,
 
     /// Specify fee for the delegation.
     ///
@@ -101,26 +109,62 @@ impl DelegateLocal {
     }
 
     pub fn execute(self) -> Result<(), CommandError> {
+        if self.cancel && self.to.is_some() {
+            exit_with_error(format!(
+                "{} and {} can't be provided at the same time.\n\n{}\n{}",
+                style("--cancel").bold(),
+                style("--to").bold(),
+                format!(
+                    " - If you wish to {} an active delegation, please remove {} argument.",
+                    style("cancel").bold(),
+                    style("--to").bold(),
+                ),
+                format!(
+                    " - If you wish to {} an active delegation, please remove {} argument.",
+                    style("set").bold(),
+                    style("--cancel").bold(),
+                ),
+            ));
+        }
+
+        if self.to.is_none() && !self.cancel {
+            exit_with_error(format!(
+                "Neither {} nor {} argument was supplied.\n\n{}",
+                style("--to").bold(),
+                style("--cancel").bold(),
+                format!(
+                    "Please specify either:\n{}\n{}",
+                    format!(" - {} <address>, to delegate to the <address>.", style("--to").bold()),
+                    format!(" - {}, to cancel active delegation.", style("--cancel").bold()),
+                ),
+            ));
+        }
+
         let public_key = self.public_key()?;
         let private_key = self.private_key()?;
 
+        let to = self.to.as_ref()
+            .map(|to| {
+                ImplicitAddress::from_base58check(to)
+                    .map_err(|err| ParseAddressError {
+                        kind: AddressKind::Destination,
+                        error: err,
+                        address: to.clone(),
+                    })
+            })
+            .transpose()?;
+        
         Ok(OperationCommand {
             options: OperationOptions {
                 no_prompt: self.no_prompt,
             },
             api: Box::new(HttpApi::new(self.endpoint.clone())),
             from: public_key.hash().into(),
-            to: Address::from_base58check(&self.to)
-                .map_err(|error| ParseAddressError {
-                    error,
-                    kind: AddressKind::Destination,
-                    address: self.to.to_string(),
-                })?,
             fee: self.fee()?,
             state: Default::default(),
             trezor_state: None,
             ledger_state: None,
             local_state: Some(LocalWalletState { public_key, private_key }),
-        }.delegate()?)
+        }.delegate(to)?)
     }
 }

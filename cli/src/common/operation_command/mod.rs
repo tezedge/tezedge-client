@@ -83,16 +83,15 @@ impl LocalWalletState {
     }
 }
 
-#[derive(PartialEq, Debug, Clone, Copy)]
+#[derive(PartialEq, Debug, Clone)]
 enum OperationType {
-    Transaction { amount: u64 },
-    Delegation,
+    Transaction { to: Address, amount: u64 },
+    Delegation { to: Option<ImplicitAddress> },
 }
 
 pub struct OperationCommand {
     pub options: OperationOptions,
     pub from: Address,
-    pub to: Address,
     pub fee: Option<u64>,
 
     pub api: Box<dyn OperationCommandApi>,
@@ -186,13 +185,14 @@ impl OperationCommand {
     fn build_transaction(
         &mut self,
         source: ImplicitOrOriginatedWithManager,
+        destination: Address,
         amount: u64,
     ) -> Result<NewTransactionOperation, Error>
     {
         Ok(NewTransactionOperationBuilder {
             amount,
             source,
-            destination: self.to.clone(),
+            destination,
             counter: self.get_counter()?,
             fee: self.fee.clone().unwrap_or(0),
             gas_limit: 10300,
@@ -203,18 +203,12 @@ impl OperationCommand {
     fn build_delegation(
         &mut self,
         source: ImplicitOrOriginatedWithManager,
+        destination: Option<ImplicitAddress>,
     ) -> Result<NewOperation, Error>
     {
-        let delegate_to = match &self.to {
-            Address::Implicit(addr) => addr.clone(),
-            Address::Originated(_) => {
-                exit_with_error("delegating to originated account is not supported!");
-            }
-        };
-
         Ok(NewDelegationOperationBuilder {
             source,
-            delegate_to: Some(delegate_to),
+            delegate_to: destination,
             counter: self.get_counter()?,
             fee: self.fee.clone().unwrap_or(0),
             gas_limit: 10300,
@@ -261,11 +255,11 @@ impl OperationCommand {
 
 
         Ok(operation_group.with_operation(match op_type {
-            OperationType::Transaction { amount } => {
-                self.build_transaction(source, amount)?.into()
+            OperationType::Transaction { to, amount } => {
+                self.build_transaction(source, to, amount)?.into()
             }
-            OperationType::Delegation => {
-                self.build_delegation(source)?
+            OperationType::Delegation { to } => {
+                self.build_delegation(source, to)?
             }
         }))
     }
@@ -551,13 +545,13 @@ impl OperationCommand {
         Ok(())
     }
 
-    pub fn transfer(&mut self, amount: u64) -> Result<(), Error> {
-        let op_type = OperationType::Transaction { amount };
+    pub fn transfer(&mut self, to: Address, amount: u64) -> Result<(), Error> {
+        let op_type = OperationType::Transaction { to, amount };
         self.execute(op_type)
     }
 
-    pub fn delegate(&mut self) -> Result<(), Error> {
-        let op_type = OperationType::Delegation;
+    pub fn delegate(&mut self, to: Option<ImplicitAddress>) -> Result<(), Error> {
+        let op_type = OperationType::Delegation { to };
         self.execute(op_type)
     }
 }

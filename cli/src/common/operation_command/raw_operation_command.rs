@@ -119,7 +119,6 @@ pub trait RawOperationCommand {
     fn get_api_endpoint(&self) -> String;
     fn get_raw_key_path(&self) -> Option<&str>;
     fn get_raw_from(&self) -> &str;
-    fn get_raw_to(&self) -> &str;
     fn get_raw_fee(&self) -> Option<&String>;
 
     fn parse(&self) -> Result<OperationCommand, ParseOperationCommandError> {
@@ -182,13 +181,6 @@ pub trait RawOperationCommand {
                 })?
         };
 
-        let to = Address::from_base58check(self.get_raw_to())
-           .map_err(|err| ParseAddressError {
-               kind: AddressKind::Destination,
-               error: err,
-               address: self.get_raw_to().to_string(),
-           })?;
-
         let fee = if let Some(raw_fee) = self.get_raw_fee() {
             Some(parse_float_amount(raw_fee)
                 .map_err(|_| InvalidFeeError(raw_fee.to_string()))?)
@@ -201,7 +193,6 @@ pub trait RawOperationCommand {
                 no_prompt: self.get_raw_options().no_prompt,
             },
             from,
-            to,
             fee,
             api,
             state,

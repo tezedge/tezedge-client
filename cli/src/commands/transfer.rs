@@ -1,10 +1,11 @@
 use structopt::StructOpt;
 use console::style;
 
+use lib::Address;
 use lib::utils::parse_float_amount;
 use crate::commands::CommandError;
 use crate::common::exit_with_error;
-use crate::common::operation_command::{RawOperationCommand, RawOptions};
+use crate::common::operation_command::*;
 
 /// Create a transaction
 ///
@@ -78,10 +79,6 @@ impl RawOperationCommand for Transfer {
         &self.from
     }
 
-    fn get_raw_to(&self) -> &str {
-        &self.to
-    }
-
     fn get_raw_fee(&self) -> Option<&String> {
         self.fee.as_ref()
     }
@@ -101,6 +98,12 @@ impl Transfer {
     }
 
     pub fn execute(self) -> Result<(), CommandError> {
-        Ok(self.parse()?.transfer(self.get_amount())?)
+        let to = Address::from_base58check(&self.to)
+           .map_err(|err| ParseAddressError {
+               kind: AddressKind::Destination,
+               error: err,
+               address: self.to.clone(),
+           })?;
+        Ok(self.parse()?.transfer(to, self.get_amount())?)
     }
 }

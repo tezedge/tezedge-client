@@ -121,6 +121,12 @@ impl TransferLocal {
     pub fn execute(self) -> Result<(), CommandError> {
         let public_key = self.public_key()?;
         let private_key = self.private_key()?;
+        let to = Address::from_base58check(&self.to)
+           .map_err(|err| ParseAddressError {
+               kind: AddressKind::Destination,
+               error: err,
+               address: self.to.clone(),
+           })?;
 
         Ok(OperationCommand {
             options: OperationOptions {
@@ -128,17 +134,11 @@ impl TransferLocal {
             },
             api: Box::new(HttpApi::new(self.endpoint.clone())),
             from: public_key.hash().into(),
-            to: Address::from_base58check(&self.to)
-                .map_err(|error| ParseAddressError {
-                    error,
-                    kind: AddressKind::Destination,
-                    address: self.to.to_string(),
-                })?,
             fee: self.fee()?,
             state: Default::default(),
             trezor_state: None,
             ledger_state: None,
             local_state: Some(LocalWalletState { public_key, private_key }),
-        }.transfer(self.get_amount())?)
+        }.transfer(to, self.get_amount())?)
     }
 }
