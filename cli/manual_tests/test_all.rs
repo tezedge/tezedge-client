@@ -1,12 +1,14 @@
 use std::fmt::{self, Display};
 use std::process::{Command, Stdio};
 use std::error::Error;
+use std::sync::Mutex;
 use structopt::StructOpt;
 use console::{style, Term};
 
-use lib::{Address, PublicKey, ToBase58Check};
-use lib::api::GetManagerPublicKey;
+use lib::{Address, ImplicitAddress, PublicKey, ToBase58Check};
+use lib::api::*;
 use lib::http_api::HttpApi;
+use lib::explorer_api::TzStats;
 use cli_spinner::SpinnerBuilder;
 
 #[derive(thiserror::Error, Debug)]
@@ -58,11 +60,27 @@ pub struct TestAll {
     /// Use --release mode when building: `cargo build --release`.
     #[structopt(long)]
     pub release: bool,
+
+    #[structopt(skip)]
+    version: Mutex<Option<VersionInfo>>,
 }
 
 impl TestAll {
     fn api(&self) -> HttpApi {
         HttpApi::new(&self.endpoint)
+    }
+
+    fn explorer(&self) -> TzStats {
+        let store = &mut *self.version.lock().unwrap();
+        let version = if let Some(version) = store.as_ref() {
+            version.clone()
+        } else {
+            let version = self.api().get_version_info().unwrap();
+            *store = Some(version.clone());
+            version
+        };
+
+        TzStats::new(version.get_network()).unwrap()
     }
 
     fn cli_command(&self) -> Command {
@@ -140,14 +158,6 @@ impl TestAll {
                 output: String::from_utf8_lossy(&output.stderr).to_string(),
             }.into())
         }
-    }
-
-    fn get_address_trezor(&self, key_path: &str) -> Result<Address, Box<dyn Error>> {
-        self.get_address(key_path, "--trezor")
-    }
-
-    fn get_address_ledger(&self, key_path: &str) -> Result<Address, Box<dyn Error>> {
-        self.get_address(key_path, "--ledger")
     }
 
     fn transfer_local_command(
@@ -251,26 +261,58 @@ impl TestAll {
         }
     }
 
-    fn trezor_transfer(
+    fn hw_delegate_command(
         &self,
+        device_flag: &str,
         from: &str,
-        to: &Address,
-        amount: &str,
+        to: Option<&ImplicitAddress>,
         fee: Option<&str>,
-    ) -> Result<String, CommandError>
+    ) -> Command
     {
-        self.hw_transfer("--trezor", from, to, amount, fee)
+        let mut command = self.cli_command();
+        command
+            .arg("delegate")
+            .arg("--no-prompt")
+            .arg(device_flag)
+            .arg("--endpoint").arg(&self.endpoint)
+            .arg("--from").arg(from);
+
+        if let Some(to) = to {
+            command.arg("--to").arg(to.to_base58check());
+        } else {
+            command.arg("--cancel");
+        }
+
+        if let Some(fee) = fee {
+            command.arg("--fee").arg(fee);
+        }
+
+        command
     }
 
-    fn ledger_transfer(
+    fn hw_delegate(
         &self,
+        device_flag: &str,
         from: &str,
-        to: &Address,
-        amount: &str,
+        to: Option<&ImplicitAddress>,
         fee: Option<&str>,
     ) -> Result<String, CommandError>
     {
-        self.hw_transfer("--ledger", from, to, amount, fee)
+        let mut command = self.hw_delegate_command(
+            device_flag, from, to, fee.clone(),
+        );
+        let command_str = format!("{:?}", &command);
+
+        let output = command.output().expect("failed to get output of delegate command!");
+
+        if output.status.success() {
+            Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
+        } else {
+            Err(CommandError {
+                command: command_str,
+                output: String::from_utf8_lossy(&output.stderr).to_string(),
+            })
+        }
     }
 
     fn hw_find_unrevealed(
@@ -311,24 +353,6 @@ impl TestAll {
 
             i += 1;
         }
-    }
-
-    fn trezor_find_unrevealed(
-        &self,
-        prefix: &str,
-        index: u32,
-    ) -> Result<(u32, String, Address), Box<dyn Error>>
-    {
-        self.hw_find_unrevealed("trezor", prefix, index)
-    }
-
-    fn ledger_find_unrevealed(
-        &self,
-        prefix: &str,
-        index: u32,
-    ) -> Result<(u32, String, Address), Box<dyn Error>>
-    {
-        self.hw_find_unrevealed("ledger", prefix, index)
     }
 
     /// Test transfer + reveal from hardware wallet.
@@ -391,6 +415,95 @@ impl TestAll {
         Ok(())
     }
 
+    /// Test delegate + reveal from hardware wallet.
+    fn test_hw_delegate_reveal(
+        &self,
+        device: &str,
+        key_path: &str,
+        to: &ImplicitAddress,
+    ) -> Result<(), Box<dyn Error>>
+    {
+        let device_flag = "--".to_string() + device;
+        let mut spinner = SpinnerBuilder::new()
+            .with_text(format!(
+                "testing {} from {} account",
+                style("delegate + reveal").yellow(),
+                style(device).bold(),
+            ))
+            .start();
+
+        let op_hash = spinner.fail_if(
+            self.hw_delegate(&device_flag, key_path, Some(to), None),
+        )?;
+        spinner.finish_succeed(format!(
+            "{} from {} account successful. Operation hash: {}",
+            style("delegate + reveal").green(),
+            style(device).bold(),
+            style(op_hash).cyan(),
+        ));
+
+        Ok(())
+    }
+
+    /// Test delegate without reveal from hardware wallet.
+    fn test_hw_delegate(
+        &self,
+        device: &str,
+        key_path: &str,
+        to: &ImplicitAddress,
+    ) -> Result<(), Box<dyn Error>>
+    {
+        let device_flag = "--".to_string() + device;
+        let mut spinner = SpinnerBuilder::new()
+            .with_text(format!(
+                "testing {} from {} account",
+                style("delegate w/o reveal").yellow(),
+                style(device).bold(),
+            ))
+            .start();
+
+        let op_hash = spinner.fail_if(
+            self.hw_delegate(&device_flag, key_path, Some(to), None),
+        )?;
+        spinner.finish_succeed(format!(
+            "{} from {} account successful. Operation hash: {}",
+            style("delegate w/o reveal").green(),
+            style(device).bold(),
+            style(op_hash).cyan(),
+        ));
+
+        Ok(())
+    }
+
+    /// Test delegate cancellation from hardware wallet.
+    fn test_hw_delegate_cancel(
+        &self,
+        device: &str,
+        key_path: &str,
+    ) -> Result<(), Box<dyn Error>>
+    {
+        let device_flag = "--".to_string() + device;
+        let mut spinner = SpinnerBuilder::new()
+            .with_text(format!(
+                "testing {} from {} account",
+                style("delegate cancellation").yellow(),
+                style(device).bold(),
+            ))
+            .start();
+
+        let op_hash = spinner.fail_if(
+            self.hw_delegate(&device_flag, key_path, None, None),
+        )?;
+        spinner.finish_succeed(format!(
+            "{} from {} account successful. Operation hash: {}",
+            style("delegate w/o reveal").green(),
+            style(device).bold(),
+            style(op_hash).cyan(),
+        ));
+
+        Ok(())
+    }
+
     pub fn test(self) -> Result<(), Box<dyn Error>> {
         let mut spinner = self.spinner_for_build().start();
         spinner.fail_if(self.build())?;
@@ -402,9 +515,9 @@ impl TestAll {
 
         let local_address: Address = public_key.hash().into();
         let (i, trezor_key_path, trezor_address)
-            = self.trezor_find_unrevealed(&key_path_prefix, 0)?;
+            = self.hw_find_unrevealed("trezor", &key_path_prefix, 0)?;
         let (_, ledger_key_path, ledger_address)
-            = self.ledger_find_unrevealed(&key_path_prefix, i)?;
+            = self.hw_find_unrevealed("ledger", &key_path_prefix, i)?;
 
         // Transfer to trezor account.
         let mut spinner = SpinnerBuilder::new()
@@ -437,19 +550,80 @@ impl TestAll {
             "funds transfered to ledger account. Operation hash: {}",
             style(op_hash).cyan(),
         ));
+        eprintln!();
 
         // test transfer + reveal
         self.test_hw_transfer_reveal("trezor", &trezor_key_path, &ledger_address)?;
         self.test_hw_transfer_reveal("ledger", &ledger_key_path, &trezor_address)?;
+        eprintln!();
 
         // test transfer with already revealed accounts
         self.test_hw_transfer("trezor", &trezor_key_path, &ledger_address)?;
         self.test_hw_transfer("ledger", &ledger_key_path, &trezor_address)?;
+        eprintln!();
+
+        let bakers = self.explorer().get_bakers()?;
+
+        let (i, trezor_key_path, trezor_address)
+            = self.hw_find_unrevealed("trezor", &key_path_prefix, 0)?;
+        let (_, ledger_key_path, ledger_address)
+            = self.hw_find_unrevealed("ledger", &key_path_prefix, i)?;
+
+        // Transfer to trezor account.
+        let mut spinner = SpinnerBuilder::new()
+            .with_text(format!(
+                "transfering funds to trezor account: {}",
+                style(trezor_address.to_base58check()).bold(),
+            ))
+            .start();
+
+        let op_hash = spinner.fail_if(
+            self.transfer_local(&local_address, &trezor_address, "2", None),
+        )?;
+        spinner.finish_succeed(format!(
+            "funds transfered to trezor account. Operation hash: {}",
+            style(op_hash).cyan(),
+        ));
+
+        // Transfer to ledger account.
+        let mut spinner = SpinnerBuilder::new()
+            .with_text(format!(
+                "transfering funds to ledger account: {}",
+                style(trezor_address.to_base58check()).bold(),
+            ))
+            .start();
+
+        let op_hash = spinner.fail_if(
+            self.transfer_local(&local_address, &ledger_address, "2", None),
+        )?;
+        spinner.finish_succeed(format!(
+            "funds transfered to ledger account. Operation hash: {}",
+            style(op_hash).cyan(),
+        ));
+        eprintln!();
+
+        // test delegate + reveal
+        self.test_hw_delegate_reveal("trezor", &trezor_key_path, &bakers[0].address)?;
+        self.test_hw_delegate_reveal("ledger", &ledger_key_path, &bakers[0].address)?;
+        eprintln!();
+
+        // test delegate
+        self.test_hw_delegate("trezor", &trezor_key_path, &bakers[1].address)?;
+        self.test_hw_delegate("ledger", &ledger_key_path, &bakers[1].address)?;
+        eprintln!();
+
+        // test cancel
+        self.test_hw_delegate_cancel("trezor", &trezor_key_path)?;
+        self.test_hw_delegate_cancel("ledger", &ledger_key_path)?;
+        eprintln!();
 
         Ok(())
     }
 }
 
 fn main() {
-    let _ = TestAll::from_args().test();
+    match TestAll::from_args().test() {
+        Ok(_) => {}
+        Err(_) => std::process::exit(1),
+    }
 }
