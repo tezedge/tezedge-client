@@ -58,7 +58,7 @@ impl NewDelegationOperationBuilder {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NewDelegationOperation {
     pub source: ImplicitAddress,
-    #[serde(rename = "delegate")]
+    #[serde(rename = "delegate", skip_serializing_if = "Option::is_none")]
     pub delegate_to: Option<ImplicitAddress>,
     #[serde(with = "utils::serde_amount")]
     pub fee: u64,
