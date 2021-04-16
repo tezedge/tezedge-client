@@ -496,7 +496,7 @@ impl TestAll {
         )?;
         spinner.finish_succeed(format!(
             "{} from {} account successful. Operation hash: {}",
-            style("delegate w/o reveal").green(),
+            style("delegate cancellation").green(),
             style(device).bold(),
             style(op_hash).cyan(),
         ));
