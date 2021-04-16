@@ -1,7 +1,14 @@
 use std::convert::TryFrom;
+use std::error::Error;
+use serde::{Serialize, Deserialize};
 
-use types::Network;
+use types::{Network, ImplicitAddress};
 use crate::UnsupportedNetworkError;
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Baker {
+    pub address: ImplicitAddress,
+}
 
 enum SupportedNetwork {
     Main(String),
@@ -64,5 +71,11 @@ impl TzStats {
 
     pub fn operation_link_prefix(&self) -> &'static str {
         self.endpoint_url()
+    }
+
+    pub fn get_bakers(&self) -> Result<Vec<Baker>, Box<dyn Error>> {
+        Ok(ureq::get(&format!("{}/explorer/bakers", self.api_endpoint_url()))
+            .call()?
+            .into_json()?)
     }
 }
