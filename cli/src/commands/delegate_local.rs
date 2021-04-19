@@ -153,7 +153,7 @@ impl DelegateLocal {
                     })
             })
             .transpose()?;
-        
+
         Ok(OperationCommand {
             options: OperationOptions {
                 no_prompt: self.no_prompt,

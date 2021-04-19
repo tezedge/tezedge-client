@@ -8,6 +8,10 @@ mod forge_operations;
 pub struct Forged(Vec<u8>);
 
 impl Forged {
+    pub fn new_unchecked(bytes: Vec<u8>) -> Self {
+        Self(bytes)
+    }
+
     pub fn take(self) -> Vec<u8> {
         self.0
     }

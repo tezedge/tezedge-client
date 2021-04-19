@@ -1,7 +1,8 @@
 use crate::{
     Address, ImplicitAddress, OriginatedAddress,
     NewOperationGroup, NewOperation, PublicKey,
-    NewDelegationOperation, NewRevealOperation, NewTransactionOperation,
+    NewOriginationOperation, NewOriginationScript,
+    NewDelegationOperation, NewTransactionOperation, NewRevealOperation,
 };
 use super::{Forge, ForgeNat, Forged};
 
@@ -141,12 +142,44 @@ impl Forge for NewDelegationOperation {
     }
 }
 
+impl Forge for NewOriginationScript {
+    fn forge(&self) -> Forged {
+        Forged([
+            self.code.forge().take()
+                // forge as an array
+                .forge().take(),
+            self.storage.forge().take()
+                // forge as an array
+                .forge().take(),
+        ].concat())
+    }
+}
+
+impl Forge for NewOriginationOperation {
+    fn forge(&self) -> Forged {
+        Forged([
+            OperationTag::Origination.forge_nat().take(),
+            self.source.forge().take(),
+            self.fee.forge_nat().take(),
+            self.counter.forge_nat().take(),
+            self.gas_limit.forge_nat().take(),
+            self.storage_limit.forge_nat().take(),
+            self.balance.forge_nat().take(),
+            // TODO: research what `delegate` field is for in origination type
+            // and replace this with forging delegate.
+            false.forge().take(),
+            self.script.forge().take(),
+        ].concat())
+    }
+}
+
 impl Forge for NewOperation {
     fn forge(&self) -> Forged {
         match self {
             NewOperation::Reveal(op) => op.forge(),
             NewOperation::Transaction(op) => op.forge(),
             NewOperation::Delegation(op) => op.forge(),
+            NewOperation::Origination(op) => op.forge(),
         }
     }
 }

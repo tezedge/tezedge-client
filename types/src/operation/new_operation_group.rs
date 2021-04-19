@@ -3,7 +3,13 @@ use serde::Serialize;
 use trezor_api::TezosSignTx;
 
 use crate::BlockHash;
-use super::{NewOperation, NewRevealOperation, NewTransactionOperation, NewDelegationOperation};
+use super::{
+    NewOperation,
+    NewRevealOperation,
+    NewTransactionOperation,
+    NewDelegationOperation,
+    NewOriginationOperation,
+};
 
 #[derive(Serialize, Debug, Clone)]
 pub struct NewOperationGroup {
@@ -12,6 +18,7 @@ pub struct NewOperationGroup {
     pub reveal: Option<NewRevealOperation>,
     pub transaction: Option<NewTransactionOperation>,
     pub delegation: Option<NewDelegationOperation>,
+    pub origination: Option<NewOriginationOperation>,
 }
 
 impl NewOperationGroup {
@@ -22,6 +29,7 @@ impl NewOperationGroup {
             reveal: None,
             transaction: None,
             delegation: None,
+            origination: None,
         }
     }
 
@@ -43,6 +51,12 @@ impl NewOperationGroup {
         self
     }
 
+    /// Set origination operation
+    pub fn with_origination(mut self, op: NewOriginationOperation) -> Self {
+        self.origination = Some(op);
+        self
+    }
+
     pub fn with_operation<T>(self, op: T) -> Self
         where T: Into<NewOperation>,
     {
@@ -50,6 +64,7 @@ impl NewOperationGroup {
             NewOperation::Reveal(op) => self.with_reveal(op),
             NewOperation::Transaction(op) => self.with_transaction(op),
             NewOperation::Delegation(op) => self.with_delegation(op),
+            NewOperation::Origination(op) => self.with_origination(op),
         }
     }
 
@@ -57,7 +72,8 @@ impl NewOperationGroup {
         let reveal = self.reveal.clone().map(|x| x.into());
         let transaction = self.transaction.clone().map(|x| x.into());
         let delegation = self.delegation.clone().map(|x| x.into());
-        vec![reveal, transaction, delegation]
+        let origination = self.origination.clone().map(|x| x.into());
+        vec![reveal, transaction, delegation, origination]
             .into_iter()
             .filter_map(|x| x)
             .collect()
@@ -83,6 +99,10 @@ impl Into<TezosSignTx> for NewOperationGroup {
 
         if let Some(op) = self.delegation {
             new_tx.set_delegation(op.into());
+        }
+
+        if let Some(op) = self.origination {
+            new_tx.set_origination(op.into());
         }
 
         new_tx

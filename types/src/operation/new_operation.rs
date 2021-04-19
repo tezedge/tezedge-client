@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 use utils::estimate_operation_fee;
-use super::{NewRevealOperation, NewTransactionOperation, NewDelegationOperation};
+use super::{NewRevealOperation, NewTransactionOperation, NewDelegationOperation, NewOriginationOperation};
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(untagged)]
@@ -9,6 +9,7 @@ pub enum NewOperation {
     Reveal(NewRevealOperation),
     Transaction(NewTransactionOperation),
     Delegation(NewDelegationOperation),
+    Origination(NewOriginationOperation),
 }
 
 impl NewOperation {
@@ -17,6 +18,7 @@ impl NewOperation {
             Self::Reveal(_) => "reveal",
             Self::Transaction(_) => "transaction",
             Self::Delegation(_) => "delegation",
+            Self::Origination(_) => "origination",
         }
     }
 
@@ -25,6 +27,7 @@ impl NewOperation {
             Self::Reveal(op) => op.fee,
             Self::Transaction(op) => op.fee,
             Self::Delegation(op) => op.fee,
+            Self::Origination(op) => op.fee,
         }
     }
 
@@ -33,6 +36,7 @@ impl NewOperation {
             Self::Reveal(op) => op.fee = fee,
             Self::Transaction(op) => op.fee = fee,
             Self::Delegation(op) => op.fee = fee,
+            Self::Origination(op) => op.fee = fee,
         }
     }
 
@@ -41,6 +45,7 @@ impl NewOperation {
             Self::Reveal(op) => op.estimate_bytes(),
             Self::Transaction(op) => op.estimate_bytes(),
             Self::Delegation(op) => op.estimate_bytes(),
+            Self::Origination(op) => op.estimate_bytes(),
         }
     }
 
@@ -76,6 +81,12 @@ impl From<NewTransactionOperation> for NewOperation {
 impl From<NewDelegationOperation> for NewOperation {
     fn from(op: NewDelegationOperation) -> Self {
         Self::Delegation(op)
+    }
+}
+
+impl From<NewOriginationOperation> for NewOperation {
+    fn from(op: NewOriginationOperation) -> Self {
+        Self::Origination(op)
     }
 }
 

@@ -3,6 +3,7 @@ use structopt::StructOpt;
 pub mod address;
 pub mod transfer;
 pub mod delegate;
+pub mod originate;
 
 // These two are temporary, before local store will be implemented.
 pub mod transfer_local;
@@ -17,6 +18,8 @@ pub enum Command {
     Delegate(delegate::Delegate),
     TransferLocal(transfer_local::TransferLocal),
     DelegateLocal(delegate_local::DelegateLocal),
+    #[structopt(setting(structopt::clap::AppSettings::Hidden))]
+    Originate(originate::Originate),
 }
 
 impl Command {
@@ -28,6 +31,7 @@ impl Command {
             Self::Delegate(cmd) => Some(cmd.endpoint.as_str()),
             Self::TransferLocal(cmd) => Some(cmd.endpoint.as_str()),
             Self::DelegateLocal(cmd) => Some(cmd.endpoint.as_str()),
+            Self::Originate(cmd) => Some(cmd.endpoint.as_str()),
         }
     }
 }
