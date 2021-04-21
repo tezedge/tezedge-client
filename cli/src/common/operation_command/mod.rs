@@ -116,12 +116,13 @@ impl OperationCommand {
         Ok(version)
     }
 
-    fn get_counter(&mut self) -> Result<u64, GetContractCounterError> {
-        let counter = self.state.counter
-            .map(|value| Ok(value))
-            .unwrap_or_else(|| {
-                self.api.get_contract_counter(&self.from)
-            })? + 1;
+    fn get_counter(&mut self) -> Result<u64, Error> {
+        let counter = if let Some(counter) = self.state.counter {
+            counter
+        } else {
+            let address = self.get_manager_address()?;
+            self.api.get_contract_counter(&address)?
+        } + 1;
 
         self.state.counter.replace(counter);
         Ok(counter)

@@ -1,6 +1,6 @@
 use std::fmt::{self, Display};
 
-use types::Address;
+use types::ImplicitAddress;
 use crypto::ToBase58Check;
 use crate::api::TransportError;
 
@@ -14,7 +14,7 @@ pub enum GetContractCounterErrorKind {
 
 #[derive(thiserror::Error, Debug)]
 pub struct GetContractCounterError {
-    pub address: Address,
+    pub address: ImplicitAddress,
     pub kind: GetContractCounterErrorKind,
 }
 
@@ -32,5 +32,5 @@ pub type GetContractCounterResult = Result<u64, GetContractCounterError>;
 
 pub trait GetContractCounter {
     /// Get counter for a contract.
-    fn get_contract_counter(&self, address: &Address) -> GetContractCounterResult;
+    fn get_contract_counter(&self, address: &ImplicitAddress) -> GetContractCounterResult;
 }

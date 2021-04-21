@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use types::Address;
+use types::ImplicitAddress;
 use crypto::ToBase58Check;
 use crate::api::{
     GetContractCounter, GetContractCounterResult,
@@ -8,7 +8,7 @@ use crate::api::{
 };
 use crate::http_api::HttpApi;
 
-fn get_contract_counter_url(base_url: &str, addr: &Address) -> String {
+fn get_contract_counter_url(base_url: &str, addr: &ImplicitAddress) -> String {
     format!(
         "{}/chains/main/blocks/head/context/contracts/{}/counter",
         base_url,
@@ -58,7 +58,7 @@ impl Into<u64> for ContractCounter {
 }
 
 #[inline]
-fn build_error<E>(address: &Address, kind: E) -> GetContractCounterError
+fn build_error<E>(address: &ImplicitAddress, kind: E) -> GetContractCounterError
     where E: Into<GetContractCounterErrorKind>,
 {
     GetContractCounterError {
@@ -69,7 +69,7 @@ fn build_error<E>(address: &Address, kind: E) -> GetContractCounterError
 
 // TODO: receiving NULL, probably because node isn't synced
 impl GetContractCounter for HttpApi {
-    fn get_contract_counter(&self, addr: &Address) -> GetContractCounterResult {
+    fn get_contract_counter(&self, addr: &ImplicitAddress) -> GetContractCounterResult {
         Ok(self.client.get(&get_contract_counter_url(&self.base_url, addr))
            .call()
            .map_err(|err| build_error(addr, err))?
@@ -78,4 +78,3 @@ impl GetContractCounter for HttpApi {
            .into())
     }
 }
-
