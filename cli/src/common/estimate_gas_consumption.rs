@@ -23,7 +23,7 @@ fn find_consumed_gas_for_kind(
     run_op_contents.iter()
         .find(|op| op.kind.as_str() == kind)
         // Add 100 for safety
-        .map(|op| op.consumed_gas + 100 + 10000)
+        .map(|op| op.consumed_gas + 100)
 }
 
 
