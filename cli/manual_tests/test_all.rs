@@ -1,4 +1,6 @@
+use std::thread;
 use std::fmt::{self, Display};
+use std::time::Duration;
 use std::process::{Command, Stdio};
 use std::error::Error;
 use std::sync::Mutex;
@@ -160,6 +162,62 @@ impl TestAll {
         }
     }
 
+    fn hw_originate_command(
+        &self,
+        device: &str,
+        key_path: &str,
+        balance: &str,
+        fee: &str,
+    ) -> Command {
+        let mut command = self.cli_command();
+        command
+            .arg("originate")
+            .arg("--no-prompt")
+            .arg("--endpoint").arg(&self.endpoint)
+            .arg(format!("--{}", device))
+            .arg("--key-path").arg(key_path)
+            .arg("--balance").arg(balance)
+            .arg("--fee").arg(fee);
+        command
+    }
+
+    fn hw_originate(
+        &self,
+        device: &str,
+        key_path: &str,
+        balance: &str,
+        fee: &str,
+    ) -> Result<Address, Box<dyn Error>> {
+        let mut command = self.hw_originate_command(device, key_path, balance, fee);
+        let command_str = format!("{:?}", &command);
+        let output = command.output()?;
+
+        if !output.status.success() {
+            return Err(CommandError {
+                command: command_str,
+                output: String::from_utf8_lossy(&output.stderr).to_string(),
+            }.into());
+        }
+
+        let op_hash = String::from_utf8_lossy(&output.stdout)
+            .trim()
+            .to_string();
+        let mut op_result = self.explorer().get_operation(&op_hash);
+        for _ in 0..10 {
+            match op_result {
+                Ok(op) => {
+                    let contract_address = op[0].receiver.clone();
+                    return Ok(contract_address);
+                }
+                _ => {}
+            }
+            thread::sleep(Duration::from_millis(1000));
+            op_result = self.explorer().get_operation(&op_hash);
+        }
+
+        Err(op_result.err().unwrap().into())  
+    }
+
     fn transfer_local_command(
         &self,
         from: &Address,
@@ -212,7 +270,8 @@ impl TestAll {
     fn hw_transfer_command(
         &self,
         device_flag: &str,
-        from: &str,
+        key_path: &str,
+        from: Option<&Address>,
         to: &Address,
         amount: &str,
         fee: Option<&str>,
@@ -224,9 +283,16 @@ impl TestAll {
             .arg("--no-prompt")
             .arg(device_flag)
             .arg("--endpoint").arg(&self.endpoint)
-            .arg("--from").arg(from)
             .arg("--to").arg(to.to_base58check())
             .arg("--amount").arg(amount);
+
+        if let Some(from) = from {
+            command
+                .arg("--from").arg(from.to_base58check())
+                .arg("--key-path").arg(key_path);
+        } else {
+            command.arg("--from").arg(key_path);
+        }
 
         if let Some(fee) = fee {
             command.arg("--fee").arg(fee);
@@ -238,14 +304,15 @@ impl TestAll {
     fn hw_transfer(
         &self,
         device_flag: &str,
-        from: &str,
+        key_path: &str,
+        from: Option<&Address>,
         to: &Address,
         amount: &str,
         fee: Option<&str>,
     ) -> Result<String, CommandError>
     {
         let mut command = self.hw_transfer_command(
-            device_flag, from, to, amount, fee.clone(),
+            device_flag, key_path, from, to, amount, fee.clone(),
         );
         let command_str = format!("{:?}", &command);
 
@@ -373,7 +440,7 @@ impl TestAll {
             .start();
 
         let op_hash = spinner.fail_if(
-            self.hw_transfer(&device_flag, key_path, to, "0.1", None),
+            self.hw_transfer(&device_flag, key_path, None, to, "0.1", None),
         )?;
         spinner.finish_succeed(format!(
             "{} from {} account successful. Operation hash: {}",
@@ -403,11 +470,42 @@ impl TestAll {
             .start();
 
         let op_hash = spinner.fail_if(
-            self.hw_transfer(&device_flag, key_path, to, "0.1", None),
+            self.hw_transfer(&device_flag, key_path, None, to, "0.1", None),
         )?;
         spinner.finish_succeed(format!(
             "{} from {} account successful. Operation hash: {}",
             style("transfer w/o reveal").green(),
+            style(device).bold(),
+            style(op_hash).cyan(),
+        ));
+
+        Ok(())
+    }
+
+    /// Test transfer from hardware wallet originated contract.
+    fn test_hw_originated_transfer(
+        &self,
+        device: &str,
+        key_path: &str,
+        from: &Address,
+        to: &Address,
+    ) -> Result<(), Box<dyn Error>>
+    {
+        let device_flag = "--".to_string() + device;
+        let mut spinner = SpinnerBuilder::new()
+            .with_text(format!(
+                "testing {} {} account",
+                style("transfer from originated").yellow(),
+                style(device).bold(),
+            ))
+            .start();
+
+        let op_hash = spinner.fail_if(
+            self.hw_transfer(&device_flag, key_path, Some(from), to, "0.1", None),
+        )?;
+        spinner.finish_succeed(format!(
+            "{} {} account successful. Operation hash: {}",
+            style("transfer from originated").green(),
             style(device).bold(),
             style(op_hash).cyan(),
         ));
@@ -512,12 +610,12 @@ impl TestAll {
         let key_path_prefix = "m/44'/1729'/0'".to_string();
         let public_key = PublicKey::from_base58check(&self.public_key)
             .map_err(|_| "invalid --public-key passed")?;
-
         let local_address: Address = public_key.hash().into();
-        let (i, trezor_key_path, trezor_address)
+
+        let (key_path_i, trezor_key_path, trezor_address)
             = self.hw_find_unrevealed("trezor", &key_path_prefix, 0)?;
         let (_, ledger_key_path, ledger_address)
-            = self.hw_find_unrevealed("ledger", &key_path_prefix, i)?;
+            = self.hw_find_unrevealed("ledger", &key_path_prefix, key_path_i)?;
 
         // Transfer to trezor account.
         let mut spinner = SpinnerBuilder::new()
@@ -565,7 +663,7 @@ impl TestAll {
         let bakers = self.explorer().get_bakers()?;
 
         let (i, trezor_key_path, trezor_address)
-            = self.hw_find_unrevealed("trezor", &key_path_prefix, 0)?;
+            = self.hw_find_unrevealed("trezor", &key_path_prefix, key_path_i)?;
         let (_, ledger_key_path, ledger_address)
             = self.hw_find_unrevealed("ledger", &key_path_prefix, i)?;
 
@@ -578,7 +676,7 @@ impl TestAll {
             .start();
 
         let op_hash = spinner.fail_if(
-            self.transfer_local(&local_address, &trezor_address, "2", None),
+            self.transfer_local(&local_address, &trezor_address, "5", None),
         )?;
         spinner.finish_succeed(format!(
             "funds transfered to trezor account. Operation hash: {}",
@@ -594,7 +692,7 @@ impl TestAll {
             .start();
 
         let op_hash = spinner.fail_if(
-            self.transfer_local(&local_address, &ledger_address, "2", None),
+            self.transfer_local(&local_address, &ledger_address, "5", None),
         )?;
         spinner.finish_succeed(format!(
             "funds transfered to ledger account. Operation hash: {}",
@@ -616,6 +714,39 @@ impl TestAll {
         self.test_hw_delegate_cancel("trezor", &trezor_key_path)?;
         self.test_hw_delegate_cancel("ledger", &ledger_key_path)?;
         eprintln!();
+
+        let trezor_contract_address = self.hw_originate("trezor", &trezor_key_path, "2", "0.1")?;
+        let ledger_contract_address = self.hw_originate("ledger", &ledger_key_path, "2", "0.1")?;
+
+        // test transfer from trezor originated address to implicit address
+        self.test_hw_originated_transfer(
+            "trezor",
+            &trezor_key_path,
+            &trezor_contract_address,
+            &ledger_address,
+        )?;
+        // test transfer from trezor originated address to originated address
+        self.test_hw_originated_transfer(
+            "trezor",
+            &trezor_key_path,
+            &trezor_contract_address,
+            &ledger_contract_address,
+        )?;
+
+        // test transfer from ledger originated address to implicit address
+        self.test_hw_originated_transfer(
+            "ledger",
+            &ledger_key_path,
+            &ledger_contract_address,
+            &trezor_address,
+        )?;
+        // test transfer from ledger originated address to originated address
+        self.test_hw_originated_transfer(
+            "trezor",
+            &ledger_key_path,
+            &ledger_contract_address,
+            &trezor_contract_address,
+        )?;
 
         Ok(())
     }
