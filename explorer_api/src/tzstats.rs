@@ -2,12 +2,18 @@ use std::convert::TryFrom;
 use std::error::Error;
 use serde::{Serialize, Deserialize};
 
-use types::{Network, ImplicitAddress};
+use types::{Network, Address, ImplicitAddress};
 use crate::UnsupportedNetworkError;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Baker {
     pub address: ImplicitAddress,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Operation {
+    pub sender: Address,
+    pub receiver: Address,
 }
 
 enum SupportedNetwork {
@@ -75,6 +81,12 @@ impl TzStats {
 
     pub fn get_bakers(&self) -> Result<Vec<Baker>, Box<dyn Error>> {
         Ok(ureq::get(&format!("{}/explorer/bakers", self.api_endpoint_url()))
+            .call()?
+            .into_json()?)
+    }
+
+    pub fn get_operation(&self, operation_hash: &str) -> Result<Vec<Operation>, Box<dyn Error>> {
+        Ok(ureq::get(&format!("{}/explorer/op/{}", self.api_endpoint_url(), operation_hash))
             .call()?
             .into_json()?)
     }
