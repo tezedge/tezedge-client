@@ -742,7 +742,7 @@ impl TestAll {
         )?;
         // test transfer from ledger originated address to originated address
         self.test_hw_originated_transfer(
-            "trezor",
+            "ledger",
             &ledger_key_path,
             &ledger_contract_address,
             &trezor_contract_address,
