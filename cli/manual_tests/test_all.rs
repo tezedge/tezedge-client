@@ -331,7 +331,8 @@ impl TestAll {
     fn hw_delegate_command(
         &self,
         device_flag: &str,
-        from: &str,
+        key_path: &str,
+        from: Option<&Address>,
         to: Option<&ImplicitAddress>,
         fee: Option<&str>,
     ) -> Command
@@ -341,8 +342,15 @@ impl TestAll {
             .arg("delegate")
             .arg("--no-prompt")
             .arg(device_flag)
-            .arg("--endpoint").arg(&self.endpoint)
-            .arg("--from").arg(from);
+            .arg("--endpoint").arg(&self.endpoint);
+
+        if let Some(from) = from {
+            command
+                .arg("--from").arg(from.to_base58check())
+                .arg("--key-path").arg(key_path);
+        } else {
+            command.arg("--from").arg(key_path);
+        }
 
         if let Some(to) = to {
             command.arg("--to").arg(to.to_base58check());
@@ -360,13 +368,14 @@ impl TestAll {
     fn hw_delegate(
         &self,
         device_flag: &str,
-        from: &str,
+        key_path: &str,
+        from: Option<&Address>,
         to: Option<&ImplicitAddress>,
         fee: Option<&str>,
     ) -> Result<String, CommandError>
     {
         let mut command = self.hw_delegate_command(
-            device_flag, from, to, fee.clone(),
+            device_flag, key_path, from, to, fee.clone(),
         );
         let command_str = format!("{:?}", &command);
 
@@ -531,7 +540,7 @@ impl TestAll {
             .start();
 
         let op_hash = spinner.fail_if(
-            self.hw_delegate(&device_flag, key_path, Some(to), None),
+            self.hw_delegate(&device_flag, key_path, None, Some(to), None),
         )?;
         spinner.finish_succeed(format!(
             "{} from {} account successful. Operation hash: {}",
@@ -561,7 +570,7 @@ impl TestAll {
             .start();
 
         let op_hash = spinner.fail_if(
-            self.hw_delegate(&device_flag, key_path, Some(to), None),
+            self.hw_delegate(&device_flag, key_path, None, Some(to), None),
         )?;
         spinner.finish_succeed(format!(
             "{} from {} account successful. Operation hash: {}",
@@ -590,11 +599,72 @@ impl TestAll {
             .start();
 
         let op_hash = spinner.fail_if(
-            self.hw_delegate(&device_flag, key_path, None, None),
+            self.hw_delegate(&device_flag, key_path, None, None, None),
         )?;
         spinner.finish_succeed(format!(
             "{} from {} account successful. Operation hash: {}",
             style("delegate cancellation").green(),
+            style(device).bold(),
+            style(op_hash).cyan(),
+        ));
+
+        Ok(())
+    }
+
+    /// Test delegation from hardware wallet originated contract.
+    fn test_hw_originated_delegate(
+        &self,
+        device: &str,
+        key_path: &str,
+        from: &Address,
+        to: &ImplicitAddress,
+    ) -> Result<(), Box<dyn Error>>
+    {
+        let device_flag = "--".to_string() + device;
+        let mut spinner = SpinnerBuilder::new()
+            .with_text(format!(
+                "testing {} {} account",
+                style("delegation from originated").yellow(),
+                style(device).bold(),
+            ))
+            .start();
+
+        let op_hash = spinner.fail_if(
+            self.hw_delegate(&device_flag, key_path, Some(from), Some(to), None),
+        )?;
+        spinner.finish_succeed(format!(
+            "{} {} account successful. Operation hash: {}",
+            style("delegation from originated").green(),
+            style(device).bold(),
+            style(op_hash).cyan(),
+        ));
+
+        Ok(())
+    }
+
+    /// Test delegation cancellation from hardware wallet originated contract.
+    fn test_hw_originated_delegate_cancel(
+        &self,
+        device: &str,
+        key_path: &str,
+        from: &Address,
+    ) -> Result<(), Box<dyn Error>>
+    {
+        let device_flag = "--".to_string() + device;
+        let mut spinner = SpinnerBuilder::new()
+            .with_text(format!(
+                "testing {} {} account",
+                style("delegate cancellation from originated").yellow(),
+                style(device).bold(),
+            ))
+            .start();
+
+        let op_hash = spinner.fail_if(
+            self.hw_delegate(&device_flag, key_path, Some(from), None, None),
+        )?;
+        spinner.finish_succeed(format!(
+            "{} {} account successful. Operation hash: {}",
+            style("delegate cancellation from originated").green(),
             style(device).bold(),
             style(op_hash).cyan(),
         ));
@@ -716,36 +786,75 @@ impl TestAll {
         eprintln!();
 
         let trezor_contract_address = self.hw_originate("trezor", &trezor_key_path, "2", "0.1")?;
-        let ledger_contract_address = self.hw_originate("ledger", &ledger_key_path, "2", "0.1")?;
+        eprintln!(
+            "originated {} contract: {}",
+            style("trezor").bold(),
+            style(trezor_contract_address.to_base58check()).bold(),
+        );
 
-        // test transfer from trezor originated address to implicit address
+        let ledger_contract_address = self.hw_originate("ledger", &ledger_key_path, "2", "0.1")?;
+        eprintln!(
+            "originated {} contract: {}",
+            style("ledger").bold(),
+            style(ledger_contract_address.to_base58check()).bold(),
+        );
+        eprintln!();
+
+        // test transfer from originated address to implicit address
         self.test_hw_originated_transfer(
             "trezor",
             &trezor_key_path,
             &trezor_contract_address,
             &ledger_address,
         )?;
-        // test transfer from trezor originated address to originated address
-        self.test_hw_originated_transfer(
-            "trezor",
-            &trezor_key_path,
-            &trezor_contract_address,
-            &ledger_contract_address,
-        )?;
-
-        // test transfer from ledger originated address to implicit address
         self.test_hw_originated_transfer(
             "ledger",
             &ledger_key_path,
             &ledger_contract_address,
             &trezor_address,
         )?;
-        // test transfer from ledger originated address to originated address
+        eprintln!();
+
+        // test transfer from originated address to originated address
+        self.test_hw_originated_transfer(
+            "trezor",
+            &trezor_key_path,
+            &trezor_contract_address,
+            &ledger_contract_address,
+        )?;
         self.test_hw_originated_transfer(
             "ledger",
             &ledger_key_path,
             &ledger_contract_address,
             &trezor_contract_address,
+        )?;
+        eprintln!();
+
+        // test delegation from originated address
+        self.test_hw_originated_delegate(
+            "trezor",
+            &trezor_key_path,
+            &trezor_contract_address,
+            &bakers[0].address,
+        )?;
+        self.test_hw_originated_delegate(
+            "ledger",
+            &ledger_key_path,
+            &ledger_contract_address,
+            &bakers[0].address,
+        )?;
+        eprintln!();
+
+        // test delegation cancellation from originated address
+        self.test_hw_originated_delegate_cancel(
+            "trezor",
+            &trezor_key_path,
+            &trezor_contract_address,
+        )?;
+        self.test_hw_originated_delegate_cancel(
+            "ledger",
+            &ledger_key_path,
+            &ledger_contract_address,
         )?;
 
         Ok(())
