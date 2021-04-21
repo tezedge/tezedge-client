@@ -17,7 +17,7 @@ impl<'a, T: 'a> ReconnectRequest<'a, T>
         if let Err(err) = self.ledger.reconnect(10) {
             return LedgerResponse::Err(err.into());
         }
-        
+
         // retry request after reconnection succeeds
         RetryRequest::new(self.ledger, self.data).into()
     }

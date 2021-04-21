@@ -215,7 +215,7 @@ impl TestAll {
             op_result = self.explorer().get_operation(&op_hash);
         }
 
-        Err(op_result.err().unwrap().into())  
+        Err(op_result.err().unwrap().into())
     }
 
     fn transfer_local_command(

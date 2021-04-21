@@ -164,7 +164,6 @@ impl Originate {
                 code: Forged::new_unchecked(hex::decode(MANAGER_CONTRACT_CODE).unwrap()),
                 storage: Micheline::String(address.to_base58check()),
             }
-
         }))
     }
 
