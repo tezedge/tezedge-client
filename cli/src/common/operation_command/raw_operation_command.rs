@@ -151,34 +151,39 @@ pub trait RawOperationCommand {
             None
         };
 
-        let from = if let Some(key_path) = key_path.filter(|_| from_is_key_path) {
+        if let Some(key_path) = key_path.clone() {
             if options.use_trezor {
-                let mut trezor = crate::trezor::find_device_and_connect();
-
-                let from_addr = crate::trezor::get_address(&mut trezor, key_path.clone());
+                let trezor = crate::trezor::find_device_and_connect();
                 trezor_state = Some(TrezorState { trezor, key_path });
-
-                from_addr.into()
             } else if options.use_ledger {
-                let mut ledger = crate::ledger::find_device_and_connect();
-
-                let from_addr = crate::ledger::ledger_execute(
-                    ledger.get_address(key_path.clone(), false),
-                );
+                let ledger = crate::ledger::find_device_and_connect();
                 ledger_state = Some(LedgerState { ledger, key_path });
-
-                from_addr.into()
             } else {
                 // key_path won't be set if neither `use_ledger` or `use_trezor` is set.
                 unreachable!()
             }
-        } else {
-            Address::from_base58check(self.get_raw_from())
-                .map_err(|err| ParseAddressError {
-                    kind: AddressKind::Source,
-                    error: err,
-                    address: self.get_raw_from().to_string(),
-                })?
+        }
+
+        let from = match (from_is_key_path, key_path) {
+            (false, _) | (_, None) => {
+                Address::from_base58check(self.get_raw_from())
+                    .map_err(|err| ParseAddressError {
+                        kind: AddressKind::Source,
+                        error: err,
+                        address: self.get_raw_from().to_string(),
+                    })?
+            }
+            (true, Some(key_path)) => {
+                if let Some(trezor_state) = trezor_state.as_mut() {
+                    crate::trezor::get_address(&mut trezor_state.trezor, key_path)
+                } else if let Some(ledger_state) = ledger_state.as_mut() {
+                    crate::ledger::ledger_execute(
+                        ledger_state.ledger.get_address(key_path, false),
+                    )
+                } else {
+                    unreachable!()
+                }.into()
+            }
         };
 
         let fee = if let Some(raw_fee) = self.get_raw_fee() {
