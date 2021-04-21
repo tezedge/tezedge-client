@@ -1,4 +1,4 @@
-use lib::NewOperationGroup;
+use lib::{NewOperationGroup, NewTransactionParameters, Address};
 use lib::api::{RunOperation, RunOperationError, RunOperationContents};
 
 #[derive(PartialEq, Debug, Clone)]
@@ -22,7 +22,8 @@ fn find_consumed_gas_for_kind(
 ) -> Option<u64> {
     run_op_contents.iter()
         .find(|op| op.kind.as_str() == kind)
-        .map(|op| op.consumed_gas)
+        // Add 100 for safety
+        .map(|op| op.consumed_gas + 100 + 10000)
 }
 
 
@@ -33,10 +34,28 @@ pub fn estimate_gas_consumption<A>(
     where A: RunOperation + ?Sized,
 {
     let op_results = api.run_operation(op)?;
+    // additional gas required when sending/delegating from Smart Contract (KT1).
+    let tx_additional_gas = op.transaction.as_ref()
+        .map(|op| {
+            use NewTransactionParameters::*;
+            match op.parameters.as_ref() {
+                Some(Transfer { to, .. }) => {
+                    match to {
+                        Address::Implicit(_) => 1427,
+                        Address::Originated(_) => 2863,
+                    }
+                }
+                Some(SetDelegate(_)) => 1000,
+                Some(CancelDelegate) => 1000,
+                None => 0,
+            }
+        })
+        .unwrap_or(0);
 
     Ok(OperationGroupGasConsumption {
         reveal: find_consumed_gas_for_kind("reveal", &op_results),
-        transaction: find_consumed_gas_for_kind("transaction", &op_results),
+        transaction: find_consumed_gas_for_kind("transaction", &op_results)
+            .map(|gas| gas + tx_additional_gas),
         delegation: find_consumed_gas_for_kind("delegation", &op_results),
     })
 }
