@@ -29,6 +29,13 @@ impl Address {
         }
     }
 
+    pub fn type_str(&self) -> &'static str {
+        match self {
+            Self::Implicit(_) => "implicit",
+            Self::Originated(_) => "originated",
+        }
+    }
+
     pub fn get_prefix(&self) -> Prefix {
         match self {
             Self::Implicit(addr) => addr.get_prefix(),

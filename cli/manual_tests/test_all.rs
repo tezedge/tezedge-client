@@ -503,9 +503,10 @@ impl TestAll {
         let device_flag = "--".to_string() + device;
         let mut spinner = SpinnerBuilder::new()
             .with_text(format!(
-                "testing {} {} account",
+                "testing {} {} account to {} account",
                 style("transfer from originated").yellow(),
                 style(device).bold(),
+                style(to.type_str()).bold(),
             ))
             .start();
 
@@ -513,9 +514,10 @@ impl TestAll {
             self.hw_transfer(&device_flag, key_path, Some(from), to, "0.1", None),
         )?;
         spinner.finish_succeed(format!(
-            "{} {} account successful. Operation hash: {}",
+            "{} {} account to {} account successful. Operation hash: {}",
             style("transfer from originated").green(),
             style(device).bold(),
+            style(to.type_str()).bold(),
             style(op_hash).cyan(),
         ));
 
