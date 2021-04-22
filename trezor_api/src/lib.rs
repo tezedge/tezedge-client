@@ -1,3 +1,53 @@
+//! Trezor Api
+//!
+//! To find available Trezor devices, use [find_devices].
+//!
+//! To connect to one of the available device, you need to call
+//! [AvailableDevice::connect] on it, Which will give you [Trezor]
+//! instance.
+//!
+//! After you have a [Trezor] instance, you need to initialize it with
+//! [Trezor::init_device] before you can interact with the device.
+//!
+//! # Example
+//! ```no_run
+//! # use trezor_api::find_devices;
+//!
+//! let mut devices = find_devices().unwrap();
+//!
+//! // take the first device out of devices.
+//! let device = devices.remove(0);
+//!
+//! let mut trezor = device.connect().unwrap();
+//! trezor.init_device().unwrap();
+//!
+//! // After this you can interact with Trezor device.
+//! ```
+//!
+//! On every call to Trezor, you will receive a [TrezorResponse]. As
+//! you will notice based on type, you will receive:
+//!
+//! - [TrezorResponse::Ok(data)] meaning that command was successful
+//!   and `data` will be whatever was requested from Trezor.
+//! - [TrezorResponse::Failure] meaning there was an error when executing
+//!   our command.
+//! - We also might receive some action request, like [TrezorResponse::ButtonRequest]
+//!   which basically tells us that the user needs to confirm the action
+//!   on the device and we need to wait for it.
+//!
+//!   Then we need to [ButtonRequest::ack] that request, which will trigger
+//!   Trezor to show a prompt on the device screen. `ack` method will block,
+//!   untill user interacts with the device.
+//!
+//!   As a response to the `ack`, we might receive another request,
+//!   failure or ok message.
+//!
+//!   With this architecture, we can first send a message to Trezor
+//!   and after receiving response, if we get action request, before doing `ack`
+//!   we can show the user on cli that he needs to confirm an action on the
+//!   device. So that user won't have to guess why the cli is frozen and
+//!   what it is waiting for.
+
 use std::fmt;
 
 pub mod protos;
@@ -25,8 +75,8 @@ pub const ENDPOINT: u8 = 1;
 pub const ENDPOINT_DEBUG: u8 = 2;
 pub const READ_ENDPOINT_MASK: u8 = 0x80;
 
-/// A device found by the `find_devices()` method.  It can be connected to using the `connect()`
-/// method.
+/// A  Trezor device found by the `find_devices()` method.  It can be
+/// connected to using the `connect()` method.
 #[derive(Debug)]
 pub struct AvailableDevice {
 	pub model: TrezorModel,
@@ -41,6 +91,9 @@ impl fmt::Display for AvailableDevice {
 }
 
 impl AvailableDevice {
+    /// Enable debug mode.
+    ///
+    /// Warning: it might cause Trezor client to not work.
     pub fn set_debug_mode(&mut self) {
         self.debug = true;
     }
@@ -82,6 +135,7 @@ impl fmt::Display for TrezorModel {
     }
 }
 
+/// Find Trezor devices.
 pub fn find_devices() -> Result<Vec<AvailableDevice>> {
     let mut devices = Vec::new();
     use transport::usb::UsbTransport;

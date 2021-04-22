@@ -31,8 +31,8 @@ pub enum InteractionType {
 }
 
 //TODO(stevenroose) should this be FnOnce and put in an FnBox?
-/// Function to be passed to the `Trezor.call` method to process the Trezor response message into a
-/// general-purpose type.
+/// Function to be passed to the `Trezor.call` method to process the
+/// Trezor response message into a general-purpose type.
 pub type ResultHandler<'a, T, R> = dyn Fn(&'a mut Trezor, R) -> Result<T>;
 
 /// A button request message sent by the device.
@@ -88,8 +88,10 @@ impl<'a, T, R: TrezorMessage> PinMatrixRequest<'a, T, R> {
 	}
 }
 
-/// A response from a Trezor device.  On every message exchange, instead of the expected/desired
-/// response, the Trezor can ask for some user interaction, or can send a failure.
+/// A response from a Trezor device.
+///
+/// On every message exchange, instead of the expected/desired response,
+/// the Trezor can ask for some user interaction, or can send a failure.
 #[derive(Debug)]
 pub enum TrezorResponse<'a, T, R: TrezorMessage> {
 	Ok(T),
@@ -195,19 +197,22 @@ impl Trezor {
 		self.features.as_ref()
 	}
 
-	/// Sends a message and returns the raw ProtoMessage struct that was responded by the device.
-	/// This method is only exported for users that want to expand the features of this library
-	/// f.e. for supporting additional coins etc.
+	/// Sends a message and returns the raw ProtoMessage struct that was
+    /// responded by the device.
+    ///
+	/// This method is only exported for users that want to expand the
+    /// features of this library f.e. for supporting additional coins etc.
 	pub fn call_raw<S: TrezorMessage>(&mut self, message: S) -> Result<ProtoMessage> {
 		let proto_msg = ProtoMessage(S::message_type(), message.write_to_bytes()?);
 		self.transport.write_message(proto_msg).map_err(|e| Error::TransportSendMessage(e))?;
 		self.transport.read_message().map_err(|e| Error::TransportReceiveMessage(e))
 	}
 
-	/// Sends a message and returns a TrezorResponse with either the expected response message,
-	/// a failure or an interaction request.
-	/// This method is only exported for users that want to expand the features of this library
-	/// f.e. for supporting additional coins etc.
+	/// Sends a message and returns a TrezorResponse with either the
+    /// expected response message, a failure or an interaction request.
+    ///
+	/// This method is only exported for users that want to expand the
+    /// features of this library f.e. for supporting additional coins etc.
 	pub fn call<'a, T, S: TrezorMessage, R: TrezorMessage>(
 		&'a mut self,
 		message: S,
@@ -230,18 +235,18 @@ impl Trezor {
 					let req_msg = resp.into_message()?;
 					// trace!("Received ButtonRequest: {:?}", req_msg);
 					Ok(TrezorResponse::ButtonRequest(ButtonRequest {
+                        result_handler,
 						message: req_msg,
 						client: self,
-						result_handler: result_handler,
 					}))
 				}
 				MessageType_PinMatrixRequest => {
 					let req_msg = resp.into_message()?;
 					// trace!("Received PinMatrixRequest: {:?}", req_msg);
 					Ok(TrezorResponse::PinMatrixRequest(PinMatrixRequest {
+                        result_handler,
 						message: req_msg,
 						client: self,
-						result_handler: result_handler,
 					}))
 				}
 				mtype => {
@@ -256,6 +261,9 @@ impl Trezor {
 		}
 	}
 
+    /// Initialize the device.
+    ///
+    /// Warning: Must be called before sending requests to Trezor.
 	pub fn init_device(&mut self) -> Result<()> {
 		let features = self.initialize()?.ok()?;
 		self.features = Some(features);
@@ -273,6 +281,10 @@ impl Trezor {
 		self.call(req, Box::new(|_, _| Ok(())))
 	}
 
+    /// Get address(public key hash) from Trezor.
+    ///
+    /// Derives keys from passed `path` (key derivation path), hashes
+    /// the public key and returns it.
     pub fn get_address(
         &mut self,
         path: Vec<u32>,
@@ -285,6 +297,10 @@ impl Trezor {
         }))
     }
 
+    /// Get public key from Trezor.
+    ///
+    /// Derives keys from passed `path` (key derivation path) and
+    /// returns public key.
     pub fn get_public_key(
         &mut self,
         path: Vec<u32>,
