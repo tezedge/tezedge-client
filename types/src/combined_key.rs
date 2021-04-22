@@ -15,7 +15,7 @@ impl CombinedKey {
     ///
     /// # Examples:
     /// ```rust
-    /// # use lib::{PublicKey, PrivateKey, CombinedKey};
+    /// # use types::{PublicKey, PrivateKey, CombinedKey};
     ///
     /// let pub_key = PublicKey::from_base58check("edpkvDFBqnw7WyvKjQMf1WcCnbeocqMwASys3Te4Z9gaznyfzuPFiU").unwrap();
     /// let priv_key = PrivateKey::from_base58check("edsk3NmghEMdi8CFKU3VwJKfzmGbPvBTVukhEXqe4XuXKRYbvx4mxo").unwrap();

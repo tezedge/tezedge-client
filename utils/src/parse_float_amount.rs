@@ -5,14 +5,14 @@ use rust_decimal::{Decimal, prelude::ToPrimitive};
 /// Convert string amount notation into number in milions
 ///
 /// # Examples:
-/// ```rust
-/// # use lib::utils::{parse_float_amount};
+/// ```
+/// # use utils::parse_float_amount;
 ///
-/// assert_eq!(parse_float_amount("1"), Ok("1000000".to_string()));
-/// assert_eq!(parse_float_amount("1.35"), Ok("1350000".to_string()));
-/// assert_eq!(parse_float_amount("1.05"), Ok("1050000".to_string()));
-/// assert_eq!(parse_float_amount(".13"), Ok("130000".to_string()));
-/// assert_eq!(parse_float_amount("0.000005"), Ok("5".to_string()));
+/// assert_eq!(parse_float_amount("1"), Ok(1000000));
+/// assert_eq!(parse_float_amount("1.35"), Ok(1350000));
+/// assert_eq!(parse_float_amount("1.05"), Ok(1050000));
+/// assert_eq!(parse_float_amount(".13"), Ok(130000));
+/// assert_eq!(parse_float_amount("0.000005"), Ok(5));
 /// assert_eq!(parse_float_amount("1.12.0"), Err(()));
 /// assert_eq!(parse_float_amount("1.1a2"), Err(()));
 /// ```

@@ -296,8 +296,12 @@ impl Ledger {
     ///
     /// To avoid extra call to the ledger if public key is needed too,
     /// one can simply do:
-    /// ```rust
-    /// let public_key = ledger.get_public_key(path, prompt).unwrap();
+    /// ```no_run
+    /// # use ledger_api::Ledger;
+    /// # let mut ledger = Ledger::connect().unwrap();
+    /// # let path = vec![];
+    /// # let prompt = false;
+    /// let public_key = ledger.get_public_key(path, prompt).ack_all().unwrap();
     /// let address = public_key.hash();
     /// ```
     ///
