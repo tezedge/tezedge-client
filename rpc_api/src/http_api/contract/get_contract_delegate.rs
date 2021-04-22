@@ -52,7 +52,6 @@ fn build_error<E>(address: &Address, kind: E) -> GetContractDelegateError
     }
 }
 
-// TODO: receiving NULL, probably because node isn't synced
 impl GetContractDelegate for HttpApi {
     fn get_contract_delegate(&self, addr: &Address) -> GetContractDelegateResult {
         Ok(self.client.get(&get_contract_delegate_url(&self.base_url, addr))

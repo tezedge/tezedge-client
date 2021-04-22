@@ -11,7 +11,6 @@ use crate::common::{parse_derivation_path, ParseDerivationPathError};
 use super::{LedgerState, TrezorState};
 
 pub fn ask_for_key_path() -> Result<String, std::io::Error> {
-    // TODO: add cli argument to specify key_path there.
     eprintln!(
         "{} in order to create operation using trezor, you need to manually enter the {}, from which the {} was derived.\n\n      For more about key derivation path see: {}\n",
         style("help:").yellow(),

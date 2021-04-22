@@ -67,7 +67,6 @@ fn build_error<E>(address: &ImplicitAddress, kind: E) -> GetContractCounterError
     }
 }
 
-// TODO: receiving NULL, probably because node isn't synced
 impl GetContractCounter for HttpApi {
     fn get_contract_counter(&self, addr: &ImplicitAddress) -> GetContractCounterResult {
         Ok(self.client.get(&get_contract_counter_url(&self.base_url, addr))

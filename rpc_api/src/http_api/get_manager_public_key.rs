@@ -53,7 +53,6 @@ fn build_error<E>(address: &Address, kind: E) -> GetManagerPublicKeyError
     }
 }
 
-// TODO: receiving NULL, probably because node isn't synced
 impl GetManagerPublicKey for HttpApi {
     fn get_manager_public_key(&self, addr: &Address) -> GetManagerPublicKeyResult {
         Ok(self.client.get(&get_manager_key_url(&self.base_url, addr))
