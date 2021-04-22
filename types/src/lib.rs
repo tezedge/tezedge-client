@@ -1,3 +1,5 @@
+//! Provides various common type definitions.
+
 mod from_prefixed_base58check_error;
 pub use from_prefixed_base58check_error::*;
 

@@ -10,6 +10,9 @@ pub struct CombinedKey(CombinedKeyInner);
 
 impl CombinedKey {
     /// Build `CombinedKey` from private and public key pair.
+    ///
+    /// Used for signing operations.
+    ///
     /// # Examples:
     /// ```rust
     /// # use lib::{PublicKey, PrivateKey, CombinedKey};

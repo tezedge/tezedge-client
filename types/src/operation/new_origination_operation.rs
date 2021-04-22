@@ -41,10 +41,14 @@ pub struct NewOriginationOperation {
 }
 
 impl NewOriginationOperation {
+    /// Estimate byte size of the operation.
+    ///
+    /// Forges the operation and counts bytes.
     pub fn estimate_bytes(&self) -> u64 {
         self.forge().take().len() as u64
     }
 
+    /// Estimate minimal fee.
     pub fn estimate_fee(
         &self,
         base_fee: u64,
@@ -63,6 +67,7 @@ impl NewOriginationOperation {
 }
 
 impl Into<TezosSignTx_TezosOriginationOp> for NewOriginationOperation {
+    /// Creates `TezosSignTx_TezosOriginationOp`, protobuf type for Trezor.
     fn into(self) -> TezosSignTx_TezosOriginationOp {
         let mut new_op = TezosSignTx_TezosOriginationOp::new();
 

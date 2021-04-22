@@ -9,6 +9,9 @@ use super::ADDRESS_LEN;
 
 type ImplicitAddressInner = [u8; ADDRESS_LEN];
 
+/// Implicit public key hash of the account.
+///
+/// Implicit are normal accounts (NOT smart contracts) prefixed with (tz1, tz2, tz3).
 #[allow(non_camel_case_types)]
 #[derive(PartialEq, Debug, Clone)]
 pub enum ImplicitAddress {

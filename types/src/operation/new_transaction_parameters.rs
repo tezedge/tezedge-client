@@ -8,12 +8,23 @@ use trezor_api::protos::{
     TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer,
 };
 
+/// Parameters for Smart Contract.
+///
+/// In order to interact with the Smart Contract, transaction must be
+/// created with the destination set to smart contract's address.
+///
+/// Note: Smart contract's address starts with **KT1**.
 #[derive(Deserialize, PartialEq, Debug, Clone)]
 pub enum NewTransactionParameters {
+    /// Set delegate of the smart contract.
     SetDelegate(ImplicitAddress),
+    /// Cancel/withdraw active delegation of the smart contract.
     CancelDelegate,
+    /// Transfer funds from smart contract to another address.
     Transfer {
+        /// Address to transfer funds to.
         to: Address,
+        /// Amount to transfer.
         amount: u64,
     },
 }
@@ -103,6 +114,7 @@ impl Serialize for NewTransactionParameters {
 }
 
 impl Into<TezosSignTx_TezosTransactionOp_TezosParametersManager> for NewTransactionParameters {
+    /// Creates `TezosSignTx_TezosTransactionOp_TezosParametersManager`, protobuf type for Trezor.
     fn into(self) -> TezosSignTx_TezosTransactionOp_TezosParametersManager {
         let mut params = TezosSignTx_TezosTransactionOp_TezosParametersManager::new();
 

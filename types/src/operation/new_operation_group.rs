@@ -11,6 +11,7 @@ use super::{
     NewOriginationOperation,
 };
 
+/// Group/Batch of Operations.
 #[derive(Serialize, Debug, Clone)]
 pub struct NewOperationGroup {
     pub branch: BlockHash,
@@ -81,7 +82,7 @@ impl NewOperationGroup {
 }
 
 impl Into<TezosSignTx> for NewOperationGroup {
-    /// Creates `TezosSignTx`
+    /// Creates `TezosSignTx`, protobuf type for Trezor.
     ///
     /// **Warning**: make sure to set `address_n` field after, since
     /// it's required and not added here.

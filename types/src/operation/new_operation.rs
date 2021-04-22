@@ -40,6 +40,9 @@ impl NewOperation {
         }
     }
 
+    /// Estimate byte size of the operation.
+    ///
+    /// Forges the operation and counts bytes.
     pub fn estimate_bytes(&self) -> u64 {
         match self {
             Self::Reveal(op) => op.estimate_bytes(),
@@ -49,6 +52,7 @@ impl NewOperation {
         }
     }
 
+    /// Estimate minimal fee.
     pub fn estimate_fee(
         &self,
         base_fee: u64,

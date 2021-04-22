@@ -9,6 +9,9 @@ use super::ADDRESS_LEN;
 
 type OriginatedAddressInner = [u8; ADDRESS_LEN];
 
+/// Originated public key hash of the account.
+///
+/// Originated are essentially smart contracts, which are prefixed with (KT1).
 #[derive(PartialEq, Debug, Clone)]
 pub struct OriginatedAddress(OriginatedAddressInner);
 

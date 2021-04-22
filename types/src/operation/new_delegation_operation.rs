@@ -19,6 +19,16 @@ pub struct NewDelegationOperationBuilder {
 }
 
 impl NewDelegationOperationBuilder {
+    /// Build Delegation Operation.
+    ///
+    /// - Will return [NewOperation::Delegation]: when delegating from
+    ///   an implicit account.
+    /// - Will return [NewOperation::Transaction]: when delegating from
+    ///   an originate account. So when delegating funds from smart contract.
+    ///
+    ///   Instead of delegation operation, it will create a transaction,
+    ///   which will call function inside given smart contract, which will
+    ///   activate delegation for that smart contract.
     pub fn build(self) -> NewOperation {
         use ImplicitOrOriginatedWithManager::*;
         match self.source {
@@ -71,10 +81,14 @@ pub struct NewDelegationOperation {
 }
 
 impl NewDelegationOperation {
+    /// Estimate byte size of the operation.
+    ///
+    /// Forges the operation and counts bytes.
     pub fn estimate_bytes(&self) -> u64 {
         self.forge().take().len() as u64
     }
 
+    /// Estimate minimal fee.
     pub fn estimate_fee(
         &self,
         base_fee: u64,
@@ -93,6 +107,7 @@ impl NewDelegationOperation {
 }
 
 impl Into<TezosSignTx_TezosDelegationOp> for NewDelegationOperation {
+    /// Creates `TezosSignTx_TezosDelegationOp`, protobuf type for Trezor.
     fn into(self) -> TezosSignTx_TezosDelegationOp {
         let mut new_op = TezosSignTx_TezosDelegationOp::new();
 

@@ -1,3 +1,6 @@
+//! Defines address(public key hash) types.
+
+/// Address size in bytes.
 pub const ADDRESS_LEN: usize = 20;
 
 mod address;
