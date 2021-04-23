@@ -1,3 +1,58 @@
+//! Ledger Api
+//!
+//! Warning: Currently doesn't support getting the list of available devices.
+//! It only supports connecting to the first available device, which
+//! is what [Ledger::connect] does.
+//!
+//! # Example
+//! ```no_run
+//! # use ledger_api::Ledger;
+//!
+//! // connect to the first available ledger device.
+//! let mut ledger = Ledger::connect().unwrap();
+//!
+//! // After this you can interact with Ledger device.
+//!
+//! // for example, get the address for key derivation path:
+//! let path = "m/44'/1729'/0'/0'".parse().unwrap();
+//! let address = ledger.get_address(&path, false).ack_all().unwrap();
+//! ```
+//!
+//! # Interacting with Ledger
+//!
+//! On every call to Ledger, you will receive a [LedgerResponse]. As
+//! you will notice based on type, you will receive:
+//!
+//! - [LedgerResponse::Ok(data)] meaning that command was successful
+//!   and `data` will be whatever was requested from Ledger.
+//! - [LedgerResponse::Err] meaning there was an error when executing
+//!   our command.
+//! - We also might receive some action request, like [LedgerResponse::RunAppRequest]
+//!   which basically tells us that the user needs to confirm opening
+//!   an application on the device and we need to wait for it.
+//!
+//!   Then we need to [RunAppRequest::ack] that request, which will trigger
+//!   Ledger to show a prompt on the device screen. `ack` method will block,
+//!   untill user interacts with the device.
+//!
+//!   As a response to the `ack`, we might receive another request,
+//!   error or ok message.
+//!
+//!   With this architecture, we can first send a message to Ledger
+//!   and after receiving response, if we get action request, before doing `ack`
+//!   we can show the user on cli that he needs to confirm an action on the
+//!   device. So that user won't have to guess why the cli is frozen and
+//!   what it is waiting for.
+//!
+//!   **Note:** we don't actually receive requests from `Ledger` like we
+//!   do with `Trezor`. Instead we interpret various error messages
+//!   as a request to do some action.
+//!
+//!   For example if we receive error code that CLA is not supported,
+//!   that means that **Tezos application** is not open, hence we can
+//!   generate a request to run an application on the device.
+//!
+
 use std::convert::TryInto;
 use std::time::Duration;
 

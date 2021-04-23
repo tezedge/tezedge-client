@@ -1,6 +1,7 @@
 use ledger_apdu::map_apdu_error_description;
 use ledger::LedgerHIDError;
 
+/// Ledger Error
 #[derive(thiserror::Error, Debug)]
 #[error(transparent)]
 pub enum LedgerError {
@@ -15,6 +16,10 @@ pub enum LedgerError {
 }
 
 impl LedgerError {
+    /// Whether Ledger needs to be reconnected to.
+    ///
+    /// When opening an application on the device, Ledger disconnects
+    /// and needs to be reconnected.
     pub fn needs_reconnect(&self) -> bool {
         let transport_err = match self {
             Self::Transport(err) => err,
