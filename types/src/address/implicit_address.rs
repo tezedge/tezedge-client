@@ -1,10 +1,9 @@
 use std::convert::TryInto;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use trezor_api::protos::{TezosSignTx_TezosContractID, TezosSignTx_TezosContractID_TezosContractType};
 
 use crypto::{Prefix, WithPrefix, WithoutPrefix};
 use crypto::base58check::{FromBase58Check, ToBase58Check};
-use crate::{Forge, FromPrefixedBase58CheckError};
+use crate::FromPrefixedBase58CheckError;
 use super::ADDRESS_LEN;
 
 type ImplicitAddressInner = [u8; ADDRESS_LEN];
@@ -82,15 +81,5 @@ impl<'de> Deserialize<'de> for ImplicitAddress {
             .map_err(|err| {
                 serde::de::Error::custom(err)
             })
-    }
-}
-
-impl Into<TezosSignTx_TezosContractID> for ImplicitAddress {
-    fn into(self) -> TezosSignTx_TezosContractID {
-        let mut contract_id = TezosSignTx_TezosContractID::new();
-        contract_id.set_hash(self.forge().take());
-        contract_id.set_tag(TezosSignTx_TezosContractID_TezosContractType::Implicit);
-
-        contract_id
     }
 }

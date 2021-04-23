@@ -4,7 +4,7 @@ use std::time::Duration;
 use ledger_apdu::{APDUCommand, APDUAnswer, APDUErrorCodes};
 use ledger::{TransportNativeHID, LedgerHIDError};
 
-use types::{PUBLIC_KEY_LEN, Forged, PublicKey, ImplicitAddress};
+use types::{PUBLIC_KEY_LEN, Forged, KeyDerivationPath, PublicKey, ImplicitAddress};
 use crypto::{hex, blake2b, ToBase58Check, WithPrefix, Prefix};
 use signer::OperationSignatureInfo;
 
@@ -37,8 +37,8 @@ pub struct Ledger {
 }
 
 impl Ledger {
-    fn encode_path(path: &Vec<u32>) -> Vec<u8> {
-        path.iter()
+    fn encode_path(path: &KeyDerivationPath) -> Vec<u8> {
+        path.as_ref().iter()
             .flat_map(|x| x.to_be_bytes().to_vec())
             .collect()
     }
@@ -166,7 +166,7 @@ impl Ledger {
 
     fn public_key_request<'a>(
         &'a mut self,
-        path: Vec<u32>,
+        path: &KeyDerivationPath,
         prompt: bool,
     ) -> LedgerRequest<'a, PublicKey>
     {
@@ -202,7 +202,7 @@ impl Ledger {
 
     fn sign_tx_request<'a>(
         &'a mut self,
-        path: Vec<u32>,
+        path: &KeyDerivationPath,
         // TODO: replace with ForgedOperation or Forged<NewOperationGroup>.
         forged_operation: Forged,
     ) -> LedgerRequest<'a, OperationSignatureInfo>
@@ -299,9 +299,10 @@ impl Ledger {
     /// ```no_run
     /// # use ledger_api::Ledger;
     /// # let mut ledger = Ledger::connect().unwrap();
-    /// # let path = vec![];
-    /// # let prompt = false;
-    /// let public_key = ledger.get_public_key(path, prompt).ack_all().unwrap();
+    /// let public_key = ledger.get_public_key(
+    ///     &"m/44'/1729'/0'/0'".parse().unwrap(),
+    ///     false,
+    /// ).ack_all().unwrap();
     /// let address = public_key.hash();
     /// ```
     ///
@@ -311,7 +312,7 @@ impl Ledger {
     /// then verifying it by asking the user if address is same as shown in Ledger.
     pub fn get_address<'a>(
         &'a mut self,
-        path: Vec<u32>,
+        path: &KeyDerivationPath,
         prompt: bool,
     ) -> LedgerResponse<'a, ImplicitAddress>
     {
@@ -326,7 +327,7 @@ impl Ledger {
     /// he/she wants to share public key for a given address to us.
     pub fn get_public_key<'a>(
         &'a mut self,
-        path: Vec<u32>,
+        path: &KeyDerivationPath,
         prompt: bool,
     ) -> LedgerResponse<'a, PublicKey>
     {
@@ -335,7 +336,7 @@ impl Ledger {
 
     pub fn sign_tx<'a>(
         &'a mut self,
-        path: Vec<u32>,
+        path: &KeyDerivationPath,
         // TODO: replace with ForgedOperation or Forged<NewOperationGroup>.
         forged_operation: Forged,
     ) -> LedgerResponse<'a, OperationSignatureInfo>

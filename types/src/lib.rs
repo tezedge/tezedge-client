@@ -12,6 +12,9 @@ pub use block_hash::*;
 mod address;
 pub use address::*;
 
+mod key_derivation_path;
+pub use key_derivation_path::*;
+
 mod public_key;
 pub use public_key::*;
 

@@ -5,7 +5,7 @@ use cli_spinner::SpinnerBuilder;
 use structopt::StructOpt;
 use console::style;
 
-use lib::{ToBase58Check, Forge, Forged, MANAGER_CONTRACT_CODE};
+use lib::{ToBase58Check, Forge, Forged, KeyDerivationPath, MANAGER_CONTRACT_CODE};
 use lib::utils::parse_float_amount;
 use lib::{ImplicitAddress, NewOperationGroup, NewOriginationOperation, NewOriginationScript};
 use lib::micheline::Micheline;
@@ -16,7 +16,6 @@ use lib::trezor_api::{Trezor, TezosSignTx};
 use lib::ledger_api::Ledger;
 use lib::crypto::hex;
 
-use crate::common::parse_derivation_path;
 use crate::trezor::trezor_execute;
 use crate::ledger::ledger_execute;
 use crate::common::operation_command::*;
@@ -87,8 +86,8 @@ impl Originate {
         HttpApi::new(self.endpoint.clone())
     }
 
-    fn key_path(&self) -> Result<Vec<u32>, CommandError> {
-        Ok(parse_derivation_path(&self.key_path)?)
+    fn key_path(&self) -> Result<KeyDerivationPath, CommandError> {
+        Ok(self.key_path.parse()?)
     }
 
     fn balance(&self) -> Result<u64, CommandError> {
@@ -129,11 +128,11 @@ impl Originate {
             let address = if self.use_trezor {
                 crate::trezor::get_address(
                     self.trezor(),
-                    key_path,
+                    &key_path,
                 )
             } else if self.use_ledger {
                 ledger_execute(
-                    self.ledger().get_address(key_path, false),
+                    self.ledger().get_address(&key_path, false),
                 )
             } else {
                 unreachable!()
@@ -171,13 +170,13 @@ impl Originate {
         let key_path = self.key_path()?;
         Ok(if self.use_trezor {
             let mut tx: TezosSignTx = op_group.clone().into();
-            tx.set_address_n(key_path);
+            tx.set_address_n(key_path.take());
             OperationSignatureInfo::from(
                 trezor_execute(self.trezor().sign_tx(tx))
             )
         } else {
             ledger_execute(
-                self.ledger().sign_tx(key_path, op_group.forge())
+                self.ledger().sign_tx(&key_path, op_group.forge())
             )
         })
     }

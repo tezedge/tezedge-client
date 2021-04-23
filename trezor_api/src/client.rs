@@ -1,5 +1,7 @@
 use std::fmt;
 
+use types::KeyDerivationPath;
+
 use crate::transport::{ProtoMessage, Transport};
 use crate::messages::TrezorMessage;
 use super::{protos, TrezorModel, Error, Result};
@@ -287,10 +289,10 @@ impl Trezor {
     /// the public key and returns it.
     pub fn get_address(
         &mut self,
-        path: Vec<u32>,
+        path: &KeyDerivationPath,
     ) -> Result<TrezorResponse<String, TezosAddress>> {
         let mut req = protos::TezosGetAddress::new();
-        req.set_address_n(path);
+        req.set_address_n(path.as_ref().to_vec());
 
         self.call(req, Box::new(|_, m| {
             Ok(m.get_address().to_string())
@@ -303,10 +305,10 @@ impl Trezor {
     /// returns public key.
     pub fn get_public_key(
         &mut self,
-        path: Vec<u32>,
+        path: &KeyDerivationPath,
     ) -> Result<TrezorResponse<String, TezosPublicKey>> {
         let mut req = protos::TezosGetPublicKey::new();
-        req.set_address_n(path);
+        req.set_address_n(path.as_ref().to_vec());
 
         self.call(req, Box::new(|_, m| {
 			Ok(m.get_public_key().to_string())

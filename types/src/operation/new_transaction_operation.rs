@@ -1,5 +1,4 @@
 use serde::{Serialize, Deserialize};
-use trezor_api::protos::TezosSignTx_TezosTransactionOp;
 
 use crate::{
     Forge, NewTransactionParameters, Address, ImplicitAddress,
@@ -94,29 +93,5 @@ impl NewTransactionOperation {
             estimated_gas,
             self.estimate_bytes(),
         )
-    }
-}
-
-impl Into<TezosSignTx_TezosTransactionOp> for NewTransactionOperation {
-    /// Creates `TezosSignTx_TezosTransactionOp`, protobuf type for Trezor.
-    fn into(self) -> TezosSignTx_TezosTransactionOp {
-        let mut new_tx = TezosSignTx_TezosTransactionOp::new();
-
-        new_tx.set_source(self.source.forge().take());
-        new_tx.set_destination(self.destination.into());
-        new_tx.set_counter(self.counter);
-        new_tx.set_fee(self.fee);
-        new_tx.set_amount(self.amount);
-        new_tx.set_gas_limit(self.gas_limit);
-        new_tx.set_storage_limit(self.storage_limit);
-
-        match self.parameters {
-            Some(parameters) => {
-                new_tx.set_parameters_manager(parameters.into());
-            }
-            None => {}
-        };
-
-        new_tx
     }
 }

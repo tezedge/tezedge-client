@@ -1,5 +1,4 @@
 use serde::Serialize;
-use trezor_api::protos::TezosSignTx_TezosRevealOp;
 
 use crate::{Forge, PublicKey, ImplicitAddress};
 use utils::estimate_operation_fee;
@@ -41,21 +40,5 @@ impl NewRevealOperation {
             estimated_gas,
             self.estimate_bytes(),
         )
-    }
-}
-
-impl Into<TezosSignTx_TezosRevealOp> for NewRevealOperation {
-    /// Creates `TezosSignTx_TezosRevealOp`, protobuf type for Trezor.
-    fn into(self) -> TezosSignTx_TezosRevealOp {
-        let mut new_op = TezosSignTx_TezosRevealOp::new();
-
-        new_op.set_source(self.source.forge().take());
-        new_op.set_public_key(self.public_key.forge().take());
-        new_op.set_counter(self.counter);
-        new_op.set_fee(self.fee);
-        new_op.set_gas_limit(self.gas_limit);
-        new_op.set_storage_limit(self.storage_limit);
-
-        new_op
     }
 }

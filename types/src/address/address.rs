@@ -1,5 +1,4 @@
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use trezor_api::protos::TezosSignTx_TezosContractID;
 
 use crypto::{Prefix, WithPrefix};
 use crypto::base58check::{FromBase58Check, ToBase58Check};
@@ -114,14 +113,5 @@ impl From<ImplicitAddress> for Address {
 impl From<OriginatedAddress> for Address {
     fn from(addr: OriginatedAddress) -> Self {
         Self::Originated(addr)
-    }
-}
-
-impl Into<TezosSignTx_TezosContractID> for Address {
-    fn into(self) -> TezosSignTx_TezosContractID {
-        match self {
-            Self::Implicit(addr) => addr.into(),
-            Self::Originated(addr) => addr.into(),
-        }
     }
 }

@@ -1,10 +1,9 @@
 use std::convert::TryInto;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use trezor_api::protos::{TezosSignTx_TezosContractID, TezosSignTx_TezosContractID_TezosContractType};
 
 use crypto::{Prefix, WithPrefix, WithoutPrefix};
 use crypto::base58check::{FromBase58Check, ToBase58Check};
-use crate::{Forge, ImplicitAddress, FromPrefixedBase58CheckError};
+use crate::{ImplicitAddress, FromPrefixedBase58CheckError};
 use super::ADDRESS_LEN;
 
 type OriginatedAddressInner = [u8; ADDRESS_LEN];
@@ -73,16 +72,6 @@ impl<'de> Deserialize<'de> for OriginatedAddress {
     }
 }
 
-impl Into<TezosSignTx_TezosContractID> for OriginatedAddress {
-    fn into(self) -> TezosSignTx_TezosContractID {
-        let mut contract_id = TezosSignTx_TezosContractID::new();
-        contract_id.set_hash(self.forge().take());
-        contract_id.set_tag(TezosSignTx_TezosContractID_TezosContractType::Originated);
-
-        contract_id
-    }
-}
-
 impl From<OriginatedAddressWithManager> for OriginatedAddress {
     fn from(s: OriginatedAddressWithManager) -> Self {
         s.address
@@ -104,11 +93,5 @@ impl AsRef<OriginatedAddress> for OriginatedAddressWithManager {
 impl AsRef<[u8]> for OriginatedAddressWithManager {
     fn as_ref(&self) -> &[u8] {
         self.address.as_ref()
-    }
-}
-
-impl Into<TezosSignTx_TezosContractID> for OriginatedAddressWithManager {
-    fn into(self) -> TezosSignTx_TezosContractID {
-        self.address.into()
     }
 }

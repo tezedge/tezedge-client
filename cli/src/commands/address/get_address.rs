@@ -2,9 +2,8 @@ use std::fmt::{self, Display};
 use structopt::StructOpt;
 use console::style;
 
-use lib::ToBase58Check;
+use lib::{ToBase58Check, KeyDerivationPath};
 
-use crate::common::parse_derivation_path;
 use crate::commands::CommandError;
 
 /// Get address
@@ -44,18 +43,18 @@ impl Display for NoSourceSpecifiedError {
 
 impl GetAddress {
     pub fn execute(self) -> Result<(), CommandError> {
-        let path = parse_derivation_path(&self.path)?;
+        let path: KeyDerivationPath = self.path.parse()?;
 
         let address = if self.trezor {
             crate::trezor::get_address(
                 &mut crate::trezor::find_device_and_connect(),
-                path,
+                &path,
             ).to_base58check()
         } else if self.ledger {
             let mut ledger = crate::ledger::find_device_and_connect();
 
             crate::ledger::ledger_execute(
-                ledger.get_address(path, false)
+                ledger.get_address(&path, false)
             )
                 .to_base58check()
         } else {

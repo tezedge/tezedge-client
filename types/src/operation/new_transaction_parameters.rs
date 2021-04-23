@@ -3,10 +3,6 @@ use serde_json::json;
 use sodiumoxide::hex;
 
 use crate::{Forge, Address, ImplicitAddress};
-use trezor_api::protos::{
-    TezosSignTx_TezosTransactionOp_TezosParametersManager,
-    TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer,
-};
 
 /// Parameters for Smart Contract.
 ///
@@ -110,29 +106,5 @@ impl Serialize for NewTransactionParameters {
                 Self::Transfer { to, amount } => transfer_json(to, *amount),
             },
         }).serialize(s)
-    }
-}
-
-impl Into<TezosSignTx_TezosTransactionOp_TezosParametersManager> for NewTransactionParameters {
-    /// Creates `TezosSignTx_TezosTransactionOp_TezosParametersManager`, protobuf type for Trezor.
-    fn into(self) -> TezosSignTx_TezosTransactionOp_TezosParametersManager {
-        let mut params = TezosSignTx_TezosTransactionOp_TezosParametersManager::new();
-
-        match self {
-            Self::SetDelegate(addr) => {
-                params.set_set_delegate(addr.forge().take());
-            }
-            Self::CancelDelegate => {
-                params.set_cancel_delegate(true);
-            }
-            Self::Transfer { to, amount } => {
-                let mut transfer = TezosSignTx_TezosTransactionOp_TezosParametersManager_TezosManagerTransfer::new();
-                transfer.set_destination(to.into());
-                transfer.set_amount(amount);
-
-                params.set_transfer(transfer);
-            }
-        }
-        params
     }
 }

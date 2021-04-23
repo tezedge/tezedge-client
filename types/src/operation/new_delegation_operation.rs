@@ -1,5 +1,4 @@
 use serde::{Serialize, Deserialize};
-use trezor_api::protos::TezosSignTx_TezosDelegationOp;
 
 use utils::estimate_operation_fee;
 use crate::{Forge, ImplicitAddress, ImplicitOrOriginatedWithManager, OriginatedAddressWithManager};
@@ -103,24 +102,5 @@ impl NewDelegationOperation {
             estimated_gas,
             self.estimate_bytes(),
         )
-    }
-}
-
-impl Into<TezosSignTx_TezosDelegationOp> for NewDelegationOperation {
-    /// Creates `TezosSignTx_TezosDelegationOp`, protobuf type for Trezor.
-    fn into(self) -> TezosSignTx_TezosDelegationOp {
-        let mut new_op = TezosSignTx_TezosDelegationOp::new();
-
-        if let Some(delegate_to) = self.delegate_to {
-            new_op.set_delegate(delegate_to.forge().take());
-        }
-
-        new_op.set_source(self.source.forge().take());
-        new_op.set_counter(self.counter);
-        new_op.set_fee(self.fee);
-        new_op.set_gas_limit(self.gas_limit);
-        new_op.set_storage_limit(self.storage_limit);
-
-        new_op
     }
 }

@@ -6,7 +6,7 @@ use lib::{
     Forge, Address, ImplicitAddress, ImplicitOrOriginatedWithManager,
     NewOperationGroup, NewOperation, NewTransactionOperation, NewRevealOperation,
     NewTransactionOperationBuilder, NewDelegationOperationBuilder,
-    PrivateKey, PublicKey,
+    KeyDerivationPath, PrivateKey, PublicKey,
 };
 
 use lib::signer::{LocalSigner, OperationSignatureInfo};
@@ -61,12 +61,12 @@ impl Default for OperationCommandState {
 
 pub struct TrezorState {
     pub trezor: Trezor,
-    pub key_path: Vec<u32>,
+    pub key_path: KeyDerivationPath,
 }
 
 pub struct LedgerState {
     pub ledger: Ledger,
-    pub key_path: Vec<u32>,
+    pub key_path: KeyDerivationPath,
 }
 
 pub struct LocalWalletState {
@@ -160,12 +160,12 @@ impl OperationCommand {
         let public_key = if let Some(trezor_state) = self.trezor_state.as_mut() {
             PublicKey::from_base58check(
                 &trezor_execute(
-                    trezor_state.trezor.get_public_key(trezor_state.key_path.clone())
+                    trezor_state.trezor.get_public_key(&trezor_state.key_path)
                 ),
             )?
         } else if let Some(ledger_state) = self.ledger_state.as_mut() {
             ledger_execute(
-                ledger_state.ledger.get_public_key(ledger_state.key_path.clone(), false)
+                ledger_state.ledger.get_public_key(&ledger_state.key_path, false)
             )
         } else if let Some(local_state) = self.local_state.as_ref() {
             local_state.public_key.clone()
@@ -410,7 +410,7 @@ impl OperationCommand {
                 "forging and signing operation using Trezor",
             );
             let mut tx: TezosSignTx = operation_group.clone().into();
-            tx.set_address_n(trezor_state.key_path.clone());
+            tx.set_address_n(trezor_state.key_path.clone().take());
             let sig_info = OperationSignatureInfo::from(
                 trezor_execute(trezor_state.trezor.sign_tx(tx))
             );
@@ -435,7 +435,7 @@ impl OperationCommand {
 
             let sig_info = ledger_execute(
                 ledger_state.ledger.sign_tx(
-                    ledger_state.key_path.clone(),
+                    &ledger_state.key_path,
                     operation_group.forge(),
                 )
             );

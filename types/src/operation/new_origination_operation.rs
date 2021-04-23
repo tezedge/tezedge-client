@@ -1,5 +1,4 @@
 use serde::{Serialize, Serializer};
-use trezor_api::protos::TezosSignTx_TezosOriginationOp;
 
 use crate::{Forge, Forged, ImplicitAddress};
 use crate::micheline::Micheline;
@@ -63,22 +62,5 @@ impl NewOriginationOperation {
             estimated_gas,
             self.estimate_bytes(),
         )
-    }
-}
-
-impl Into<TezosSignTx_TezosOriginationOp> for NewOriginationOperation {
-    /// Creates `TezosSignTx_TezosOriginationOp`, protobuf type for Trezor.
-    fn into(self) -> TezosSignTx_TezosOriginationOp {
-        let mut new_op = TezosSignTx_TezosOriginationOp::new();
-
-        new_op.set_source(self.source.forge().take());
-        new_op.set_counter(self.counter);
-        new_op.set_fee(self.fee);
-        new_op.set_balance(self.balance);
-        new_op.set_gas_limit(self.gas_limit);
-        new_op.set_storage_limit(self.storage_limit);
-        new_op.set_script(self.script.forge().take());
-
-        new_op
     }
 }

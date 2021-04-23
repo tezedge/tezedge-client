@@ -2,11 +2,10 @@ use std::fmt::{self, Display};
 use console::style;
 use dialoguer::theme::ColorfulTheme;
 
-use lib::Address;
+use lib::{Address, ParseDerivationPathError};
 use lib::http_api::HttpApi;
 use lib::utils::parse_float_amount;
 use crate::common::operation_command::{OperationCommand, OperationOptions, OperationCommandState};
-use crate::common::{parse_derivation_path, ParseDerivationPathError};
 
 use super::{LedgerState, TrezorState};
 
@@ -145,7 +144,7 @@ pub trait RawOperationCommand {
                 ask_for_key_path()?
             };
 
-            Some(parse_derivation_path(&raw_key_path)?)
+            Some(raw_key_path.parse()?)
         } else {
             None
         };
@@ -174,10 +173,10 @@ pub trait RawOperationCommand {
             }
             (true, Some(key_path)) => {
                 if let Some(trezor_state) = trezor_state.as_mut() {
-                    crate::trezor::get_address(&mut trezor_state.trezor, key_path)
+                    crate::trezor::get_address(&mut trezor_state.trezor, &key_path)
                 } else if let Some(ledger_state) = ledger_state.as_mut() {
                     crate::ledger::ledger_execute(
-                        ledger_state.ledger.get_address(key_path, false),
+                        ledger_state.ledger.get_address(&key_path, false),
                     )
                 } else {
                     unreachable!()

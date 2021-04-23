@@ -10,7 +10,4 @@ pub use estimate_gas_consumption::*;
 mod estimate_operation_fees;
 pub use estimate_operation_fees::*;
 
-mod parsers;
-pub use parsers::*;
-
 pub mod operation_command;

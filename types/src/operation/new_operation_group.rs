@@ -1,7 +1,5 @@
 use serde::Serialize;
 
-use trezor_api::TezosSignTx;
-
 use crate::BlockHash;
 use super::{
     NewOperation,
@@ -78,34 +76,5 @@ impl NewOperationGroup {
             .into_iter()
             .filter_map(|x| x)
             .collect()
-    }
-}
-
-impl Into<TezosSignTx> for NewOperationGroup {
-    /// Creates `TezosSignTx`, protobuf type for Trezor.
-    ///
-    /// **Warning**: make sure to set `address_n` field after, since
-    /// it's required and not added here.
-    fn into(self) -> TezosSignTx {
-        let mut new_tx = TezosSignTx::new();
-        new_tx.set_branch(self.branch.as_ref().to_vec());
-
-        if let Some(op) = self.reveal {
-            new_tx.set_reveal(op.into());
-        }
-
-        if let Some(op) = self.transaction {
-            new_tx.set_transaction(op.into());
-        }
-
-        if let Some(op) = self.delegation {
-            new_tx.set_delegation(op.into());
-        }
-
-        if let Some(op) = self.origination {
-            new_tx.set_origination(op.into());
-        }
-
-        new_tx
     }
 }

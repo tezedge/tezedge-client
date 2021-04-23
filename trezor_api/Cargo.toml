@@ -8,6 +8,7 @@ edition = "2018"
 protoc-rust = "2.22.0"
 
 [dependencies]
+types = { path = "../types" }
 protobuf = "2.22.0"
 rusb = "0.7.0"
 byteorder = "1.4.2"

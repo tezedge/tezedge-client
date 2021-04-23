@@ -1,13 +1,13 @@
 use console::style;
 
-use lib::ImplicitAddress;
+use lib::{ImplicitAddress, KeyDerivationPath};
 use lib::trezor_api::Trezor;
 
 use crate::common::exit_with_error;
 use super::trezor_execute;
 
-pub fn get_address(trezor: &mut Trezor, path: Vec<u32>) -> ImplicitAddress {
-    let address = trezor_execute(trezor.get_address(path.clone()));
+pub fn get_address(trezor: &mut Trezor, path: &KeyDerivationPath) -> ImplicitAddress {
+    let address = trezor_execute(trezor.get_address(path));
     match ImplicitAddress::from_base58check(&address) {
         Ok(addr) => addr,
         Err(_) => {
