@@ -3,15 +3,17 @@ use lib::trezor_api::messages::TrezorMessage;
 use cli_spinner::wait_for_action_spinner;
 use crate::common::exit_with_error;
 
-// TODO: at the moment if before calling "ack" or before response comes for "ack",
-// process crashes or is terminated for some reason, Trezor seems to get stuck.
-// Explore the issue and fix it or at least print useful error message.
 /// Execute Trezor command and drive it to completion.
 ///
 /// Handles action requests and returns successful result `T` at the end,
 /// if no error occurred. Otherwise [crate::common::exit_with_error] will
 /// be called, which will print an error to `stderr` and will exit the process
 /// with code 1: `process.exit(1)`.
+///
+/// Warning: At the moment if before calling `ack` or before response comes for `ack`,
+///          process crashes or is terminated for some reason, Trezor seems to get stuck.
+// TODO: Explore the issue and fix it or at least print useful error message, when
+//       the case detailed in the 'Warning', happens.
 pub fn trezor_execute<T, R>(mut response: Result<TrezorResponse<T, R>>) -> T
     where R: TrezorMessage,
 {
