@@ -220,26 +220,19 @@ impl Ledger {
 
         LedgerRequest::new(self, initial_command)
             .map(move |ledger, _| {
-                let mut op = forged_operation.as_ref().to_vec();
-                op.insert(0, 0x03);
-
-                let chunks = (0..)
-                    .step_by(230)
-                    .take_while(|i| *i < op.len())
-                    .map(|start_i| {
-                        let end_i = (start_i + 230).min(op.len());
-                        &op[start_i..end_i]
-                    })
-                    .enumerate()
+                let encoded_op = [0x03].iter()
+                    .chain(forged_operation.as_ref())
+                    .map(|x| *x)
                     .collect::<Vec<_>>();
 
+                let chunks = encoded_op.chunks(230).collect::<Vec<_>>();
 
                 // TODO: change error type. This can only happen if
                 // forged_operation is an empty array.
                 let mut result = Err(LedgerError::InvalidDataLength);
 
-                for (index, chunk) in chunks.iter() {
-                    let code = if *index == chunks.len() - 1 {
+                for (index, chunk) in chunks.iter().enumerate() {
+                    let code = if index == chunks.len() - 1 {
                         0x81
                     } else {
                         0x01
