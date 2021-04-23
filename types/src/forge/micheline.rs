@@ -21,9 +21,9 @@ fn forge_micheline_uint(mut num: u64) -> Forged {
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum Micheline {
-    // TODO: technically this `Int` can be boundless integer (bigint).
-    // Also it can be negative, but for now only unsigned u64 is used,
-    // so forging bigger numbers or negative ones aren't implemented.
+    /// technically this `Int` can be boundless integer (bigint).
+    /// Also it can be negative, but for now only unsigned u64 is used,
+    /// so forging bigger numbers or negative ones aren't implemented.
     Int(u64),
     Bytes(Vec<u8>),
     String(String),
