@@ -102,7 +102,7 @@ pub enum ParseOperationCommandError {
     InvalidFee(#[from] InvalidFeeError),
 
     #[error("interactivity is turned off, but `--key-path` wasn't passed in.")]
-    MissingKeyPath
+    MissingKeyPath,
 }
 
 pub struct RawOptions {
@@ -156,9 +156,6 @@ pub trait RawOperationCommand {
             } else if options.use_ledger {
                 let ledger = crate::ledger::find_device_and_connect();
                 ledger_state = Some(LedgerState { ledger, key_path });
-            } else {
-                // key_path won't be set if neither `use_ledger` or `use_trezor` is set.
-                unreachable!()
             }
         }
 
@@ -179,6 +176,7 @@ pub trait RawOperationCommand {
                         ledger_state.ledger.get_address(&key_path, false),
                     )
                 } else {
+                    // key_path won't be set if neither `use_ledger` or `use_trezor` is set.
                     unreachable!()
                 }.into()
             }
