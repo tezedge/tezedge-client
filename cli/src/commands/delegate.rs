@@ -7,7 +7,9 @@ use crate::commands::CommandError;
 use crate::common::exit_with_error;
 use crate::common::operation_command::*;
 
-/// Delegate balance to baker
+/// Delegate balance to baker.
+///
+/// Outputs transaction hash to stdout in case of success.
 #[derive(StructOpt)]
 pub struct Delegate {
     /// Verbose mode (-v, -vv, -vvv, etc.)
@@ -18,24 +20,36 @@ pub struct Delegate {
     #[structopt(short = "y", long = "no-prompt")]
     pub no_prompt: bool,
 
+    /// Node's rpc endpoint.
+    ///
+    /// Sample Testnet nodes:
+    /// - https://api.tez.ie/rpc/edonet
+    /// - https://rpctest.tzbeta.net
+    /// - https://testnet-tezos.giganode.io
     #[structopt(short = "E", long)]
     pub endpoint: String,
 
+    /// Use Trezor device.
     #[structopt(long = "trezor")]
     pub use_trezor: bool,
 
+    /// Use Ledger device.
     #[structopt(long = "ledger")]
     pub use_ledger: bool,
 
-    /// Required only if `--from` argument is an originated
-    /// (starts with KT1) address.
+    /// Key Derivation Path.
+    ///
+    /// Required only when transferring/delegating from scriptless
+    /// smart contract (when --from address starts with KT1).
+    ///
+    /// Otherwise pass key derivation path to --from argument instead!
     #[structopt(long = "key-path")]
     pub key_path: Option<String>,
 
     /// Address to delegate tezos from.
     ///
-    /// When delegating from originated (KT1) address, this needs to be
-    /// that KT1 address.
+    /// When delegating from scriptless smart contract (KT1) address,
+    /// this needs to be that KT1 address.
     ///
     /// Otherwise use key derivation path, like: "m/44'/1729'/0'/0'"
     #[structopt(short, long)]
@@ -51,7 +65,7 @@ pub struct Delegate {
     #[structopt(long)]
     pub cancel: bool,
 
-    /// Specify fee for the delegation.
+    /// Fee for the delegation.
     ///
     /// If not specified, fee will be estimated and you will be prompted
     /// whether or not you accept estimate or would like to enter custom one.

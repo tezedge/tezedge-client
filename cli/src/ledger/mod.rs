@@ -1,3 +1,5 @@
+//! Ledger helpers.
+
 mod execute;
 pub use execute::*;
 

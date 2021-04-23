@@ -1,3 +1,17 @@
+//! Tezedge-Client Cli
+//!
+//! There is no global arguments for the cli like: **--endpoint**.
+//! Instead each command defines those 'global' arguments for them to use.
+//! This approach is used to:
+//!   - Make commands code more portable.
+//!   - Some commands don't need all of the global arguments.
+//!   - With global args it's harder to move args around (you have
+//!     to write them before command).
+//!
+//! Warning: in this crate functions aren't guaranteed to not end the
+//!          process and just exit. Some functions just print an error
+//!          to the terminal and end the process with error code 1.
+
 use std::error::Error;
 use structopt::StructOpt;
 use console::style;

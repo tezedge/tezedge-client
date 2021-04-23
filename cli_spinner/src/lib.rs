@@ -4,6 +4,10 @@ use std::time::Duration;
 use std::sync::mpsc;
 use console::{Term, style};
 
+/// Indicator that we are waiting for user's action.
+///
+/// For example it is shown when we are waiting for user to confirm
+/// an action on the hardware wallet.
 pub fn wait_for_action_spinner() -> SpinnerBuilder {
     SpinnerBuilder::new()
         .with_spinner_chars(vec![
@@ -41,6 +45,7 @@ type SpinnerSender = mpsc::SyncSender<SpinnerMsg>;
 type SpinnerReceiver = mpsc::Receiver<SpinnerMsg>;
 type SpinnerChannel = (SpinnerSender, SpinnerReceiver);
 
+/// Cli Spinner Builder
 #[derive(Clone)]
 pub struct SpinnerBuilder {
     spinner_chars: Vec<String>,
@@ -195,6 +200,7 @@ impl Spinner {
         }
     }
 
+    /// Finish with Success without consuming self.
     fn success<S>(&mut self, message: S)
         where S: ToString,
     {
@@ -204,6 +210,7 @@ impl Spinner {
         }
     }
 
+    /// Finish with Failure without consuming self.
     fn fail<S>(&mut self, message: S)
         where S: ToString,
     {
@@ -213,12 +220,14 @@ impl Spinner {
         }
     }
 
+    /// Finish the spinner with success and show the `message`.
     pub fn finish_succeed<S>(mut self, message: S)
         where S: ToString,
     {
         self.success(message);
     }
 
+    /// Finish the spinner with failure and show the error `message`.
     #[inline]
     pub fn finish_fail<S>(mut self, message: S)
         where S: ToString,
@@ -228,6 +237,9 @@ impl Spinner {
 
     /// If `result` is an [Err], stop the spinner and print the error
     /// as a failure message.
+    ///
+    /// Doesn't work with `?Sized` Error types like: `Result<T, Box<dyn Error>>`.
+    // TODO: if possible make it work with Result<T, Box<dyn Error>>.
     #[inline]
     pub fn fail_if<T, E>(&mut self, result: Result<T, E>) -> Result<T, E>
         where E: Error,

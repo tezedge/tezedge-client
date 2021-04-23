@@ -1,3 +1,5 @@
+//! Defines various emojies as constants.
+
 use console::Emoji;
 
 pub static TICK: Emoji<'_, '_> = Emoji("✔️  ", "");

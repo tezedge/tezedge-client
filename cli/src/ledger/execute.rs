@@ -4,6 +4,12 @@ use lib::ledger_api::LedgerResponse;
 use cli_spinner::{wait_for_action_spinner, SpinnerBuilder};
 use crate::common::exit_with_error;
 
+/// Execute Ledger command and drive it to completion.
+///
+/// Handles action requests and returns successful result `T` at the end,
+/// if no error occurred. Otherwise [crate::common::exit_with_error] will
+/// be called, which will print an error to `stderr` and will exit the process
+/// with code 1: `process.exit(1)`.
 pub fn ledger_execute<'a, T>(mut response: LedgerResponse<'a, T>) -> T
     where T: 'static,
 {
