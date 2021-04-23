@@ -22,7 +22,12 @@
 //! trezor.init_device().unwrap();
 //!
 //! // After this you can interact with Trezor device.
+//! let address = trezor.get_address(
+//!     &"m/44'/1729'/0'/0'".parse().unwrap(),
+//! ).unwrap().ack_all().unwrap();
 //! ```
+//!
+//! # Interacting with Trezor
 //!
 //! On every call to Trezor, you will receive a [TrezorResponse]. As
 //! you will notice based on type, you will receive:

@@ -151,6 +151,24 @@ impl<'a, T, R: TrezorMessage> TrezorResponse<'a, T, R> {
 			}
 		}
 	}
+
+	/// Ack all requests and return final `Result`.
+	///
+	/// Will error if it receives requests, which require input
+	/// like: `PinMatrixRequest`.
+	pub fn ack_all(self) -> Result<T> {
+        let mut resp = self;
+        loop {
+            resp = match resp {
+                Self::Ok(val) => { return Ok(val); }
+                Self::Failure(err) => { return Err(Error::FailureResponse(err)); }
+                Self::ButtonRequest(req) => req.ack()?,
+                Self::PinMatrixRequest(_) => {
+					return Err(Error::UnexpectedInteractionRequest(InteractionType::PinMatrix));
+				}
+            };
+        }
+    }
 }
 
 /// When resetting the device, it will ask for entropy to aid key generation.
