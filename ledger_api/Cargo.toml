@@ -9,6 +9,6 @@ types = { path = "../types" }
 crypto = { path = "../crypto" }
 signer = { path = "../signer" }
 hidapi = { version = "1.2.5", default-features = false, features = ["linux-static-hidraw"] }
-ledger-apdu = { git = "https://github.com/simplestaking/ledger-rs.git", tag = "v0.1.2" }
-ledger-transport-hid = { git = "https://github.com/simplestaking/ledger-rs.git", tag = "v0.1.2" }
+ledger-apdu = { git = "https://github.com/tezedge/ledger-rs.git", tag = "v0.1.2" }
+ledger-transport-hid = { git = "https://github.com/tezedge/ledger-rs.git", tag = "v0.1.2" }
 thiserror = "1.0.24"
