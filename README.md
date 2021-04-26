@@ -131,7 +131,7 @@ trusted to ensure security.
 Gas is estimated by simulating operationusing [run_operation](https://tezos.gitlab.io/008/rpc.html#post-block-id-helpers-scripts-run-operation)
 endpoint in the node. **100** gas is added for safety to the estimation.
 
-For operations from [scriptless(KT1) accounts](#scriptless-kt1-account),
+For operations from [scriptless(KT1) accounts](#scriptlesskt1-account),
 additional consant gas is required, hence added. [You can see that here](cli/src/common/estimate_gas_consumption.rs).
 
 For estimating a fee, along with estimating gas, operation size in bytes
