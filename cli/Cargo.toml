@@ -5,6 +5,10 @@ authors = ["Zura Benashvili <zura.benashvili@gmail.com>"]
 edition = "2018"
 
 [[bin]]
+name = "tezedge-client"
+path = "src/main.rs"
+
+[[bin]]
 name = "test_all"
 path = "manual_tests/test_all.rs"
 
