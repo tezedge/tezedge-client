@@ -104,6 +104,19 @@ impl SpinnerBuilder {
         let thread_handle = thread::spawn(move || {
             let mut has_printed = false;
             for sp_char in spinner_chars.iter().cycle() {
+                // current full text to display.
+                let cur_text = format!(
+                    "{} {}   {}",
+                    prefix,
+                    sp_char,
+                    spinner_text,
+                );
+                // disable line wrapping if not on windows.
+                // When line is longer than terminal window, the
+                // spinner won't work.
+                #[cfg(not(target_os = "windows"))]
+                let cur_text = format!("\x1B[?7l{}\x1B[?7h", cur_text);
+
                 loop {
                     match rx.try_recv() {
                         Ok(spinner_msg) => {
@@ -154,12 +167,7 @@ impl SpinnerBuilder {
                 if has_printed {
                     let _ = t.clear_last_lines(1);
                 }
-                let _ = t.write_line(&format!(
-                    "{} {}   {}",
-                    prefix,
-                    sp_char,
-                    spinner_text,
-                ));
+                let _ = t.write_line(&cur_text);
                 has_printed = true;
                 thread::sleep(interval);
             }
