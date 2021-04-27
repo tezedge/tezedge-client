@@ -38,16 +38,20 @@ Sample node endpoints:
 
 ## Get Address From Hardware Wallet
 
-<p align="center"><img src="/docs/trezor_get_address.gif?raw=true"/></p>
-
 To get address (public key hash) for a given [key derivation path](https://learnmeabitcoin.com/technical/derivation-paths) run this command:
 
 - **Trezor:**
+
+  ![](/docs/get_address_trezor.gif?raw=true)
+
   ```bash
   tezedge-client address get --trezor --path "m/44'/1729'/0'/0'"
   ```
 
 - **Ledger:**
+
+  ![](/docs/get_address_ledger.gif?raw=true)
+
   ```bash
   tezedge-client address get --ledger --path "m/44'/1729'/0'/0'"
   ```
