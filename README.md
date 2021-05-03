@@ -58,14 +58,18 @@ To get address (public key hash) for a given [key derivation path](https://learn
 
 ## Create a Transaction
 
-<p align="center"><img src="/docs/create_transaction.gif?raw=true"/></p>
-
 - **Trezor:**
+
+  ![](/docs/transfer_trezor.gif?raw=true)
+
   ```bash
   tezedge-client transfer -E https://rpctest.tzbeta.net --trezor --from "m/44'/1729'/0'/0'" --to tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU --amount 0.5 --fee 0.01
   ```
 
 - **Ledger:**
+
+  ![](/docs/transfer_ledger.gif?raw=true)
+
   ```bash
   tezedge-client transfer -E https://rpctest.tzbeta.net --ledger --from "m/44'/1729'/0'/0'" --to tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU --amount 0.5 --fee 0.01
   ```
