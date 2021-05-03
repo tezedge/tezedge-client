@@ -418,7 +418,7 @@ impl OperationCommand {
             Term::stderr().clear_last_lines(1)?;
             eprintln!(
                 "{} {} {}",
-                style("[2/4]").bold().green(),
+                style("[2/4]").bold().dim().green(),
                 emojies::TICK,
                 "operation forged and signed",
             );
@@ -443,7 +443,7 @@ impl OperationCommand {
             Term::stderr().clear_last_lines(4)?;
             eprintln!(
                 "{} {} {}",
-                style("[2/4]").bold().green(),
+                style("[2/4]").bold().dim().green(),
                 emojies::TICK,
                 "operation signed",
             );
