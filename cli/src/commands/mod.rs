@@ -26,12 +26,12 @@ impl Command {
     /// Get node endpoint.
     pub fn get_endpoint(&self) -> Option<&str> {
         match self {
-            Self::Address(_) => None,
-            Self::Transfer(cmd) => Some(cmd.endpoint.as_str()),
-            Self::Delegate(cmd) => Some(cmd.endpoint.as_str()),
-            Self::UnsafeTransferLocal(cmd) => Some(cmd.endpoint.as_str()),
-            Self::UnsafeDelegateLocal(cmd) => Some(cmd.endpoint.as_str()),
-            Self::Originate(cmd) => Some(cmd.endpoint.as_str()),
+            Self::Address(cmd) => cmd.get_endpoint(),
+            Self::Transfer(cmd) => cmd.get_endpoint(),
+            Self::Delegate(cmd) => cmd.get_endpoint(),
+            Self::UnsafeTransferLocal(cmd) => cmd.get_endpoint(),
+            Self::UnsafeDelegateLocal(cmd) => cmd.get_endpoint(),
+            Self::Originate(cmd) => cmd.get_endpoint(),
         }
     }
 }
