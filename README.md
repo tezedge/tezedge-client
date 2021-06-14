@@ -5,15 +5,83 @@ CLI client/wallet for Tezos.
 
 ## Getting Started
 
+1. [Install Prerequisites](#install-prerequisites)
 1. [Build the package](#build-the-package)
 1. Choose desired [node endpoint](#node-endpoint).
 1. Proceed with using tezedge-client.
 
 **Important**: Please make sure to read the [potential issues section](#potential-issues)!
 
+## Install Prerequisites
+
+1. Install Git (client)
+
+    ```bash
+    sudo apt install git
+    ```
+
+1. Install Rust (We recommend installing Rust through rustup.)
+
+    ```bash
+    sudo apt install curl
+    # Run the following in your terminal, then follow the onscreen instructions.
+    curl https://sh.rustup.rs -sSf | sh
+    ```
+
+1. Install Rust toolchain
+
+    ```bash
+    rustup toolchain install 1.52.1
+    ```
+
+1. Install **required OS libs**
+    - Clang for linking:
+
+      ```bash
+      sudo apt install clang
+      ```
+    - Sodiumoxide package:
+
+      ```bash
+      sudo apt install pkg-config libsodium-dev
+      ```
+    - Other requirements:
+
+      ```bash
+      sudo apt install libhidapi-dev libudev-dev
+      ```
+
 ## Build The Package
 
-You can build the package simply by running: `cargo build --release`.
+1. **Download Tezedge Client source code**
+    ```bash
+    git clone https://github.com/tezedge/tezedge-client
+    cd tezedge-client
+    ```
+1. **Set desired Rust toolchain version for tezedge-client**
+
+    ```bash
+    rustup override set 1.52.1
+    ```
+1. **Build**
+
+    In order to build the package, you first need to set an environment variable
+    (otherwise it won't compile):
+    ```bash
+    export SODIUM_USE_PKG_CONFIG=1
+    ```
+
+    Then you can execute a build command:
+    ```bash
+    cargo build --release
+    ```
+
+    **Or** you can instead set it each time when calling `cargo build`:
+    ```bash
+    SODIUM_USE_PKG_CONFIG=1 cargo build --release
+    ```
+
+<br>
 
 Cli binary can be located at: `./target/release/tezedge-client`.
 
