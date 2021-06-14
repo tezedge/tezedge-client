@@ -1,7 +1,7 @@
 use std::convert::TryInto;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use crypto::{Prefix, WithPrefix, WithoutPrefix};
+use crypto::{Prefix, WithPrefix, WithoutPrefix, NotMatchingPrefixError};
 use crypto::base58check::{FromBase58Check, ToBase58Check};
 use crate::FromPrefixedBase58CheckError;
 use super::ADDRESS_LEN;
@@ -20,10 +20,22 @@ pub enum ImplicitAddress {
 }
 
 impl ImplicitAddress {
+    fn try_without_prefix(
+        bytes: &[u8],
+        prefix: Prefix,
+    ) -> Result<(Prefix, Vec<u8>), NotMatchingPrefixError>
+    {
+        bytes
+            .without_prefix(prefix)
+            .map(|bytes| (prefix, bytes))
+    }
+
     pub fn from_base58check(encoded: &str) -> Result<Self, FromPrefixedBase58CheckError> {
-        let (prefix, bytes_vec) = encoded
-            .from_base58check()?
-            .without_any_prefix()?;
+        let bytes = encoded.from_base58check()?;
+
+        let (prefix, bytes_vec) = Self::try_without_prefix(&bytes, Prefix::tz1)
+            .or_else(|_| Self::try_without_prefix(&bytes, Prefix::tz2))
+            .or_else(|_| Self::try_without_prefix(&bytes, Prefix::tz3))?;
 
         let inner = bytes_vec.try_into()
             .or(Err(FromPrefixedBase58CheckError::InvalidSize))?;
@@ -32,7 +44,7 @@ impl ImplicitAddress {
             Prefix::tz1 => Ok(Self::tz1(inner)),
             Prefix::tz2 => Ok(Self::tz2(inner)),
             Prefix::tz3 => Ok(Self::tz3(inner)),
-            _ => Err(FromPrefixedBase58CheckError::NotMatchingPrefix)
+            _ => unreachable!(),
         }
     }
 

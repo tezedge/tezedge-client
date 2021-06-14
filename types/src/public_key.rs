@@ -1,7 +1,7 @@
 use std::convert::TryInto;
 use serde::{Serialize, Serializer};
 
-use crypto::{blake2b, Prefix, WithPrefix, WithoutPrefix};
+use crypto::{blake2b, Prefix, WithPrefix, WithoutPrefix, NotMatchingPrefixError};
 use crypto::base58check::{FromBase58Check, ToBase58Check};
 use crate::ImplicitAddress;
 use super::FromPrefixedBase58CheckError;
@@ -12,25 +12,41 @@ type PublicKeyInner = [u8; PUBLIC_KEY_LEN];
 #[allow(non_camel_case_types)]
 #[derive(PartialEq, Debug, Clone)]
 pub enum PublicKey {
-    edpk(PublicKeyInner),
-    sppk(PublicKeyInner),
-    p2pk(PublicKeyInner),
+    edpk([u8; 32]),
+    sppk([u8; 33]),
+    p2pk([u8; 33]),
 }
 
 impl PublicKey {
-    pub fn from_base58check(encoded: &str) -> Result<Self, FromPrefixedBase58CheckError> {
-        let (prefix, bytes_vec) = encoded
-            .from_base58check()?
-            .without_any_prefix()?;
+    fn try_without_prefix(
+        bytes: &[u8],
+        prefix: Prefix,
+    ) -> Result<(Prefix, Vec<u8>), NotMatchingPrefixError>
+    {
+        bytes
+            .without_prefix(prefix)
+            .map(|bytes| (prefix, bytes))
+    }
 
-        let inner = bytes_vec.try_into()
-            .or(Err(FromPrefixedBase58CheckError::InvalidSize))?;
+    fn try_into_inner<T, U>(bytes: U) -> Result<T, FromPrefixedBase58CheckError>
+        where U: TryInto<T>,
+    {
+        bytes.try_into().or(Err(FromPrefixedBase58CheckError::InvalidSize))
+    }
+
+    pub fn from_base58check(encoded: &str) -> Result<Self, FromPrefixedBase58CheckError> {
+        let bytes = encoded.from_base58check()?;
+
+        dbg!(bytes.len());
+        let (prefix, bytes_vec) = Self::try_without_prefix(&bytes, Prefix::edpk)
+            .or_else(|_| Self::try_without_prefix(&bytes, Prefix::sppk))
+            .or_else(|_| Self::try_without_prefix(&bytes, Prefix::p2pk))?;
 
         match prefix {
-            Prefix::edpk => Ok(Self::edpk(inner)),
-            Prefix::sppk => Ok(Self::sppk(inner)),
-            Prefix::p2pk => Ok(Self::p2pk(inner)),
-            _ => Err(FromPrefixedBase58CheckError::NotMatchingPrefix)
+            Prefix::edpk => Ok(Self::edpk(Self::try_into_inner(bytes_vec)?)),
+            Prefix::sppk => Ok(Self::sppk(Self::try_into_inner(bytes_vec)?)),
+            Prefix::p2pk => Ok(Self::p2pk(Self::try_into_inner(bytes_vec)?)),
+            _ => unreachable!(),
         }
     }
 
@@ -44,24 +60,22 @@ impl PublicKey {
 
     /// Hash of the public key, gives it's corresponding address.
     pub fn hash(&self) -> ImplicitAddress {
-        match self {
-            Self::edpk(key)
-                | Self::sppk(key)
-                | Self::p2pk(key)
-            => {
-                let hash = blake2b::digest_160(key);
-                let addr_bytes: [u8; 20] = hash
-                    .try_into()
-                    // unwrap can't fail since blake2b outputs 160 bit digest,
-                    // which is exactly 20 bytes, same as `addr_bytes` size.
-                    .unwrap();
+        let key = match self {
+            Self::edpk(key) => &key[..],
+            Self::sppk(key) => &key[..],
+            Self::p2pk(key) => &key[..],
+        };
+        let hash = blake2b::digest_160(key);
+        let addr_bytes: [u8; 20] = hash
+            .try_into()
+            // unwrap can't fail since blake2b outputs 160 bit digest,
+            // which is exactly 20 bytes, same as `addr_bytes` size.
+            .unwrap();
 
-                match self {
-                    Self::edpk(_) => ImplicitAddress::tz1(addr_bytes),
-                    Self::sppk(_) => ImplicitAddress::tz2(addr_bytes),
-                    Self::p2pk(_) => ImplicitAddress::tz3(addr_bytes),
-                }
-            }
+        match self {
+            Self::edpk(_) => ImplicitAddress::tz1(addr_bytes),
+            Self::sppk(_) => ImplicitAddress::tz2(addr_bytes),
+            Self::p2pk(_) => ImplicitAddress::tz3(addr_bytes),
         }
     }
 }
@@ -74,12 +88,12 @@ impl ToBase58Check for PublicKey {
     }
 }
 
-impl AsRef<PublicKeyInner> for PublicKey {
-    fn as_ref(&self) -> &PublicKeyInner {
+impl AsRef<[u8]> for PublicKey {
+    fn as_ref(&self) -> &[u8] {
         match self {
-            Self::edpk(k) => &k,
-            Self::sppk(k) => &k,
-            Self::p2pk(k) => &k,
+            Self::edpk(k) => k,
+            Self::sppk(k) => k,
+            Self::p2pk(k) => k,
         }
     }
 }

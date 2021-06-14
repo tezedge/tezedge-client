@@ -24,8 +24,8 @@ impl CombinedKey {
     /// ```
     pub fn new(priv_key: &PrivateKey, pub_key: &PublicKey) -> Self {
         let inner: CombinedKeyInner = vec![
-                priv_key.as_ref().clone(),
-                pub_key.as_ref().clone(),
+                &priv_key.as_ref()[..],
+                pub_key.as_ref(),
             ]
             .concat()
             .try_into()

@@ -89,23 +89,12 @@ impl WithPrefix for [u8] {
 pub trait WithoutPrefix {
     type Target;
 
-    /// remove any known `Prefix`
-    fn without_any_prefix(&self) -> Result<(Prefix, Self::Target), NotMatchingPrefixError>;
-
     /// returns value with prefix removed.
     fn without_prefix(&self, prefix: Prefix) -> Result<Self::Target, NotMatchingPrefixError>;
 }
 
 impl WithoutPrefix for [u8] {
     type Target = Vec<u8>;
-
-    fn without_any_prefix(&self) -> Result<(Prefix, Self::Target), NotMatchingPrefixError> {
-        if let Some(prefix) = Prefix::of(self) {
-            Ok((prefix, self.without_prefix(prefix)?))
-        } else {
-            Err(NotMatchingPrefixError)
-        }
-    }
 
     fn without_prefix(&self, prefix: Prefix) -> Result<Self::Target, NotMatchingPrefixError> {
         let prefix_bytes: &[u8] = prefix.as_ref();

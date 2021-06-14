@@ -13,6 +13,10 @@ pub struct LocalSigner {
 
 impl LocalSigner {
     pub fn new(pub_key: PublicKey, priv_key: PrivateKey) -> Self {
+        match pub_key {
+            PublicKey::edpk(_) => {}
+            PublicKey::sppk(_) | PublicKey::p2pk(_) => unimplemented!()
+        }
         Self {
             pub_key,
             priv_key,
