@@ -37,7 +37,6 @@ impl PublicKey {
     pub fn from_base58check(encoded: &str) -> Result<Self, FromPrefixedBase58CheckError> {
         let bytes = encoded.from_base58check()?;
 
-        dbg!(bytes.len());
         let (prefix, bytes_vec) = Self::try_without_prefix(&bytes, Prefix::edpk)
             .or_else(|_| Self::try_without_prefix(&bytes, Prefix::sppk))
             .or_else(|_| Self::try_without_prefix(&bytes, Prefix::p2pk))?;
