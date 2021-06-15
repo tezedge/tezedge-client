@@ -59,8 +59,8 @@ fn main() {
         Command::Address(c) => c.execute(),
         Command::Transfer(c) => c.execute(),
         Command::Delegate(c) => c.execute(),
-        Command::TransferLocal(c) => c.execute(),
-        Command::DelegateLocal(c) => c.execute(),
+        Command::UnsafeTransferLocal(c) => c.execute(),
+        Command::UnsafeDelegateLocal(c) => c.execute(),
         Command::Originate(c) => c.execute(),
     };
 

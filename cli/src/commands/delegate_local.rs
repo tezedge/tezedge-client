@@ -39,7 +39,12 @@ impl Display for ParseKeyError {
     }
 }
 
-/// Delegate balance to baker
+/// Delegate balance to baker using local wallet.
+///
+/// Outputs operation hash to stdout in case of success.
+///
+/// WARNING: should only be used for testing purposes! This command requires
+///          keys to be passed as command line arguments which is very unsafe.
 #[derive(StructOpt)]
 pub struct DelegateLocal {
     /// Verbose mode (-v, -vv, -vvv, etc.)

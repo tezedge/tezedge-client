@@ -9,7 +9,7 @@ use crate::common::operation_command::*;
 
 /// Delegate balance to baker.
 ///
-/// Outputs transaction hash to stdout in case of success.
+/// Outputs operation hash to stdout in case of success.
 #[derive(StructOpt)]
 pub struct Delegate {
     /// Verbose mode (-v, -vv, -vvv, etc.)

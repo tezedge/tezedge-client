@@ -6,18 +6,20 @@ use lib::{ToBase58Check, KeyDerivationPath};
 
 use crate::commands::CommandError;
 
-/// Get address
+/// Get address from hardware wallet.
 ///
-/// Outputs transaction hash to stdout in case of success.
+/// Outputs Public key hash to stdout.
 #[derive(StructOpt, Debug, Clone)]
 pub struct GetAddress {
     /// Verbose mode (-v, -vv, -vvv, etc.)
     #[structopt(short, long, parse(from_occurrences))]
     verbose: u8,
 
+    /// Get address from Ledger.
     #[structopt(long)]
     trezor: bool,
 
+    /// Get address from Ledger.
     #[structopt(long)]
     ledger: bool,
 

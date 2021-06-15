@@ -187,12 +187,46 @@ Like this: `--key-path "m/44'/1729'/0'/0'" --from KT1Nm9tCSMA6WS1LHerH5PTVRDzbTL
 
 - **Trezor:**
   ```bash
-  tezedge-client delegate -E https://rpctest.tzbeta.net --trezor --key-path "m/44'/1729'/0'/0'" --from KT1Nm9tCSMA6WS1LHerH5PTVRDzbTLLyM5xp --to tz1R55a2HQbXUAzWKJYE5bJp3UvvawwCm9Pr --amount 0.5 --fee 0.01
+  tezedge-client delegate -E https://rpctest.tzbeta.net --trezor --key-path "m/44'/1729'/0'/0'" --from KT1Nm9tCSMA6WS1LHerH5PTVRDzbTLLyM5xp --to tz1R55a2HQbXUAzWKJYE5bJp3UvvawwCm9Pr --fee 0.01
   ```
 
 - **Ledger:**
   ```bash
-  tezedge-client delegate -E https://rpctest.tzbeta.net --ledger --key-path "m/44'/1729'/0'/0'" --from KT1Nm9tCSMA6WS1LHerH5PTVRDzbTLLyM5xp --to tz1R55a2HQbXUAzWKJYE5bJp3UvvawwCm9Pr --amount 0.5 --fee 0.01
+  tezedge-client delegate -E https://rpctest.tzbeta.net --ledger --key-path "m/44'/1729'/0'/0'" --from KT1Nm9tCSMA6WS1LHerH5PTVRDzbTLLyM5xp --to tz1R55a2HQbXUAzWKJYE5bJp3UvvawwCm9Pr --fee 0.01
+  ```
+
+## Unsafe Transfer + Delegate using local wallet
+
+Transfer + Delegate funds using local wallet, by passing in public and
+private keys to the cli as command line arguments.
+
+### Warning!
+This should only be used for **testing purposes!** This command requires
+keys to be passed as command line arguments which is very unsafe.
+
+---
+
+- **Transfer**:
+  ```bash
+  tezedge-client unsafe-transfer-local \
+      -E https://rpctest.tzbeta.net \
+      --private-key edsk3p1JnT4LFXuxmcddNoJ7J5u12T7423mshwEikWmcLJnf2XvH7t \
+      --public-key edpkvLzwxgqDf9qp5vGq5UvTHLRvz54PXae1U4UhWSTdjzAiKJbbJB \
+      --from tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU \
+      --to tz1e6W1pk9kkrjVTRWYZwtVFSjQQgYBmbhFp \
+      --fee 0.1 \
+      --amount 10
+
+  ```
+- **Delegate**:
+  ```bash
+  tezedge-client unsafe-delegate-local \
+      -E https://rpctest.tzbeta.net \
+      --private-key edsk3p1JnT4LFXuxmcddNoJ7J5u12T7423mshwEikWmcLJnf2XvH7t \
+      --public-key edpkvLzwxgqDf9qp5vGq5UvTHLRvz54PXae1U4UhWSTdjzAiKJbbJB \
+      --from tz1av5nBB8Jp6VZZDBdmGifRcETaYc7UkEnU \
+      --to tz1R55a2HQbXUAzWKJYE5bJp3UvvawwCm9Pr \
+      --fee 0.1
   ```
 
 ## Forging

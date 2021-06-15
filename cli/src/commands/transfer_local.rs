@@ -39,9 +39,12 @@ impl Display for ParseKeyError {
     }
 }
 
-/// Create a transaction
+/// Create a transaction using local wallet.
 ///
-/// Outputs transaction hash to stdout in case of success.
+/// Outputs operation hash to stdout in case of success.
+///
+/// WARNING: should only be used for testing purposes! This command requires
+///          keys to be passed as command line arguments which is very unsafe.
 #[derive(StructOpt)]
 pub struct TransferLocal {
     /// Verbose mode (-v, -vv, -vvv, etc.)
