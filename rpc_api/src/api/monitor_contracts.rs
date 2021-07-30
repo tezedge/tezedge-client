@@ -214,6 +214,12 @@ impl<U> MonitorContractsAsync for U
                                         if contracts.contains_contract(&source) {
                                             affected_contracts.push(source);
                                         }
+                                        for contract in &op.metadata.operation_result.originated_contracts {
+                                            let contract = contract.clone().into();
+                                            if contracts.contains_contract(&contract) {
+                                                affected_contracts.push(contract);
+                                            }
+                                        }
                                     },
                                     BlockOperationContent::Other => {},
                                 }

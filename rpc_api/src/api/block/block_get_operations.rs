@@ -2,7 +2,7 @@ use std::fmt::{self, Display};
 use serde::{Deserialize, Deserializer};
 
 use types::{
-    Address, ImplicitAddress,
+    Address, ImplicitAddress, OriginatedAddress,
     PublicKey, BlockHash, OperationHash, FromPrefixedBase58CheckError,
 };
 use crate::BoxFuture;
@@ -28,7 +28,7 @@ impl Display for BlockGetOperationsError {
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct BlockOperationResultOrigination {
-
+    pub originated_contracts: Vec<OriginatedAddress>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -83,7 +83,6 @@ pub struct BlockOperationContentDelegation {
 #[derive(Deserialize, Debug, Clone)]
 pub struct BlockOperationContentOrigination {
     pub source: ImplicitAddress,
-    pub public_key: PublicKey,
     #[serde(with = "utils::serde_amount")]
     pub balance: u64,
     #[serde(with = "utils::serde_amount")]

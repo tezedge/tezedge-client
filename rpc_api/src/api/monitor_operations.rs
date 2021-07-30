@@ -111,10 +111,8 @@ impl<U> MonitorOperationsAsync for U
                     async move {
                         match result {
                             Ok(head) => {
-                                println!("received head: {}", head.level);
                                 match client.block_get_operations(&head.hash).await {
                                     Ok(ops) => {
-                                        println!("received ops for head: {}", head.level);
                                         let ops_iter = ops.into_iter()
                                             .map(move |op| Ok(MonitoredOperation::new(head.level, op)));
 
@@ -131,7 +129,7 @@ impl<U> MonitorOperationsAsync for U
                 .flatten()
                 // .flat_map(|res| {
                 //     match res {
-                //         Ok(ops) => 
+                //         Ok(ops) =>
                 //             ops.into_iter().map(|x| Ok(MonitoredOperation::new(x)))
                 //         ).boxed(),
                 //         Err(err) => futures_util::stream::once(
