@@ -33,7 +33,7 @@ impl OperationHash {
 impl ToBase58Check for OperationHash {
     fn to_base58check(&self) -> String {
         self.0
-            .with_prefix(Prefix::B)
+            .with_prefix(Prefix::operation)
             .to_base58check()
     }
 }
